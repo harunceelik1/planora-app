@@ -85,8 +85,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative h-[calc(100dvh-0px)] shrink-0 border-r backdrop-blur pl-2",
         "transition-[width] duration-300",
+        "relative flex flex-col shrink-0 border-r backdrop-blur pl-2",
         collapsed ? "w-16" : "w-64",
         "overflow-x-visible"
       )}
