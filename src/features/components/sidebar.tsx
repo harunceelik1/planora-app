@@ -13,6 +13,7 @@ import {
   Plus,
   ChevronLeft,
   UserCog,
+  Timer,
   Settings,
 } from "lucide-react";
 import * as React from "react";
@@ -27,24 +28,24 @@ type NavItem = { href: string; label: string; icon: React.ReactNode };
 const mainItems: NavItem[] = [
   {
     href: "/dashboard",
-    label: "Overview",
+    label: "Ev",
     icon: <LayoutGrid className="h-4 w-4" />,
   },
   {
     href: "/dashboard/tasks",
-    label: "Tasks",
+    label: "Çalışmalarım",
     icon: <ListTodo className="h-4 w-4" />,
   },
   {
     href: "/dashboard/calendar",
-    label: "Calendar",
-    icon: <CalendarDays className="h-4 w-4" />,
+    label: "En Son",
+    icon: <Timer className="h-4 w-4" />,
   },
-  {
-    href: "/dashboard/team",
-    label: "Team",
-    icon: <Users className={cn("h-4 w-4")} />,
-  },
+  // {
+  //   href: "/dashboard/team",
+  //   label: "Team",
+  //   icon: <Users className={cn("h-4 w-4")} />,
+  // },
   {
     href: "/dashboard/profile",
     label: "Profile",

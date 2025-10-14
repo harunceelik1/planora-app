@@ -10,7 +10,7 @@ export default function ProfilePage() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">My Profile</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm  text-muted-foreground">
           Manage your personal info, security and preferences.
         </p>
       </div>
@@ -53,9 +53,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Two-factor authentication</p>
-              <p className="text-sm text-muted-foreground">
-                Add extra security to your account.
-              </p>
+              <p className="text-sm text-muted-foreground">Add extra .</p>
             </div>
             <Button variant="outline">Enable 2FA</Button>
           </div>

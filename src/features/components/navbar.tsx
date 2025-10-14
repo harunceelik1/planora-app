@@ -125,7 +125,7 @@ export const Navbar = () => {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1 text-xs h-7 px-3 cursor-pointer"
-                      onClick={() => router.push("/settings")}
+                      onClick={() => router.push("/dashboard/profile")}
                     >
                       <Settings className="h-4 w-4" />
                       Hesap ayarları
