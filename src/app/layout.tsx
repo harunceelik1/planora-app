@@ -22,7 +22,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(inter.className, "antialiased min-h-screen ")}>
         {/* <div className="circlePosition w-[50%] h-[50%] bg-[#6177f8da] rounded-[100%] absolute z-[-1] top-[40%] left-[20%] -translate-x-1/2 -translate-y-1/2 blur-[180px]" /> */}
-
         <Providers>
           {children}
           <ToastContainer position="top-right" autoClose={3000} />

@@ -19,7 +19,7 @@ declare module "next-auth" {
 const handler = NextAuth({
   adapter: PrismaAdapter(db) as any,
   session: { strategy: "jwt" },
-  pages: { signIn: "/login" }, // login sayfan burası
+  pages: { signIn: "/sign-in" ,error:"/routets" ,}, // login sayfan burası
 
   providers: [
     Google({

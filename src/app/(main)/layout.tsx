@@ -1,5 +1,5 @@
 // app/(main)/layout.tsx  (SERVER)
-import Navbar from "@/features/components/navbar";
+import Navbar from "@/features/components/layout/navbar";
 
 export default function MainLayout({
   children,

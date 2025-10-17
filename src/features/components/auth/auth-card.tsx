@@ -123,7 +123,7 @@ const AuthCard = ({ type }: AuthCardProps) => {
                   type="button"
                   className="mt-4 flex-1 cursor-pointer"
                   variant="outline"
-                  onClick={() => signIn("google", { callbackUrl: "/" })}
+                  onClick={() => signIn("google")}
                 >
                   <FcGoogle size={30} className="mr-2" /> Google
                 </Button>

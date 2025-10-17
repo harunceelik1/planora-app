@@ -12,27 +12,15 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { LogOut, Settings } from "lucide-react";
+import { formatName, getInitials } from "@/lib/utils";
+import { userAgent } from "next/server";
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const initials = getInitials(session?.user.name, session?.user.email);
+  const name = formatName(session?.user.name);
 
-  const name = session?.user?.name
-    ?.split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
-
-  const initials = (session?.user?.name || session?.user?.email || "U")
-    .split(" ")
-    .map((s) => s[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-  // Split fonksiyonu stringi parçalara ayırır ve bunu dizi olarak döndürür örneğin: "John Doe" -> ["John", "Doe"]
-  // Map fonksiyonu ise bu dizinin her bir elemanına uygulanır. Örneğin yukarıdaki örnekte her ismin ilk harfini alır.
-  // Join fonksiyonu ise bu harfleri tekrar birleştirir. Örneğin: ["J", "D"] -> "JD"
-  // Slice fonksiyonu ise stringin belirli bir kısmını alır. Örneğin: "JD" -> "JD" (ilk 2 karakter)
-  // Charat fonksiyonu ise stringin belirli bir indeksindeki karakteri alır. Örneğin: "John" -> 'J' (0. indeks)
   return (
     <header
       className="
@@ -42,7 +30,6 @@ export const Navbar = () => {
       "
     >
       <nav className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
-        {/* Sol: Logo + Menü */}
         <div className="flex items-center gap-8">
           <button
             onClick={() => router.push("/")}
@@ -51,7 +38,6 @@ export const Navbar = () => {
           >
             Planora
           </button>
-
           <div className="hidden md:flex items-center gap-1 text-lg">
             <Button
               variant="link"
@@ -69,8 +55,6 @@ export const Navbar = () => {
             </Button>
           </div>
         </div>
-
-        {/* Sağ: Auth durumu */}
         <div className="flex items-center gap-3">
           {status === "loading" ? (
             <Spinner className="size-4" />

@@ -1,5 +1,5 @@
 // SERVER component
-import { Sidebar } from "@/features/components/sidebar";
+import { Sidebar } from "@/features/components/layout/sidebar";
 import type { ReactNode } from "react";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {

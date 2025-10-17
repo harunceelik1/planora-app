@@ -1,7 +1,7 @@
-import AuthCard from "./auth-card";
 import { CalendarDays } from "lucide-react";
 import { ChartArea } from "lucide-react";
 import { Users } from "lucide-react";
+import AuthCard from "./auth-card";
 
 const SignUpCard = () => {
   return (
