@@ -58,7 +58,7 @@ export default function ProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-x-4">
-              <Label htmlFor="email">Email addresses</Label>
+              <Label htmlFor="email">Email </Label>
               <p className="text-sm opacity-50 pt-2">{session?.user.email}</p>
             </div>
           </div>
