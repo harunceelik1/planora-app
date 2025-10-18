@@ -38,29 +38,48 @@ const AuthCard = ({ type }: AuthCardProps) => {
     isSignIn,
   } = useAuthForm(type);
   const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <div className="w-full items-center flex flex-col">
-      <Card className="w-full h-full md:w-[487px] bg-gray-100 flex flex-col">
-        <CardHeader className="flex flex-col items-center justify-center text-center pt-7">
-          <CardTitle className="text-xl font-semibold">
+    // Arka plan rengini koruyoruz, bileşeni ortalıyoruz
+    <div className="w-full items-center flex flex-col min-h-screen bg-gray-100 py-10">
+      {/* Kartı beyaz yapıyoruz ve gölge ekliyoruz. */}
+      <Card className="w-full md:w-[487px] bg-white shadow-xl rounded-xl flex flex-col">
+        <CardHeader className="flex flex-col items-center justify-center text-center pt-8 pb-4 space-y-1">
+          <CardTitle className="text-2xl font-bold">
             {isSignIn ? "Sign in to Planora" : "Create your account"}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base text-gray-600">
             {isSignIn
               ? "Welcome back! Please sign in to continue"
               : "Welcome! Please fill in the details to get started."}
           </CardDescription>
         </CardHeader>
 
-        <div className="px-7 mb-2">
-          <Separator />
-        </div>
-        <CardContent className="space-y-4 px-7 flex-1">
-          <form onSubmit={handleSubmit} className="">
-            <div className="grid gap-2">
+        <CardContent className="space-y-6 px-7 flex-1">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => signIn("google")}
+            className="w-full h-10   transition-colors duration-300 border-gray-300 "
+          >
+            <FcGoogle size={24} className="mr-3" /> Sign{" "}
+            {isSignIn ? "In" : "Up"} with Google
+          </Button>
+
+          {/* 2. VEYA AYIRICISI */}
+          <div className="relative flex justify-center text-xs uppercase">
+            <Separator />
+            <span className="absolute px-2 text-xs font-medium text-gray-500 bg-white -top-2">
+              YA DA
+            </span>
+          </div>
+
+          {/* 3. MANUEL FORM */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4">
               {!isSignIn && (
-                <>
-                  <Label htmlFor="name" className="text-sm">
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="text-sm font-medium">
                     Name
                   </Label>
                   <Input
@@ -70,68 +89,68 @@ const AuthCard = ({ type }: AuthCardProps) => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="hover:border-gray-400 focus:border-white transition-colors duration-300"
+                    className="h-10  border-gray-300 transition-all duration-300"
                   />
-                </>
+                </div>
               )}
-              <Label htmlFor="email" className="text-sm">
-                Email address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                required
-                // pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="hover:border-gray-400 focus:border-white transition-colors duration-300"
-              />
-              <Label htmlFor="password" className="text-sm">
-                Password
-              </Label>
-              <div className="relative w-full">
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email address
+                </Label>
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="hover:border-gray-400 focus:border-white transition-colors duration-300"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-10  border-gray-300 transition-all duration-300"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <div className="relative w-full">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-10  border-gray-300 transition-all duration-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               {passwordError && (
                 <p className="text-red-500 text-xs mt-1">{passwordError}</p>
               )}
-              <div className="flex justify-center gap-4">
+
+              <div className="pt-2">
                 <Button
                   type="submit"
-                  className="mt-4 flex-1 cursor-pointer"
-                  variant="outline"
+                  variant="default"
+                  className="w-full h-10 font-semibold text-base transition-colors duration-300  text-white"
                 >
                   {isSignIn ? "Sign In" : "Sign Up"}
-                </Button>
-                <Button
-                  type="button"
-                  className="mt-4 flex-1 cursor-pointer"
-                  variant="outline"
-                  onClick={() => signIn("google")}
-                >
-                  <FcGoogle size={30} className="mr-2" /> Google
                 </Button>
               </div>
             </div>
           </form>
         </CardContent>
-        <CardFooter>
+
+        <CardFooter className="pt-4 pb-8 justify-center border-t border-gray-100 mt-2">
           <AuthFooter isSignIn={isSignIn} />
         </CardFooter>
       </Card>
