@@ -15,7 +15,6 @@ declare module "next-auth" {
     };
   }
 }
-
 const handler = NextAuth({
   adapter: PrismaAdapter(db) as any,
   session: { strategy: "jwt" },
@@ -35,7 +34,6 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-
         const user = await db.user.findUnique({
           where: { email: credentials.email },
           select: { id: true, email: true, name: true, image: true, password: true },

@@ -44,8 +44,6 @@ export default function ChangePasswordDialog() {
 
   return (
     <div className="space-y-3">
-      <Label>Şifre</Label>
-
       <Dialog onOpenChange={onOpenChange}>
         <DialogTrigger asChild>
           <Button variant="outline" className="">

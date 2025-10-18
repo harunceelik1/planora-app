@@ -87,17 +87,17 @@ export default function HomePage() {
             Planla Ve Yönet
           </h1>
           <p className="mt-6 max-w-xl text-lg md:text-xl text-gray-600">
-            Planora, projelerini **hızla planlamanı**, **etkin bir şekilde
-            yönetmeni** ve **ekibinle kesintisiz iş birliği** yapmanı sağlayan
-            hepsi bir arada bir platformdur. Karmaşık süreçları basitleştirerek
-            hedeflerine daha kolay ulaşmanı sağlar.
+            Planora, projelerini hızla planlamanı, verimli bir şekilde yönetmeni
+            ve ekibinle kesintisiz iş birliği yapmanı sağlayan hepsi bir arada
+            bir platformdur. Karmaşık süreçleri sadeleştirir, böylece
+            hedeflerine daha kolay ve etkili bir şekilde ulaşmanı sağlar.
           </p>
           <Button
-            className="mt-8 px-8 py-4 w-fit gap-2 font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-500 ease-in-out"
+            className="mt-8 px-8 py-4 w-fit gap-2   shadow-md hover:shadow-lg transition-all duration-500 ease-in-out"
             onClick={() => router.push("/sign-up")}
           >
-            Hemen Başla
-            <ArrowRight className="size-5" />
+            Hemen Başlayın
+            <ArrowRight className="size-4" />
           </Button>
         </div>
         {/* ... Özellik Kartları (Küçük olanlar) */}
@@ -186,10 +186,9 @@ export default function HomePage() {
                   </div>
                 </div>
               ) : (
-                // DİĞER KARTLAR (ZAMAN ÇİZELGESİ ve GÖREV YÖNETİMİ): BÜYÜK İKON (KARTSİZ)
                 <div className="flex flex-col items-center justify-center h-96 w-full max-w-md">
                   <card.icon
-                    size={160} // Çok daha büyük ikon boyutu
+                    size={160}
                     className={`
                             ${
                               card.bgColor === "bg-[#0b2e59]"
@@ -216,22 +215,11 @@ export default function HomePage() {
               >
                 {card.title}
               </h2>
-
-              {/* Açıklama */}
               <p
                 className={`text-xl leading-relaxed ${card.subTextColor} mb-8`}
               >
                 {card.longDescription}
               </p>
-
-              {/* CTA Butonu */}
-              <Button
-                variant="default"
-                className="px-8 py-4 w-fit gap-2 font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-500 ease-in-out"
-                onClick={() => router.push("/sign-up")}
-              >
-                Hemen Başla <ArrowRight className="ml-2 size-5" />
-              </Button>
             </div>
           </div>
         </section>
