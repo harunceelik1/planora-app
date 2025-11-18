@@ -15,8 +15,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { LogOut, Settings, Menu, Home, Info, User } from "lucide-react";
 import { formatName, getInitials } from "@/lib/utils";
-
-// Sheet bileşeni varsayımı: Projenizde bu yolu kullanarak import etmelisiniz.
 import {
   Sheet,
   SheetContent,
@@ -24,6 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import Image from "next/image";
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
@@ -33,7 +32,7 @@ export const Navbar = () => {
 
   const navLinks = [
     { name: "Home", href: "/", icon: Home },
-    { name: "About", href: "/about", icon: Info },
+    // { name: "About", href: "/about", icon: Info },
   ];
 
   return (
@@ -45,23 +44,24 @@ export const Navbar = () => {
       "
     >
       {/* max-w-7xl içindeki nav elementi ile tüm içeriğin sola ve sağa yaslı kalmasını sağlıyoruz */}
-      <nav className=" flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 ">
+      <nav
+        className=" flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 
+      "
+      >
         <div className="flex items-center gap-10">
-          <button
-            onClick={() => router.push("/")}
-            className="text-2xl font-bold text-gray-900 tracking-tight cursor-pointer hover:text-gray-700 transition-colors"
-            aria-label="Planora Home"
-          >
-            Planora
-          </button>
-
+          <Image
+            alt="Planora Logo"
+            src="/images/logo-yazı.png"
+            width={72}
+            height={32}
+            className="inline-block mr-2 "
+          />
           {/* Masaüstü Navigasyon Linkleri */}
           <div className="md:flex hidden items-center gap-1">
             {navLinks.map((link) => (
               <Button
                 key={link.name}
-                variant="link" // link variant'ına geri döndük
-                // Hover rengini eski sade griye döndürdük
+                variant="link"
                 className="text-base font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
                 onClick={() => router.push(link.href)}
               >

@@ -40,7 +40,6 @@ const AuthCard = ({ type }: AuthCardProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    // Arka plan rengini koruyoruz, bileşeni ortalıyoruz
     <div className="w-full items-center flex flex-col min-h-screen bg-gray-100 py-10">
       {/* Kartı beyaz yapıyoruz ve gölge ekliyoruz. */}
       <Card className="w-full md:w-[487px] bg-white shadow-xl rounded-xl flex flex-col">

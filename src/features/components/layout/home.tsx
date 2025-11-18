@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ListChecks, LogIn, Mail, ChartColumn } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FcGoogle } from "react-icons/fc";
+import { ROUTES } from "@/constants/routest";
 
 // Kaydırma fonksiyonu
 const scrollToSection = (id: string) => {
@@ -21,8 +22,10 @@ export default function HomePage() {
   const { status } = useSession();
 
   useEffect(() => {
+    console.log("HomePage component rendered with status:", status);
+
     if (status === "authenticated") {
-      router.replace("/dashboard");
+      router.replace(ROUTES.PROJECTS.LIST);
     }
   }, [status, router]);
 

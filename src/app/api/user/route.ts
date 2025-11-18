@@ -3,21 +3,52 @@ import { db } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { Prisma } from '@prisma/client';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const users = await db.user.findMany({
-      //burada passwordu api çıktısında göstermiyoruz
-      select: {
-      id: true,
-      email: true,
-      name: true,
-      image: true,
-      emailVerified: true,
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get("q");
+    let users;
+
+    // Query kontrolü: null değilse VE boşlukları silince uzunluğu 0'dan büyükse
+    if (query && query.trim().length > 0) {
+      const cleanQuery = query.trim();
+      console.log("✅ Arama Modu Aktif. Aranan kelime:", cleanQuery);
+
+      users = await db.user.findMany({
+        where: {
+          OR: [
+            // mode: 'insensitive' -> Büyük/küçük harf fark etmez
+            { name: { contains: cleanQuery, mode: "insensitive" } },
+            { email: { contains: cleanQuery, mode: "insensitive" } },
+          ],
+        },
+        select: {
+          id: true, email: true, name: true, image: true,
+        },
+        take: 5,
+      });
+      
+      console.log(`📊 Arama Sonucu: ${users.length} kişi bulundu.`);
+      // Kimleri bulduğunu da yazdıralım (sorunu anlamak için)
+      users.forEach(u => console.log(`   -> Bulunan: ${u.name} (${u.email})`));
+
+    } else {
+      console.log("⚠️ Arama kelimesi yok veya boş. Varsayılan liste (Son 5 kişi) getiriliyor.");
+      
+      // Arama yoksa SADECE 5 kişi getir, Hepsini değil.
+      users = await db.user.findMany({
+        select: {
+          id: true, email: true, name: true, image: true,
+        },
+        orderBy: { id: 'desc' }, // En son eklenenleri getir
+        take: 5, 
+      });
+    }
+
     return NextResponse.json(users);
+
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("API Hatası:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
 }

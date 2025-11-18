@@ -22,32 +22,38 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ROUTES } from "@/constants/routest";
 
 type NavItem = { href: string; label: string; icon: React.ReactNode };
 
 const mainItems: NavItem[] = [
+  /*
   {
-    href: "/dashboard",
+    href: ROUTES.DASHBOARD,
     label: "Ev",
     icon: <LayoutGrid className="h-4 w-4" />,
   },
+  */
   {
-    href: "/dashboard/tasks",
-    label: "Çalışmalarım",
+    href: ROUTES.PROJECTS.LIST,
+    label: "Kontrol Paneli",
     icon: <ListTodo className="h-4 w-4" />,
   },
+  // {
+  //   href: ROUTES.MAIN,
+  //   label: "Çalışmalarım",
+  //   icon: <ListTodo className="h-4 w-4" />,
+  // },
+  // proje listesinden seçilecek ve route dinamik olacak
+  // ROUTES.PROJECTS.CALENDAR("1")
   {
-    href: "/dashboard/calendar",
+    href: "/main/projects/calendar/:id",
     label: "En Son",
     icon: <Timer className="h-4 w-4" />,
   },
-  // {
-  //   href: "/dashboard/team",
-  //   label: "Team",
-  //   icon: <Users className={cn("h-4 w-4")} />,
-  // },
+
   {
-    href: "/dashboard/profile",
+    href: ROUTES.PROFILE,
     label: "Profile",
     icon: <UserCog className="h-4 w-4" />,
   },
@@ -241,7 +247,7 @@ export function Sidebar() {
 
           {/* Footer */}
           <div className="absolute bottom-0 left-0 right-0 border-t p-2 bg-white/60 backdrop-blur-sm">
-            <Link href="/dashboard/settings">
+            <Link href="/main/settings">
               <div className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-gray-100 cursor-pointer">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>

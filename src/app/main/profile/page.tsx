@@ -12,8 +12,6 @@ import { formatName, getInitials } from "@/lib/utils";
 import { MapPin, BriefcaseBusiness, Calendar } from "lucide-react";
 import EditProfileDialog from "@/features/components/profile/editeProfile";
 import ChangePasswordDialog from "@/features/components/profile/changePassword";
-
-/** Reusable: label + left icon + input */
 function Field({
   id,
   label,
@@ -68,15 +66,10 @@ export default function ProfilePage() {
           </CardHeader>
 
           <CardContent className="space-y-8">
-            {/* Personal Info & Actions */}
             <section className="space-y-4">
-              {/* Buradaki 'sm' breakpoint'leri mobil/tablet geçişi için kritik */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                {/* Avatar ve İsim/Email */}
                 <div className="flex items-center gap-4">
                   <Avatar className="h-14 w-14 ring-2 ring-gray-100">
-                    {" "}
-                    {/* Avatarı biraz büyüttük */}
                     <AvatarImage
                       src={session?.user?.image || ""}
                       className="object-cover rounded-full"
@@ -109,7 +102,6 @@ export default function ProfilePage() {
 
               <Separator />
             </section>
-
             <section className="space-y-4">
               <div className="text-sm font-semibold">Düzenlemeler</div>{" "}
               <div className="grid gap-6 sm:grid-cols-2">

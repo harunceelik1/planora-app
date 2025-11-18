@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model User {
-//   id        Int      @id @default(autoincrement())
-//   email     String   @unique
-//   password  String
-//   createdAt DateTime @default(now())
-// }
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -22,6 +16,11 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+
+  createdProjects  Project[]       @relation("CreatedProjects") // Sahibi olduğu projeler
+  reportedIssues   Issue[]         @relation("ReportedIssues") // Raporladığı görevler
+  assignedIssues   Issue[]         @relation("AssignedIssues") // Kendisine atanan görevler
+  projectsAsMember ProjectMember[] @relation("ProjectsAsMember") // Üyesi olduğu projeler (ProjectMember tablosu üzerinden)
 }
 
 model Account {
@@ -57,4 +56,84 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  projectName String
+  projectKey  String   @unique // Jira'daki "KAN", "PROJ" gibi kısa kod
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // --- İlişkiler ---
+  // Projeyi oluşturan kişi (Owner)
+  ownerId String
+  owner   User   @relation("CreatedProjects", fields: [ownerId], references: [id])
+
+  // Projedeki üyeler (Çoktan-çoka)
+  members ProjectMember[]
+
+  // Projedeki tüm görevler
+  issues Issue[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  role      Role     @default(MEMBER) // Enum ile rol yönetimi
+  createdAt DateTime @default(now())
+
+  // --- İlişkiler ---
+  userId String
+  user   User   @relation("ProjectsAsMember", fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // Proje silinirse üyelik de silinir
+
+  // Bir kullanıcı bir projeye sadece bir kez üye olabilir
+  @@unique([userId, projectId])
+}
+
+model Issue {
+  id          String        @id @default(cuid())
+  title       String
+  description String?       @db.Text
+  status      IssueStatus   @default(TODO) // Enum ile durum yönetimi
+  priority    IssuePriority @default(MEDIUM) // Enum ile öncelik yönetimi
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // --- İlişkiler ---
+  // Görevin ait olduğu proje
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // Proje silinirse görevler de silinir
+
+  // Görevi raporlayan/açan kişi
+  reporterId String
+  reporter   User   @relation("ReportedIssues", fields: [reporterId], references: [id])
+
+  // Görevin atandığı kişi (opsiyonel, atanmamış olabilir)
+  assigneeId String?
+  assignee   User?   @relation("AssignedIssues", fields: [assigneeId], references: [id])
+}
+
+// Projedeki kullanıcı rolleri
+enum Role {
+  ADMIN // Projeyi yönetebilir, üye ekleyip çıkarabilir
+  MEMBER // Görev oluşturabilir, görevleri yönetebilir
+}
+
+// Bir görevin durumu (Kanban board için)
+enum IssueStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+// Bir görevin öncelik seviyesi
+enum IssuePriority {
+  LOW
+  MEDIUM
+  HIGH
+  HIGHEST
 }
