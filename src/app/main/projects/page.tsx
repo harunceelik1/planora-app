@@ -4,6 +4,8 @@ import useSWR from "swr";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
 import { ProjectList } from "@/features/components/project/project-list";
+import { Button } from "@/components/ui/button";
+import Home from "../page";
 
 /**
  * fetcher (Veri Çekici) Fonksiyonu
@@ -12,7 +14,9 @@ import { ProjectList } from "@/features/components/project/project-list";
  */
 const fetcher = async (url: string) => {
   const res = await fetch(url);
-
+  // throw new Error(
+  //   "Bu bir test hatasıdır! Tasarımı kontrol etmek için eklendi."
+  // );
   if (!res.ok) {
     const errorData = await res.json();
     // API'den gelen özel hata mesajını (örn: "Lütfen Giriş Yapın.") fırlat
@@ -23,49 +27,6 @@ const fetcher = async (url: string) => {
   console.log("Projeler başarıyla çekildi.", res);
   return res.json();
 };
-
-// const ProjectList = ({ projects }: { projects: any[] }) => {
-//   return (
-//     <div className="p-8 max-w-4xl mx-auto">
-//       <div className="flex justify-between items-center mb-6">
-//         <h1 className="text-3xl font-bold">Projelerim</h1>
-//         <Link
-//           href="/main/create-project"
-//           className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90"
-//         >
-//           Yeni Proje Oluştur
-//         </Link>
-//       </div>
-//       <ul className="space-y-4">
-//         {projects.map((project) => (
-//           <li
-//             key={project.id}
-//             className="p-5 border rounded-lg shadow-sm bg-card text-card-foreground"
-//           >
-//             <h2 className="text-xl font-semibold text-primary">
-//               {project.projectName}
-//             </h2>
-//             <p className="text-sm text-muted-foreground mt-1">
-//               Anahtar:{" "}
-//               <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
-//                 {project.projectKey}
-//               </span>
-//             </p>
-//             <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
-//               <span>{project._count.members} Üye</span>
-//               <span>{project._count.issues} Görev</span>
-//             </div>
-//             {/* Buraya projeye giden bir link ekleyebilirsiniz
-//             <Link href={`/projects/${project.id}`} className="text-blue-500 mt-2 inline-block">
-//               Projeye Git
-//             </Link>
-//             */}
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
 
 /**
  * Ana Projects Sayfası
@@ -95,10 +56,48 @@ export default function Projects() {
   }
 
   // 4. Hata durumu: API bir hata döndürdü
+  // Projects.tsx içindeki 4. Hata durumu bloğu
+
+  // 4. Hata durumu: API bir hata döndürdü
   if (error) {
-    // Örneğin, 401 (giriş yapılmamış) hatası yakalanırsa
+    // Hata mesajını daha iyi biçimlendirmek için
+    const errorMessage = error.message || "Bilinmeyen bir hata oluştu.";
+
     return (
-      <div className="p-8 text-center text-red-500">Hata: {error.message}</div>
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl border border-red-200 dark:border-red-800/50">
+          {/* Hata Başlığı */}
+          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center">
+            Veri Yüklenemedi
+          </h2>
+
+          <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
+            {errorMessage}
+          </p>
+
+          {/* Genellikle 401 hatası (Giriş Yapılmamış) için yönlendirme yaparız. */}
+          {errorMessage.includes("Giriş Yapın") ? (
+            <Link href="/auth/sign-in" passHref>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                Şimdi Giriş Yap
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => window.location.reload()} // Sayfayı yenileme denemesi
+            >
+              Tekrar Dene
+            </Button>
+          )}
+
+          {/* Destek Metni */}
+          <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
+            Sorun devam ederse lütfen yöneticinizle iletişime geçin.
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -115,7 +114,7 @@ export default function Projects() {
       ) : (
         // Proje listesi boşsa veya 'projects' 'undefined' ise:
         // ProjectInitialization (ilk proje oluşturma) bileşenini göster
-        <ProjectInitialization />
+        <Home />
       )}
     </>
   );

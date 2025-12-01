@@ -7,33 +7,73 @@ import { authOptions } from "../auth/[...nextauth]/route";
  * @route GET /api/project
  * @desc Giriş yapan kullanıcının üye olduğu tüm projeleri getirir.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-
     const session = await getServerSession(authOptions);
-    if(!session || !session.user ||!session.user.id) {
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json(
-        {error: "Lütfen Giriş Yapınç."},
-        {status: 401}
-      )
+        { error: "Lütfen Giriş Yapın." },
+        { status: 401 }
+      );
     }
-    const userId= session.user.id;
+    const userId = session.user.id;
+    const { searchParams } = new URL(req.url);
+    const projectId = searchParams.get("projectId");
+
+    // --- SENARYO 1: TEK BİR PROJE İSTENİYORSA (Dialog Burayı Kullanıyor) ---
+    if (projectId) {
+      const project = await db.project.findUnique({
+        where: { id: projectId },
+        include: {
+          owner: true,
+          members: {
+            include: {
+              user: true, // Üyenin ismini ve resmini almak için
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        return NextResponse.json(
+          { error: "Proje bulunamadı" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(project);
+    }
+
+    // --- SENARYO 2: TÜM PROJELER LİSTELENİYORSA ---
     const projects = await db.project.findMany({
       where: {
-        ownerId: {
-            equals: userId,
-        },
+        // Hem sahibi olduklarını HEM DE üyesi olduklarını getir
+        OR: [
+          { ownerId: userId }, // Sahibi olduklarım
+          {
+            members: {
+              some: {
+                userId: userId, // Üyesi olduklarım
+              },
+            },
+          },
+        ],
       },
       include: {
         owner: {
           select: { name: true, image: true, email: true },
+        },
+        members: {
+          include: {
+            user: true,
+          },
         },
         _count: {
           select: { members: true, issues: true },
         },
       },
       orderBy: {
-        createdAt: "desc",
+        updatedAt: "desc", // Son işlem yapılana göre sıralamak daha iyidir
       },
     });
 
@@ -48,11 +88,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  
   // 1. Session yerine test için sabit ID
   const session = await getServerSession(authOptions);
- 
-  if(!session || !session.user || !session.user.id) {
+
+  if (!session || !session.user || !session.user.id) {
     return NextResponse.json(
       { error: "Yetkisiz erişim. Lütfen giriş yapın." },
       { status: 401 } // Unauthorized
@@ -60,8 +99,7 @@ export async function POST(request: Request) {
   }
 
   const sessionUserId = session.user.id;
-  console.log("Oturum açan kullanıcı ID'si:", session.user.name, sessionUserId);  
-
+  console.log("Oturum açan kullanıcı ID'si:", session.user.name, sessionUserId);
 
   try {
     // 2. Gelen isteğin gövdesini (body) JSON olarak oku
@@ -77,33 +115,39 @@ export async function POST(request: Request) {
     }
 
     // 4. VERİTABANINA KAYDET
-    // Yorum satırlarını kaldırın ve 'db' kullanın.
     const newProject = await db.project.create({
       data: {
-        projectName: name, 
+        projectName: name,
         projectKey: projectKey,
-        ownerId: sessionUserId, 
+        ownerId: sessionUserId,
+        members: {
+          create: {
+            userId: sessionUserId,
+            role: "OWNER",
+          },
+        },
       },
     });
 
     // 5. BAŞARILI YANITI DÖNDÜR
     // Bu satır, SADECE 'await db.project.create' başarılı olursa çalışır.
     return NextResponse.json(
-      { message: "Proje başarıyla oluşturuldu.", project: newProject }, 
+      { message: "Proje başarıyla oluşturuldu.", project: newProject },
       { status: 201 } // Created
     );
-
-  } catch (error: any) { 
-    
+  } catch (error: any) {
     // 6. HATA YÖNETİMİ
     // 'projectKey' unique olduğu için çakışma hatası
-    if (error?.code === 'P2002' && error?.meta?.target?.includes('projectKey')) {
+    if (
+      error?.code === "P2002" &&
+      error?.meta?.target?.includes("projectKey")
+    ) {
       return NextResponse.json(
         { error: "Bu proje anahtarı zaten kullanılıyor." },
         { status: 409 } // 409 Conflict (Çakışma)
       );
     }
-    
+
     // Diğer tüm hatalar
     console.error("Proje oluşturma hatası:", error);
     return NextResponse.json(

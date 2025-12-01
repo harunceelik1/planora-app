@@ -7,11 +7,14 @@ import { Star, ArrowUp, ArrowDown, ChevronsUpDown, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Project } from "@/types/project";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/constants/routest";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { AddMemberDialog } from "./add-member-dialog";
+import Link from "next/link";
 export const columns: ColumnDef<Project>[] = [
   {
     id: "favorites",
@@ -62,13 +65,25 @@ export const columns: ColumnDef<Project>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      const project = row.original;
+
+      return (
+        <Link
+          // ROUTES.PROJECTS.DETAILS fonksiyonuna ID'yi gönderiyoruz
+          href={ROUTES.PROJECTS.DETAILS(project.id)}
+          className="font-medium text-foreground hover:underline  transition-colors"
+        >
+          <p className=" text-blue-600">{project.projectName}</p>
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "projectKey",
     header: "Anahtar",
   },
 
-  // 3. SAHİBİ SÜTUNU (Hata Düzeltmesi)
   {
     accessorKey: "owner.name", // Sıralama için bu kalabilir
     header: "Lider",

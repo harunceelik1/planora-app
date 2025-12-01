@@ -9,7 +9,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { FcGoogle } from "react-icons/fc";
 import { ROUTES } from "@/constants/routest";
 
-// Kaydırma fonksiyonu
 const scrollToSection = (id: string) => {
   document.getElementById(id)?.scrollIntoView({
     behavior: "smooth",

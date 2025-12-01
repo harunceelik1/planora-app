@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id;
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q");
     let users;
@@ -21,41 +25,56 @@ export async function GET(request: Request) {
             { name: { contains: cleanQuery, mode: "insensitive" } },
             { email: { contains: cleanQuery, mode: "insensitive" } },
           ],
+          NOT: {
+            // İsteğe bağlı: Belirli kullanıcıları hariç tutmak isterseniz burada yapabilirsiniz
+            id: currentUserId, // Örneğin, mevcut kullanıcıyı hariç tut
+          },
         },
         select: {
-          id: true, email: true, name: true, image: true,
+          id: true,
+          email: true,
+          name: true,
+          image: true,
         },
         take: 5,
       });
-      
+
       console.log(`📊 Arama Sonucu: ${users.length} kişi bulundu.`);
       // Kimleri bulduğunu da yazdıralım (sorunu anlamak için)
-      users.forEach(u => console.log(`   -> Bulunan: ${u.name} (${u.email})`));
-
+      users.forEach((u) =>
+        console.log(`   -> Bulunan: ${u.name} (${u.email})`)
+      );
     } else {
-      console.log("⚠️ Arama kelimesi yok veya boş. Varsayılan liste (Son 5 kişi) getiriliyor.");
-      
+      console.log(
+        "⚠️ Arama kelimesi yok veya boş. Varsayılan liste (Son 5 kişi) getiriliyor."
+      );
+
       // Arama yoksa SADECE 5 kişi getir, Hepsini değil.
       users = await db.user.findMany({
         select: {
-          id: true, email: true, name: true, image: true,
+          id: true,
+          email: true,
+          name: true,
+          image: true,
         },
-        orderBy: { id: 'desc' }, // En son eklenenleri getir
-        take: 5, 
+        orderBy: { id: "desc" }, // En son eklenenleri getir
+        take: 5,
       });
     }
 
     return NextResponse.json(users);
-
   } catch (error) {
     console.error("API Hatası:", error);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 }
+    );
   }
 }
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name,email, password } = body;
+    const { name, email, password } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -78,12 +97,11 @@ export async function POST(req: Request) {
     const newUser = await db.user.create({
       data: {
         email,
-        password: hashedPassword ,
+        password: hashedPassword,
         name: name,
         image: "",
         emailVerified: null,
-
-      }as Prisma.UserUncheckedCreateInput
+      } as Prisma.UserUncheckedCreateInput,
     });
 
     return NextResponse.json({
@@ -97,4 +115,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

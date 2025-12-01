@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+
 }
 
 model User {
@@ -21,6 +22,7 @@ model User {
   reportedIssues   Issue[]         @relation("ReportedIssues") // Raporladığı görevler
   assignedIssues   Issue[]         @relation("AssignedIssues") // Kendisine atanan görevler
   projectsAsMember ProjectMember[] @relation("ProjectsAsMember") // Üyesi olduğu projeler (ProjectMember tablosu üzerinden)
+  comments         Comment[]
 }
 
 model Account {
@@ -71,10 +73,10 @@ model Project {
   owner   User   @relation("CreatedProjects", fields: [ownerId], references: [id])
 
   // Projedeki üyeler (Çoktan-çoka)
-  members ProjectMember[]
-
+  members    ProjectMember[]
+  issueCount Int             @default(0)
   // Projedeki tüm görevler
-  issues Issue[]
+  issues     Issue[]
 }
 
 model ProjectMember {
@@ -82,7 +84,6 @@ model ProjectMember {
   role      Role     @default(MEMBER) // Enum ile rol yönetimi
   createdAt DateTime @default(now())
 
-  // --- İlişkiler ---
   userId String
   user   User   @relation("ProjectsAsMember", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -101,7 +102,10 @@ model Issue {
   priority    IssuePriority @default(MEDIUM) // Enum ile öncelik yönetimi
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  order       Float         @default(0) // Sıralama için (Float kullanmak araya eklemeyi kolaylaştırır)
+  comments    Comment[] // İlişki
 
+  number    Int // Proje içindeki benzersiz görev numarası
   // --- İlişkiler ---
   // Görevin ait olduğu proje
   projectId String
@@ -114,12 +118,28 @@ model Issue {
   // Görevin atandığı kişi (opsiyonel, atanmamış olabilir)
   assigneeId String?
   assignee   User?   @relation("AssignedIssues", fields: [assigneeId], references: [id])
+
+  @@unique([projectId, number])
 }
 
 // Projedeki kullanıcı rolleri
 enum Role {
+  OWNER
   ADMIN // Projeyi yönetebilir, üye ekleyip çıkarabilir
   MEMBER // Görev oluşturabilir, görevleri yönetebilir
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 // Bir görevin durumu (Kanban board için)
