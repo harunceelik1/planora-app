@@ -136,8 +136,8 @@ export default function ProjectSettingsPage({ params }: SettingsPageProps) {
             <Input
               id="key"
               value={key}
-              disabled
-              className="h-10 bg-slate-100 dark:bg-slate-900 text-muted-foreground border-slate-200 dark:border-slate-800 cursor-not-allowed uppercase"
+              onChange={(e) => setKey(e.target.value.toUpperCase())}
+              className="h-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-800 focus-visible:ring-blue-600 focus-visible:ring-2"
             />
           </div>
 

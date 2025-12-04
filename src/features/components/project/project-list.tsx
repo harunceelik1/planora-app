@@ -11,8 +11,9 @@ import { SearchIcon } from "lucide-react"; // Sadece SearchIcon kaldı
 import { DataTable } from "./project-data/data-table";
 import { columns } from "./project-data/columns";
 import { useState } from "react";
+import { Project } from "@/types/project";
 
-export const ProjectList = ({ projects }: { projects: any[] }) => {
+export const ProjectList = ({ projects }: { projects: Project[] }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const filteredProjects = projects.filter((project) => {

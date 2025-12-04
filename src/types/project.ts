@@ -1,3 +1,5 @@
+import { User } from "@/types/user";
+
 export type Project = {
   id: string;
   projectName: string;
@@ -16,3 +18,17 @@ export type Project = {
   };
   isFavorite: boolean;
 };
+
+export interface ProjectMember {
+  user: User;
+  role: string;
+}
+
+export interface ProjectData {
+  ownerId: string;
+  members: ProjectMember[];
+}
+
+export interface UserWithRole extends User {
+  role: string;
+}

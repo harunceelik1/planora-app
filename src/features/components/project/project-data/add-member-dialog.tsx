@@ -10,7 +10,6 @@ import {
   UserPlus,
   X,
   Search,
-  UserCheck,
   Crown,
 } from "lucide-react";
 import {
@@ -22,12 +21,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { User } from "@/types/user";
 import { useAddMember } from "@/hooks/useAddMember";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr"; // 👈 1. useSWRConfig EKLENDİ
+import { useRouter } from "next/navigation"; // 👈 2. useRouter EKLENDİ
+import { ProjectData, UserWithRole } from "@/types/project";
 
 interface AddMemberDialogProps {
   projectId: string;
   projectName: string;
-  trigger?: React.ReactNode; // Trigger prop'u ekledik (Ayarlar sayfası için)
+  trigger?: React.ReactNode;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -38,6 +39,8 @@ export function AddMemberDialog({
   trigger,
 }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter(); // 👈 Router tanımlandı
+  const { mutate: globalMutate } = useSWRConfig(); // 👈 Global Mutate tanımlandı
 
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,26 +50,23 @@ export function AddMemberDialog({
 
   const { addMember, isLoading } = useAddMember();
 
-  // 1. VERİYİ DOĞRU URL İLE ÇEKİYORUZ (/api/project/[id])
+  // Dialog verisi
   const {
     data: projectData,
     isLoading: isProjectLoading,
-    mutate,
-  } = useSWR(open ? `/api/project/${projectId}` : null, fetcher);
-  console.log("API'den Gelen Üyeler:", projectData?.members);
-  // 2. GÜNCEL SAHİP ID
+    mutate: localMutate, // Buna localMutate diyelim karışmasın
+  } = useSWR<ProjectData>(open ? `/api/project/${projectId}` : null, fetcher);
+
   const activeOwnerId = projectData?.ownerId;
 
-  // 3. MEVCUT ÜYE ID'LERİ (Set)
   const existingMemberIds = new Set<string>(
-    projectData?.members?.map((m: any) => m.userId) || []
+    projectData?.members?.map((m) => m.user.id) || []
   );
 
-  // 4. MEVCUT ÜYE LİSTESİ (User objelerini alıyoruz)
-  const existingMembersList =
-    projectData?.members?.map((m: any) => ({
-      ...m.user, // User bilgileri (id, name, image)
-      role: m.role, // Rol bilgisi (OWNER, ADMIN, MEMBER)
+  const existingMembersList: UserWithRole[] =
+    projectData?.members?.map((m) => ({
+      ...m.user,
+      role: m.role,
     })) || [];
 
   // --- ARAMA MANTIĞI ---
@@ -93,11 +93,8 @@ export function AddMemberDialog({
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
-  // --- SEÇİM MANTIĞI ---
   const toggleUser = (user: User) => {
-    // Zaten üyeyse seçtirme (Lider veya Member fark etmez)
     if (existingMemberIds.has(user.id)) return;
-
     if (selectedUsers.find((u) => u.id === user.id)) {
       setSelectedUsers(selectedUsers.filter((u) => u.id !== user.id));
     } else {
@@ -109,19 +106,19 @@ export function AddMemberDialog({
   const handleAddMembers = async () => {
     if (selectedUsers.length === 0) return;
 
-    // Optimistic Update için hazırlık
+    // Optimistic Update (Anlık Görsel Hızlandırma)
     const newMembers = selectedUsers.map((u) => ({
-      userId: u.id,
       user: u,
+      role: "MEMBER",
     }));
 
-    const optimisticData = {
-      ...projectData,
+    const optimisticData: ProjectData = {
+      ownerId: projectData?.ownerId || "",
       members: [...(projectData?.members || []), ...newMembers],
     };
 
-    // Cache'i hemen güncelle
-    await mutate(optimisticData, false);
+    // Sadece dialog içini güncelle (hızlıca)
+    await localMutate(optimisticData, false);
 
     setSearchQuery("");
     setSearchResults([]);
@@ -130,19 +127,30 @@ export function AddMemberDialog({
     try {
       await addMember({
         projectId,
-        userIds: newMembers.map((m) => m.userId),
+        userIds: newMembers.map((m) => m.user.id),
       });
-      // İşlem bitince sunucudan tekrar doğrula
-      await mutate();
+
+      // 👇 KRİTİK NOKTA: GLOBAL GÜNCELLEME 👇
+      // 1. Proje detay sayfasını yenile (Header'daki veriler için)
+      await globalMutate(`/api/project/${projectId}`);
+
+      // 2. Proje listesini yenile (Sidebar'daki veriler için)
+      await globalMutate("/api/project");
+
+      // 3. Server Component'leri yenile (Garanti olsun)
+      router.refresh();
     } catch (error) {
       console.error("Üye ekleme hatası:", error);
-      await mutate(); // Hata varsa geri al
+      // Hata varsa geri al
+      await localMutate();
+      await globalMutate(`/api/project/${projectId}`);
     }
   };
 
   // Liste Kararı
-  const displayList =
+  const displayList: (User | UserWithRole)[] =
     searchQuery.length > 0 ? searchResults : existingMembersList;
+
   const listTitle =
     searchQuery.length > 0 ? "Arama Sonuçları" : "Mevcut Üyeler";
 
@@ -162,10 +170,8 @@ export function AddMemberDialog({
     >
       <PopoverTrigger asChild>
         {trigger ? (
-          // Eğer dışarıdan trigger geldiyse onu kullan (Ayarlar sayfası için)
           <div className="w-full cursor-pointer">{trigger}</div>
         ) : (
-          // Yoksa varsayılan buton
           <Button
             variant="ghost"
             size="icon"
@@ -179,10 +185,11 @@ export function AddMemberDialog({
 
       <PopoverContent
         className="w-[90vw] sm:w-[420px] p-0 overflow-hidden border shadow-2xl rounded-xl"
-        align="end"
+        align="start"
+        side="bottom"
         sideOffset={8}
       >
-        {/* 1. HEADER */}
+        {/* HEADER */}
         <div className="bg-slate-50/80 dark:bg-slate-900/50 backdrop-blur-sm border-b p-4 flex flex-col gap-3">
           <div>
             <h4 className="font-semibold text-sm leading-none">Kişi Ekle</h4>
@@ -223,7 +230,7 @@ export function AddMemberDialog({
           )}
         </div>
 
-        {/* 2. LİSTE */}
+        {/* LİSTE */}
         <div className="p-2">
           <div className="relative px-2 py-2">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -260,48 +267,66 @@ export function AddMemberDialog({
                     </span>
                   </div>
                 )}
-              {displayList.map((user: any) => {
-                // user: any yaptık çünkü içinde 'role' olabilir
+
+              {displayList.map((user) => {
                 const isAlreadyMember = existingMemberIds.has(user.id);
                 const isSelectedNew = selectedUsers.some(
                   (u) => u.id === user.id
                 );
                 const showCheck = isAlreadyMember || isSelectedNew;
 
-                // 1. KULLANICININ ROLÜNÜ BUL
-                // Eğer listede zaten varsa, rolünü 'existingMembersList' içinden bulmalıyız.
-                // (Çünkü arama sonuçlarında 'role' verisi gelmez)
-                let userRole = user.role;
+                let userRole = (user as UserWithRole).role;
 
                 if (!userRole && isAlreadyMember) {
                   const memberRecord = existingMembersList.find(
-                    (m: any) => m.id === user.id
+                    (m) => m.id === user.id
                   );
-                  userRole = memberRecord?.role;
+                  userRole = memberRecord?.role || "";
                 }
 
-                // 2. KİM BU KİŞİ? (Sahip mi, Yönetici mi?)
                 const isOwner = user.id === activeOwnerId;
                 const isAdmin = userRole === "ADMIN";
+
+                // ROZET
+                let badge = null;
+                if (isOwner) {
+                  badge = (
+                    <span className="ml-2 flex items-center gap-1 rounded-full border border-yellow-200 bg-yellow-100 px-2 py-0.5 text-[10px] font-bold text-yellow-700 dark:border-yellow-900/30 dark:bg-yellow-900/30 dark:text-yellow-500">
+                      <Crown className="h-3 w-3" /> Lider
+                    </span>
+                  );
+                } else if (isAdmin) {
+                  badge = (
+                    <span className="ml-2 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/30 dark:text-blue-400">
+                      Yönetici
+                    </span>
+                  );
+                } else if (isAlreadyMember) {
+                  badge = (
+                    <span className="ml-2 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400">
+                      Üye
+                    </span>
+                  );
+                }
 
                 return (
                   <div
                     key={user.id}
                     onClick={() => toggleUser(user)}
-                    className={`flex items-center gap-3 p-2 rounded-md transition-all text-sm
+                    className={`flex items-center gap-3 p-2 rounded-md transition-all text-sm mb-1
                       ${
                         isAlreadyMember
-                          ? "opacity-60 cursor-default"
+                          ? "opacity-100 cursor-default"
                           : "cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                       }
                       ${
                         isSelectedNew
-                          ? "bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-200"
+                          ? "bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-200 dark:ring-blue-800"
                           : ""
                       }
                     `}
                   >
-                    <Avatar className="h-8 w-8 border">
+                    <Avatar className="h-8 w-8 border border-slate-200">
                       <AvatarImage src={user.image || ""} />
                       <AvatarFallback className="text-xs bg-slate-100 text-slate-600">
                         {getInitials(user.name, "")}
@@ -309,24 +334,11 @@ export function AddMemberDialog({
                     </Avatar>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center flex-wrap">
                         <span className="font-medium truncate text-foreground">
                           {user.name}
                         </span>
-
-                        {isOwner ? (
-                          <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold border border-amber-200">
-                            <Crown className="h-3 w-3" /> Lider
-                          </span>
-                        ) : isAdmin ? (
-                          <span className="text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded font-bold border border-indigo-200">
-                            Yönetici
-                          </span>
-                        ) : isAlreadyMember ? (
-                          <span className="text-[10px] bg-slate-100 text-slate-500 dark:bg-slate-800 px-1.5 py-0.5 rounded font-medium border">
-                            Üye
-                          </span>
-                        ) : null}
+                        {badge}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
                         {user.email}
@@ -336,9 +348,7 @@ export function AddMemberDialog({
                     {showCheck && (
                       <div
                         className={
-                          isAlreadyMember
-                            ? "text-muted-foreground"
-                            : "text-blue-600"
+                          isAlreadyMember ? "text-slate-400" : "text-blue-600"
                         }
                       >
                         <Check className="h-4 w-4" />
@@ -351,7 +361,6 @@ export function AddMemberDialog({
           </div>
         </div>
 
-        {/* 3. FOOTER */}
         <div className="bg-slate-50 dark:bg-slate-900 border-t p-3 flex justify-between items-center">
           <div className="text-xs text-muted-foreground px-1">
             {selectedUsers.length > 0 ? (

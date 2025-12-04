@@ -14,9 +14,11 @@ import { getInitials } from "@/lib/utils";
 import { User } from "@/types/user";
 import useSWR, { mutate } from "swr";
 import { toast } from "react-toastify";
+import { ProjectData, UserWithRole } from "@/types/project";
 
 interface ChangeOwnerDialogProps {
   projectId: string;
+  currentOwnerId: string; // Mevcut sahibin ID'si
   trigger?: React.ReactNode;
 }
 
@@ -32,7 +34,7 @@ export function ChangeOwnerDialog({
   const [isSaving, setIsSaving] = useState(false);
 
   // 1. GÜNCEL PROJE VERİSİNİ ÇEK
-  const { data: projectData, isLoading } = useSWR(
+  const { data: projectData, isLoading } = useSWR<ProjectData>(
     open ? `/api/project/${projectId}` : null,
     fetcher
   );
@@ -40,14 +42,14 @@ export function ChangeOwnerDialog({
   const activeOwnerId = projectData?.ownerId;
 
   // 2. LİSTEYİ ROL BİLGİSİYLE BİRLİKTE HAZIRLA
-  const memberList =
-    projectData?.members?.map((m: any) => ({
+  const memberList: UserWithRole[] =
+    projectData?.members?.map((m) => ({
       ...m.user,
       role: m.role, // 👇 Rolü saklıyoruz
     })) || [];
 
   const filteredMembers = memberList.filter(
-    (user: any) =>
+    (user) =>
       user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -103,7 +105,7 @@ export function ChangeOwnerDialog({
               <div className="text-center py-4 text-xs">Yükleniyor...</div>
             )}
 
-            {filteredMembers.map((user: any) => {
+            {filteredMembers.map((user) => {
               // 👇 SAHİPLİK VE SEÇİM KONTROLÜ
               const isCurrentOwner = user.id === activeOwnerId;
               const isSelected = selectedUser?.id === user.id;
