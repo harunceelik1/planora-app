@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/prisma"; // Prisma client yolun
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Auth options yolun
 
 interface RouteParams {
   params: Promise<{ projectId: string }>;
@@ -31,18 +31,23 @@ export async function GET(request: Request, { params }: RouteParams) {
   return NextResponse.json(project);
 }
 
-// --- PATCH: GÜNCELLEME (SAHİPLİK DEVRİ DAHİL) ---
+// --- PATCH: GÜNCELLEME VE SAHİPLİK DEVRİ ---
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session)
+    // @ts-ignore
+    const currentUserId = session?.user?.id;
+
+    if (!currentUserId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { projectId } = await params;
     const body = await request.json();
-    const { name, description, ownerId } = body; // ownerId: Yeni Sahip Adayı
 
-    // 1. Mevcut projeyi ve sahibini bul
+    // Frontend'den gelen veriler
+    const { name, description, ownerId, key, image, icon, color } = body;
+
+    // 1. Mevcut projeyi kontrol et
     const existingProject = await db.project.findUnique({
       where: { id: projectId },
       select: { ownerId: true },
@@ -51,22 +56,36 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (!existingProject)
       return NextResponse.json({ error: "Proje yok" }, { status: 404 });
 
+    // 2. GÜVENLİK: Sadece şu anki sahip (Owner) değişiklik yapabilir
+    if (existingProject.ownerId !== currentUserId) {
+      return NextResponse.json(
+        { error: "Bu işlem için yetkiniz yok. Sadece proje sahibi yapabilir." },
+        { status: 403 }
+      );
+    }
+
     const oldOwnerId = existingProject.ownerId;
 
-    // --- SENARYO A: SAHİPLİK DEĞİŞİYORSA (Transaction Kullan) ---
+    // SENARYO 2: SAHİPLİK DEVRİ (Transfer Ownership)
+    // Eğer body içinde 'ownerId' geldiyse ve eski sahibinden farklıysa:
     if (ownerId && ownerId !== oldOwnerId) {
       const result = await db.$transaction([
-        // 1. ADIM: Proje tablosunda sahibini değiştir
+        // ADIM 1: Proje tablosunda 'ownerId'yi değiştir
+        // (Aynı zamanda isim, key, resim değiştiyse onları da güncelle)
         db.project.update({
           where: { id: projectId },
           data: {
-            ownerId: ownerId,
+            ownerId: ownerId, // YENİ SAHİP
             ...(name && { projectName: name }),
-            ...(description && { description: description }),
+            ...(key && { projectKey: key }),
+            ...(image !== undefined && { image }),
+            ...(icon !== undefined && { icon }),
+            ...(color !== undefined && { color }),
           },
         }),
 
-        // 2. ADIM: Eski sahibin rolünü 'ADMIN' yap (Üye listesinde kalması için)
+        // ADIM 2: Eski sahibin (SENİN) rolünü 'ADMIN' yap
+        // Böylece projeden atılmazsın, yönetici olarak kalırsın.
         db.projectMember.upsert({
           where: {
             userId_projectId: { userId: oldOwnerId, projectId: projectId },
@@ -75,25 +94,29 @@ export async function PATCH(request: Request, { params }: RouteParams) {
           update: { role: "ADMIN" },
         }),
 
-        // 3. ADIM: Yeni sahibin rolünü 'OWNER' yap
-        db.projectMember.update({
+        // ADIM 3: Yeni sahibin rolünü 'OWNER' yap
+        db.projectMember.upsert({
           where: {
             userId_projectId: { userId: ownerId, projectId: projectId },
           },
-          data: { role: "OWNER" },
+          create: { userId: ownerId, projectId: projectId, role: "OWNER" },
+          update: { role: "OWNER" },
         }),
       ]);
 
-      // Transaction dizisinin ilk elemanı güncellenmiş projedir
+      // İşlem başarılı, güncellenmiş projeyi döndür
       return NextResponse.json(result[0]);
     }
+    // NORMAL GÜNCELLEME (Sahiplik değişmiyor, sadece isim/resim vb.)
 
-    // --- SENARYO B: SADECE İSİM/AÇIKLAMA DEĞİŞİYORSA ---
     const simpleUpdate = await db.project.update({
       where: { id: projectId },
       data: {
         ...(name && { projectName: name }),
-        ...(description && { description: description }),
+        ...(key && { projectKey: key }),
+        ...(image !== undefined && { image: image }),
+        ...(icon !== undefined && { icon }), // 👈 EKLENDİ
+        ...(color !== undefined && { color }), // 👈 EKLEN
       },
     });
 
@@ -106,11 +129,25 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
 // --- DELETE: SİLME ---
 export async function DELETE(request: Request, { params }: RouteParams) {
-  // ... (Bu kısım aynı kalabilir) ...
   const session = await getServerSession(authOptions);
-  if (!session)
+
+  // @ts-ignore
+  const currentUserId = session?.user?.id;
+
+  if (!currentUserId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { projectId } = await params;
+
+  // Sadece Owner silebilir kontrolü eklemek iyi olur
+  const project = await db.project.findUnique({ where: { id: projectId } });
+  if (project?.ownerId !== currentUserId) {
+    return NextResponse.json(
+      { error: "Sadece proje sahibi silebilir" },
+      { status: 403 }
+    );
+  }
+
   await db.project.delete({ where: { id: projectId } });
   return NextResponse.json({ message: "Silindi" });
 }

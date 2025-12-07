@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-
 }
 
 model User {
@@ -63,9 +62,13 @@ model VerificationToken {
 model Project {
   id          String   @id @default(cuid())
   projectName String
-  projectKey  String   @unique // Jira'daki "KAN", "PROJ" gibi kısa kod
+  projectKey  String   @unique // Proje anahtarı (benzersiz)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  image String? // Proje resmi/ikonu
+  icon  String? // Proje ikonu (emoji veya simge)
+  color String? // Proje rengi (hex kodu) 
 
   // --- İlişkiler ---
   // Projeyi oluşturan kişi (Owner)

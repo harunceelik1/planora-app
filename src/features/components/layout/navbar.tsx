@@ -234,8 +234,8 @@ export const Navbar = () => {
                         className="justify-start text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors h-10 px-4 mt-2"
                         onClick={() => signOut({ callbackUrl: "/sign-in" })}
                       >
-                        <LogOut className="mr-3 h-5 w-5" />
-                        Sign Out
+                        <LogOut className="mr-3 h-5 w-5 text-red-600" />
+                        Çıkış Yap
                       </Button>
                     </>
                   ) : (

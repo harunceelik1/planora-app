@@ -1,19 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { use } from "react";
-import useSWR, { mutate } from "swr";
+import { useState, useEffect, use } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/lib/utils";
-import { MoreHorizontal, RefreshCw } from "lucide-react"; // İkonlar
-import Image from "next/image";
-import Link from "next/link";
+import { Loader2, Settings, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeOwnerDialog } from "@/features/components/project/project-data/change-owner-dialog";
+import { useUpdateProject } from "@/hooks/useUpdateProject";
+import { toast } from "react-toastify";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { MembersList } from "@/features/components/project/member-list";
+
+import { ProjectIconPicker } from "@/features/components/project/project-data/project-icon-picker";
 
 interface SettingsPageProps {
   params: Promise<{ projectId: string }>;
@@ -23,175 +34,260 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ProjectSettingsPage({ params }: SettingsPageProps) {
   const { projectId } = use(params);
-  const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
-  // Veriyi çek
-  const { data: project, isLoading } = useSWR(
-    `/api/project/${projectId}`,
-    fetcher
-  );
+  const { updateProject, isUpdating } = useUpdateProject(projectId);
 
-  // Form State'leri
+  // Veriyi çek (mutate fonksiyonunu da aldık)
+  const {
+    data: project,
+    isLoading,
+    mutate,
+  } = useSWR(`/api/project/${projectId}`, fetcher);
+
+  // --- STATE TANIMLARI ---
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
 
-  // Veri gelince state'i güncelle
+  // 👇 YENİ STATE'LER (Monday tarzı için)
+  const [image, setImage] = useState("");
+  const [icon, setIcon] = useState("");
+  const [color, setColor] = useState("");
+
+  // Veri gelince state'leri doldur
+  // Veri gelince state'leri doldur
+  // Sadece sayfa ilk açıldığında çalışır, sonrasında senin seçimlerine karışmaz.
   useEffect(() => {
     if (project) {
-      setName(project.projectName);
-      setKey(project.projectKey);
+      // Sadece state boşsa doldur (veya ilk yüklemede)
+      // Bu sayede senin seçtiğin rengi ezmez.
+      setName((prev) => prev || project.projectName || "");
+      setKey((prev) => prev || project.projectKey || "");
+      setImage((prev) => prev || project.image || "");
+      setIcon((prev) => prev || project.icon || "Layout");
+      setColor((prev) => prev || project.color || "#3357FF");
     }
-  }, [project]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]); // ✅ Sadece yükleme bitince 1 kere çalışır.
+  const handleIconUpdate = async (newData: {
+    image?: string;
+    icon?: string;
+    color?: string;
+  }) => {
+    // 1. STATE'LERİ GÜNCELLE (Anlık değişim için)
+    if (newData.image !== undefined) setImage(newData.image);
+    if (newData.icon !== undefined) setIcon(newData.icon);
+    if (newData.color !== undefined) setColor(newData.color);
+
+    // 2. YENİ VERİYİ HAZIRLA
+    const optimisticData = {
+      ...project,
+      image: newData.image ?? image,
+      icon: newData.icon ?? icon,
+      color: newData.color ?? color,
+    };
+
+    // 3. SWR CACHE'İNİ GÜNCELLE (revalidate: false ÇOK ÖNEMLİ)
+    // false demezsen gider sunucudan eski veriyi çeker yine bozulur.
+    await mutate(optimisticData, false);
+
+    try {
+      // 4. SESSİZ KAYIT (Toast yok)
+      await updateProject(
+        {
+          name,
+          key,
+          image: newData.image ?? image,
+          icon: newData.icon ?? icon,
+          color: newData.color ?? color,
+        },
+        { showToast: false }
+      );
+    } catch (error) {
+      // Hata olursa cache'i geri al (rollback) ve uyar
+      mutate();
+      toast.error("Kaydedilemedi");
+    }
+  };
+
+  // 👇 FORMU KAYDETME (BU HALA TOAST GÖSTERSİN)
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Burada options vermiyoruz, varsayılan (true) çalışır ve toast çıkar
+    await updateProject({ name, key, image, icon, color });
+  };
 
   if (isLoading)
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-screen items-center justify-center">
         <Spinner className="size-8" />
       </div>
     );
 
   if (!project) return <div className="p-8">Proje bulunamadı.</div>;
 
+  const formattedMembers =
+    project?.members?.map((m: any) => ({
+      id: m.userId,
+      role: m.role,
+      user: m.user,
+    })) || [];
+
   return (
-    <div className="flex flex-col items-center py-10 px-4 bg-white dark:bg-background min-h-screen">
-      {/* 1. ÜST HEADER (Breadcrumb ve Başlık) */}
-      <div className="w-full max-w-[600px] mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-md text-muted-foreground mb-1">
-              <Link href={"/main/projects"} className="hover:underline">
-                Alan
-              </Link>
-              <span> / </span>
-              <Link
-                href={`/main/projects/${projectId}`}
-                className="hover:underline"
-              >
-                {project.projectName}
-              </Link>{" "}
-              / Alan ayarları
-            </div>
-            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 tracking-tight">
-              Ayrıntılar
-            </h1>
-          </div>
-          {/* Sağ üstteki üç nokta menüsü */}
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-          </Button>
-        </div>
+    <div className="container max-w-6xl py-10 px-4 md:px-8">
+      {/* BAŞLIK */}
+      <div className="space-y-0.5 mb-8">
+        <h2 className="text-2xl font-bold tracking-tight">Ayarlar</h2>
+        <p className="text-muted-foreground">
+          Proje ayarlarını ve ekip üyeliklerini buradan yönetin.
+        </p>
       </div>
 
-      {/* 2. ORTA KISIM: İKON VE FORM */}
-      <div className="w-full max-w-[600px] space-y-8">
-        {/* İKON ALANI (Ortalanmış) */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative group cursor-pointer">
-            <div className="relative h-24 w-24 border-1 rounded-lg flex items-center justify-center ">
-              <Image src="/images/logo.png" alt="Logo" width={64} height={64} />
-            </div>
-          </div>
+      <Separator className="my-6" />
 
-          <Button
-            variant="outline"
-            className="h-8 text-xs font-medium bg-white dark:bg-transparent"
-          >
-            Simgeyi değiştir
-          </Button>
-        </div>
-
-        {/* FORM ALANI */}
-        <div className="space-y-6">
-          <p className="text-xs text-muted-foreground text-center sm:text-left">
-            Gerekli alanlar yıldız işaretiyle belirtilmiştir *
-          </p>
-
-          {/* Input: Ad */}
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="name"
-              className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide"
+      <Tabs
+        defaultValue="general"
+        className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12"
+      >
+        {/* SOL MENÜ */}
+        <aside className="md:w-1/4">
+          <TabsList className="flex md:flex-col justify-start w-full h-auto bg-transparent p-0 gap-2">
+            <TabsTrigger
+              value="general"
+              className="cursor-pointer w-full justify-start px-3 py-2 h-9 text-sm font-medium rounded-md hover:bg-muted data-[state=active]:bg-muted data-[state=active]:text-primary transition-all"
             >
-              Ad <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-800 focus-visible:ring-blue-600 focus-visible:ring-2"
-            />
-          </div>
+              <Settings className="mr-2 h-4 w-4" /> Genel
+            </TabsTrigger>
+            <TabsTrigger
+              value="members"
+              className=" cursor-pointer w-full justify-start px-3 py-2 h-9 text-sm font-medium rounded-md hover:bg-muted data-[state=active]:bg-muted data-[state=active]:text-primary transition-all"
+            >
+              <Users className="mr-2 h-4 w-4" /> Üyeler ve Erişim
+            </TabsTrigger>
+          </TabsList>
+        </aside>
 
-          {/* Input: Anahtar (Disabled) */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1">
-              <Label
-                htmlFor="key"
-                className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide"
-              >
-                Alan anahtarı <span className="text-red-500">*</span>
-              </Label>
-              {/* Bilgi ikonu eklenebilir */}
-            </div>
-            <Input
-              id="key"
-              value={key}
-              onChange={(e) => setKey(e.target.value.toUpperCase())}
-              className="h-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-800 focus-visible:ring-blue-600 focus-visible:ring-2"
-            />
-          </div>
-
-          {/* Alan Sahibi (Custom Div) */}
-          <div className="space-y-1.5">
-            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
-              Alan sahibi
-            </Label>
-            <ChangeOwnerDialog
-              projectId={project.id}
-              currentOwnerId={project.ownerId} // Mevcut sahibin ID'si
-              trigger={
-                <div className="flex items-center justify-between px-3 h-10 border border-slate-300 dark:border-slate-800 rounded-md bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-5 w-5">
-                      <AvatarImage src={project.owner?.image || ""} />
-                      <AvatarFallback className="text-[9px]">
-                        {getInitials(project.owner?.name || "", "")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {project.owner?.name}
-                    </span>
+        {/* SAĞ İÇERİK */}
+        <div className="flex-1 md:max-w-2xl">
+          {/* --- TAB: GENEL --- */}
+          <TabsContent value="general" className="space-y-6 mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle>Proje Kimliği</CardTitle>
+                <CardDescription>
+                  Projenizin görünür adı, simgesi ve temel ayarları.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSave} className="space-y-6">
+                  {/* 👇 BURAYI DEĞİŞTİRDİK: YENİ İKON SEÇİCİ */}
+                  <div className="flex flex-col gap-3">
+                    <Label>Proje Görünümü</Label>
+                    <ProjectIconPicker
+                      // 1. Resim (Boşsa null gönderiyoruz)
+                      image={image || null}
+                      // 2. 👇 HATA BURADAYDI: İsimleri eşleştirdik
+                      currentIcon={icon} // State adı 'icon', Prop adı 'currentIcon'
+                      currentColor={color} // State adı 'color', Prop adı 'currentColor'
+                      name={name}
+                      // 3. Değişiklik Fonksiyonu
+                      onChange={handleIconUpdate}
+                    />
                   </div>
 
-                  <span className="text-[10px] text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                    Değiştir
-                  </span>
-                </div>
-              }
-            />
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Alan liderinizin alandaki biletlere erişimi olduğundan emin olun.
-            </p>
-          </div>
+                  {/* İSİM VE ANAHTAR */}
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Proje Adı</Label>
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={isUpdating}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="key">Proje Anahtarı</Label>
+                      <div className="relative">
+                        <Input
+                          id="key"
+                          value={key}
+                          onChange={(e) => setKey(e.target.value.toUpperCase())}
+                          disabled={isUpdating}
+                          maxLength={5}
+                          className="uppercase font-mono"
+                        />
+                        <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                          Max 5
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-          {/* Butonlar */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              variant="ghost"
-              onClick={() => router.push(`/main/projects/${projectId}`)}
-              className="font-medium text-muted-foreground hover:bg-slate-100"
-            >
-              İptal
-            </Button>
-            <Button
-              disabled={isSaving}
-              className="bg-blue-700 hover:bg-blue-800 text-white font-medium px-4"
-            >
-              {isSaving ? "Kaydediliyor..." : "Değişiklikleri kaydet"}
-            </Button>
-          </div>
+                  {/* ALAN SAHİBİ */}
+                  <div className="grid gap-2">
+                    <Label>Alan Sahibi</Label>
+                    <ChangeOwnerDialog
+                      projectId={project.id}
+                      currentOwnerId={project.ownerId || ""}
+                      trigger={
+                        <div className="flex items-center justify-between px-3 h-10 border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={project.owner?.image || ""} />
+                              <AvatarFallback className="text-[10px]">
+                                {project.owner?.name?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm font-medium">
+                              {project.owner?.name}
+                            </span>
+                          </div>
+                          <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Değiştir
+                          </span>
+                        </div>
+                      }
+                    />
+                  </div>
+
+                  {/* KAYDET BUTONU */}
+                  <div className="flex justify-end pt-4 border-t">
+                    <Button
+                      type="submit"
+                      disabled={isUpdating}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {isUpdating ? (
+                        <Spinner className="size-8" />
+                      ) : (
+                        "Değişiklikleri Kaydet"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* --- TAB: ÜYELER --- */}
+          <TabsContent value="members" className="space-y-6 mt-0">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium">Ekip Yönetimi</h3>
+              <p className="text-sm text-muted-foreground">
+                Projenize kimlerin erişebileceğini ve yetkilerini buradan
+                kontrol edin.
+              </p>
+            </div>
+            <MembersList
+              projectId={projectId}
+              members={formattedMembers}
+              currentUserId={project?.ownerId || ""}
+              ownerId={project?.ownerId || ""}
+              onUpdate={() => mutate()}
+            />
+          </TabsContent>
         </div>
-      </div>
+      </Tabs>
     </div>
   );
 }

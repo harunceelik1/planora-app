@@ -13,7 +13,7 @@ export const useAddMember = () => {
     setIsLoading(true);
     setApiError("");
     try {
-      const response = await fetch("/api/project-member", {
+      const response = await fetch("/api/project-members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

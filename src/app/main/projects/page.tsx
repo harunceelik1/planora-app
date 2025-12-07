@@ -56,9 +56,6 @@ export default function Projects() {
   }
 
   // 4. Hata durumu: API bir hata döndürdü
-  // Projects.tsx içindeki 4. Hata durumu bloğu
-
-  // 4. Hata durumu: API bir hata döndürdü
   if (error) {
     // Hata mesajını daha iyi biçimlendirmek için
     const errorMessage = error.message || "Bilinmeyen bir hata oluştu.";

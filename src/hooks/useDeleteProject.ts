@@ -1,0 +1,38 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify"; // Kullandığınız toast kütüphanesi
+
+export function useDeleteProject() {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
+
+  const deleteProject = async (projectId: string) => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/project/${projectId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Silme işlemi başarısız oldu.");
+      }
+
+      toast.success("Proje başarıyla silindi.");
+
+      router.push("/main/projects"); // Listeye yönlendir
+      router.refresh(); // Server componentleri yenile
+
+      return true; // İşlem başarılı
+    } catch (error) {
+      toast.error("Proje silinirken bir hata oluştu.");
+      console.error(error);
+      return false; // İşlem başarısız
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return { deleteProject, isDeleting };
+}

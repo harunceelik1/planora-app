@@ -24,6 +24,7 @@ import { useAddMember } from "@/hooks/useAddMember";
 import useSWR, { useSWRConfig } from "swr"; // 👈 1. useSWRConfig EKLENDİ
 import { useRouter } from "next/navigation"; // 👈 2. useRouter EKLENDİ
 import { ProjectData, UserWithRole } from "@/types/project";
+import { Spinner } from "@/components/ui/spinner";
 
 interface AddMemberDialogProps {
   projectId: string;
@@ -240,9 +241,7 @@ export function AddMemberDialog({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-9 bg-muted/30 border-muted-foreground/20 focus-visible:ring-1"
             />
-            {isSearching && (
-              <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 h-3 w-3 animate-spin text-muted-foreground" />
-            )}
+            {isSearching && <Spinner className="size-8" />}
           </div>
 
           <div className="h-[240px] overflow-y-auto custom-scrollbar px-2 flex flex-col gap-2">

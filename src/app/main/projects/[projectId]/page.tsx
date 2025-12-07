@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
 import useSWR from "swr";
-
+import * as Icons from "lucide-react";
 interface ProjectDetailsPageProps {
   params: Promise<{ projectId: string }>;
 }
@@ -30,7 +30,17 @@ export default function ProjectDetailsPage({
 }: ProjectDetailsPageProps) {
   const router = useRouter();
   const { projectId } = use(params);
-
+  const RenderIcon = ({
+    iconName,
+    className,
+  }: {
+    iconName: string;
+    className?: string;
+  }) => {
+    // @ts-ignore
+    const IconComponent = Icons[iconName] || Icons.Layout;
+    return <IconComponent className={className} />;
+  };
   const {
     data: project,
     isLoading,
@@ -85,7 +95,41 @@ export default function ProjectDetailsPage({
         </h2>
 
         <div className="flex flex-row items-center">
-          <Image width={24} height={24} src={"/images/logo.png"} alt="Logo" />
+          <div className="mr-3">
+            {project.image ? (
+              // DURUM A: Özel Resim Varsa
+              <div className="relative h-8 w-8 rounded-md overflow-hidden border border-slate-200">
+                <Image
+                  src={project.image}
+                  alt="Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : project.icon && project.color ? (
+              // DURUM B: İkon + Renk Varsa (Monday Tarzı)
+              <div
+                className="h-8 w-8 rounded-md flex items-center justify-center border border-black/5 shadow-sm"
+                style={{ backgroundColor: project.color }}
+              >
+                <RenderIcon
+                  iconName={project.icon}
+                  className="h-5 w-5 text-white"
+                />
+              </div>
+            ) : (
+              // DURUM C: Hiçbiri Yoksa (Varsayılan Logo)
+              <div className="relative h-8 w-8">
+                <Image
+                  src={"/images/logo.png"}
+                  alt="Logo"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                />
+              </div>
+            )}
+          </div>
 
           <p className="items-center justify-center flex pl-2 font-bold text-xl text-gray-800 dark:text-gray-100">
             {project.projectName}
