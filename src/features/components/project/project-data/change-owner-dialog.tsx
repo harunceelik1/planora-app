@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Check, Crown } from "lucide-react";
+import { Search, Crown } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -15,8 +15,10 @@ import { User } from "@/types/user";
 import useSWR, { mutate } from "swr";
 import { toast } from "react-toastify";
 import { ProjectData, UserWithRole } from "@/types/project";
-import { useRouter } from "next/navigation"; // 👈 EKLENDİ
+import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+// 👇 1. IMPORT ET
+import { useTranslations } from "next-intl";
 
 interface ChangeOwnerDialogProps {
   projectId: string;
@@ -30,11 +32,14 @@ export function ChangeOwnerDialog({
   projectId,
   trigger,
 }: ChangeOwnerDialogProps) {
+  // 👇 2. HOOK'U BAŞLAT
+  const t = useTranslations("ChangeOwnerDialog");
+
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter(); // 👈 EKLENDİ
+  const router = useRouter();
 
   // 1. GÜNCEL PROJE VERİSİNİ ÇEK
   const { data: projectData, isLoading } = useSWR<ProjectData>(
@@ -61,7 +66,6 @@ export function ChangeOwnerDialog({
     if (!selectedUser) return;
     setIsSaving(true);
     try {
-      // Backend'deki "Scenario 2" Transaction'ı tetiklenir
       const res = await fetch(`/api/project/${projectId}`, {
         method: "PATCH",
         body: JSON.stringify({ ownerId: selectedUser.id }),
@@ -69,17 +73,14 @@ export function ChangeOwnerDialog({
 
       if (!res.ok) throw new Error("Devredilemedi");
 
-      toast.success(`Sahiplik devredildi. Artık yöneticisiniz.`);
+      toast.success(t("toasts.success")); // Çeviri: Sahiplik devredildi...
 
-      // Cache'i güncelle
       await mutate(`/api/project/${projectId}`);
-
-      // 👈 ÖNEMLİ: Server Component'leri (Sidebar, Header vb.) yenile
       router.refresh();
 
       setOpen(false);
     } catch (error) {
-      toast.error("Hata oluştu.");
+      toast.error(t("toasts.error")); // Çeviri: Hata oluştu
     } finally {
       setIsSaving(false);
     }
@@ -88,30 +89,26 @@ export function ChangeOwnerDialog({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        {/* Trigger yoksa varsayılan bir buton göster, varsa trigger'ı kullan */}
         <div className="cursor-pointer w-full">
-          {trigger || <Button variant="outline">Sahibi Değiştir</Button>}
+          {trigger || <Button variant="outline">{t("trigger")}</Button>}{" "}
+          {/* Çeviri: Sahibi Değiştir */}
         </div>
       </PopoverTrigger>
 
       <PopoverContent className="w-[350px] p-0" align="start">
-        {/* ... (Tasarım kodların aynı kalacak) ... */}
-
         <div className="p-4 border-b bg-slate-50 dark:bg-slate-900/50">
-          <h4 className="font-semibold text-sm">Proje Sahibini Değiştir</h4>
+          <h4 className="font-semibold text-sm">{t("header.title")}</h4>{" "}
+          {/* Çeviri: Proje Sahibini Değiştir */}
           <p className="text-xs text-muted-foreground mt-1">
-            Dikkat: Bu işlem geri alınamaz. Projenin tam yetkisi seçilen kişiye
-            geçer.
+            {t("header.warning")} {/* Çeviri: Dikkat... */}
           </p>
         </div>
 
-        {/* ... (Arama inputu ve liste kodların aynı) ... */}
         <div className="p-2 flex flex-col gap-2">
-          {/* ... ARAMA INPUTU AYNI ... */}
           <div className="relative px-2 py-2">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Üye ara..."
+              placeholder={t("search.placeholder")} // Çeviri: Üye ara...
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-9"
@@ -119,9 +116,10 @@ export function ChangeOwnerDialog({
           </div>
 
           <div className="max-h-[240px] overflow-y-auto custom-scrollbar px-2 mt-1">
-            {/* ... LİSTELEME AYNI ... */}
             {isLoading && (
-              <div className="text-center py-4 text-xs">Yükleniyor...</div>
+              <div className="text-center py-4 text-xs">
+                {t("search.loading")}
+              </div> // Çeviri: Yükleniyor...
             )}
 
             {filteredMembers.map((user) => {
@@ -152,18 +150,20 @@ export function ChangeOwnerDialog({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{user.name}</span>
-                      {/* ROZETLER AYNI */}
+
+                      {/* ROZETLER (Çeviri ile) */}
                       {isCurrentOwner ? (
                         <span className="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-bold flex items-center gap-1 border border-yellow-200">
-                          <Crown className="h-3 w-3" /> Lider
+                          <Crown className="h-3 w-3" /> {t("roles.owner")}{" "}
+                          {/* Çeviri: Lider */}
                         </span>
                       ) : isAdmin ? (
                         <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-bold border border-blue-200">
-                          Yönetici
+                          {t("roles.admin")} {/* Çeviri: Yönetici */}
                         </span>
                       ) : (
                         <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full font-medium border border-slate-200">
-                          Üye
+                          {t("roles.member")} {/* Çeviri: Üye */}
                         </span>
                       )}
                     </div>
@@ -171,7 +171,6 @@ export function ChangeOwnerDialog({
                       {user.email}
                     </p>
                   </div>
-                  {isSelected && <Check className="h-4 w-4 text-blue-600" />}
                 </div>
               );
             })}
@@ -180,7 +179,7 @@ export function ChangeOwnerDialog({
 
         <div className="p-3 border-t flex justify-end gap-2 bg-slate-50 dark:bg-slate-900/50">
           <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-            İptal
+            {t("buttons.cancel")} {/* Çeviri: İptal */}
           </Button>
           <Button
             size="sm"
@@ -188,7 +187,8 @@ export function ChangeOwnerDialog({
             disabled={!selectedUser || isSaving}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {isSaving ? <Spinner className="size-8" /> : "Devret"}
+            {isSaving ? <Spinner className="size-8" /> : t("buttons.transfer")}{" "}
+            {/* Çeviri: Devret */}
           </Button>
         </div>
       </PopoverContent>

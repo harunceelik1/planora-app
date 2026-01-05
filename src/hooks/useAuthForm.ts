@@ -4,36 +4,41 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl"; // 👈 1. Import
+import { ROUTES } from "@/constants/routest";
 
 export const useAuthForm = (type: "signin" | "signup") => {
   const router = useRouter();
-  const isSignIn = type === "signin";
+  const t = useTranslations("Auth.Form"); // 👈 2. Hook'u başlattık
 
+  const isSignIn = type === "signin";
+  const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
-  // En az 6 karakter, 1 büyük harf, 1 sayı
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
 
     if (!isSignIn && !passwordRegex.test(password)) {
-      setPasswordError(
-        "Şifre en az 6 karakter olmalı, en az 1 büyük harf ve 1 sayı içermeli"
-      );
+      // 👇 Çeviri: Şifre kuralı hatası
+      setPasswordError(t("validation.password"));
       setLoading(false);
       return;
     }
     setPasswordError("");
 
     try {
+      // ------------------------------------------------
+      // 🔑 GİRİŞ YAPMA (SIGN IN)
+      // ------------------------------------------------
       if (isSignIn) {
-        // ---- SIGN IN ----
         const res = await signIn("credentials", {
           email,
           password,
@@ -42,37 +47,48 @@ export const useAuthForm = (type: "signin" | "signup") => {
         });
 
         if (res?.error) {
-          toast.error("E-posta veya şifre hatalı");
+          // Eğer backend özel bir hata mesajı dönmüyorsa standart mesaj göster
+          const errorMsg =
+            res.error === "CredentialsSignin"
+              ? t("errors.signInFailed")
+              : res.error;
+
+          toast.error(errorMsg);
+          setError(errorMsg);
           return;
         }
 
-        toast.success("Giriş başarılı!");
-        // console.log("SIGN IN RES:", res?.url);
-        router.push(res?.url ?? "/");
+        toast.success(t("success.signIn")); // 👇 Çeviri: Giriş Başarılı
+        router.push("/");
         router.refresh();
         return;
       }
 
-      // ---- SIGN UP ----
+      // ------------------------------------------------
+      // 📝 KAYIT OLMA (SIGN UP)
+      // ------------------------------------------------
       const response = await fetch("/api/user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name,email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
-  
+
+      const data = await response.json();
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const message = data?.error ?? "Kayıt sırasında bir hata oluştu";
+        // 👇 Çeviri: API hatası veya varsayılan hata
+        const message = data?.error ?? t("errors.signUpDefault");
         toast.error(message);
+        setError(message);
         return;
       }
-      toast.success("Kayıt başarılı! Şimdi giriş yapabilirsin.");
-      router.push("/sign-in");
+      toast.success(t("success.signUp"));
+      router.push(ROUTES.NEW_VERIFICATION(email));
+
       router.refresh();
-      
     } catch (err: any) {
-      const message = err?.message ?? "Beklenmeyen bir hata oluştu";
+      // 👇 Çeviri: Beklenmeyen hata
+      const message = err?.message ?? t("errors.unexpected");
       toast.error(message);
     } finally {
       setLoading(false);
@@ -90,5 +106,6 @@ export const useAuthForm = (type: "signin" | "signup") => {
     passwordError,
     handleSubmit,
     isSignIn,
+    error,
   };
 };

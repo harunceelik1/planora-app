@@ -1,0 +1,490 @@
+{
+  "HomePage": {
+    "heroTitle": "Plan and Manage",
+    "heroDescription": "Planora is an all-in-one platform that enables you to plan projects quickly, manage them efficiently, and collaborate seamlessly with your team.",
+    "getStarted": "Get Started Now",
+    "features": {
+      "timeline": {
+        "title": "Timeline",
+        "subTitle": "Deliver Your Projects on Time",
+        "shortDesc": "Visually plan the start and end of every task with Gantt charts.",
+        "longDesc": "Planora's advanced Timeline tool allows you to visualize your projects from A to Z. Easily identify the critical path to prevent bottlenecks."
+      },
+      "tasks": {
+        "title": "Task Management",
+        "subTitle": "Keep Every Task Under Control",
+        "shortDesc": "Control all your tasks from different perspectives with Kanban, list, and calendar views.",
+        "longDesc": "Instantly switch between Kanban boards, list, or calendar views according to your project needs."
+      },
+      "account": {
+        "title": "Account Management",
+        "subTitle": "Google or Manual Login",
+        "shortDesc": "One-click login with Google for a quick start, or register with traditional email.",
+        "longDesc": "The Account Management module offers two flexible login options: sign in instantly with your Google account or register with email."
+      }
+    },
+    "buttons": {
+      "moreInfo": "Learn More",
+      "googleLogin": "Sign in with Google",
+      "quickStart": "Quick start",
+      "register": "Sign Up",
+      "emailPassword": "Email & Password"
+    }
+  },
+  "Navbar": {
+    "links": {
+      "home": "Home",
+      "about": "About"
+    },
+    "auth": {
+      "loading": "Loading...",
+      "signIn": "Sign In",
+      "signOut": "Sign Out",
+      "profile": "Profile Settings"
+    },
+    "aria": {
+      "userMenu": "User menu",
+      "openMenu": "Open menu" 
+    }
+  },
+  "CreateProject": {
+    "nav": {
+      "back": "Go Back"
+    },
+    "header": {
+      "title": "Create New Project",
+      "description": "Fill in the fields below to start your project."
+    },
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Team name, project goal, project name...",
+      "keyLabel": "Key",
+      "requiredNote": "Required fields are marked with an asterisk",
+      "cancelButton": "Cancel",
+      "createButton": "Create Project"
+    },
+    "popover": {
+      "title": "What is a Project Key?",
+      "description": "The project key is a short, unique identifier used for all records in your project. (e.g. PRJ, TEST)"
+    },
+    "errors": {
+      "nameRequired": "You must enter a name for your new project.",
+      "keyRequired": "Your workspace needs a key."
+    },
+    "preview": {
+      "defaultName": "Project Name",
+      "defaultKey": "KEY",
+      "tasksTitle": "Project Tasks"
+    }
+},
+  "ProfilePage": {
+    "header": {
+      "title": "My Profile",
+      "description": "Manage your personal information, security, and preferences."
+    },
+    "changePassword": {
+      "trigger": "Update Password",
+      "title": "Update Password",
+      "labels": {
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "errors": {
+        "minLength": "Password must be at least 8 characters long.",
+        "mismatch": "Passwords do not match."
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save"
+      }
+    },
+    "editProfile": {
+      "trigger": "Edit Profile",
+      "title": "Edit Profile",
+      "helpText": "Recommended size 1:1, max 10MB.",
+      "labels": {
+        "name": "Name"
+      },
+      "placeholders": {
+        "name": "Your name"
+      },
+      "buttons": {
+        "upload": "Upload",
+        "remove": "Remove",
+        "cancel": "Cancel",
+        "save": "Save"
+      }
+    },
+    "account": {
+      "title": "Account",
+      "description": "Current data and actions regarding your account."
+    },
+    "details": {
+      "title": "Details",
+      "location": {
+        "label": "Location",
+        "placeholder": "City, Country"
+      },
+      "job": {
+        "label": "Profession",
+        "placeholder": "e.g. Student / Software Developer"
+      },
+      "birthdate": {
+        "label": "Birth Date"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "(555) 123 45 67"
+      }
+    },
+    "googleManaged": {
+      "title": "Account linked with Google",
+      "description": "Your password is managed by Google."
+    },
+    "notSpecified": "Not Specified",
+    "jobTitle": "Job Title",
+    "location": "Location",
+    "phone": "Phone",
+    "birthdate": "Birth Date"
+  },
+  "Sidebar": {
+    "menu": {
+      "profile": "Profile",
+      "dashboard": "Dashboard",
+      "projects": "Projects",
+      "favorites": "Favorites",
+      "settings": "Settings"
+    },
+    "actions": {
+      "createProject": "Create Project",
+      "viewAllProjects": "View All Projects"
+    },
+    "status": {
+      "loading": "Loading...",
+      "noProjects": "No projects yet.",
+      "noFavorites": "No favorites yet."
+    },
+    "aria": {
+      "toggleSidebar": "Toggle sidebar"
+    }
+  },
+  "Projects": {
+    "error": {
+      "title": "Data Could Not Be Loaded",
+      "unknown": "An unknown error occurred.",
+      "signInButton": "Sign In Now",
+      "retryButton": "Try Again",
+      "support": "If the problem persists, please contact your administrator."
+    }
+  },
+"ProjectDetails": {
+    "nav": {
+      "workspace": "Workspace"
+    },
+    "header": {
+      "logoAlt": "Project Logo"
+    },
+   "tabs": {
+      "overview": "Overview",
+      "timeline": "Timeline",
+      "backlog": "Backlog",
+      "board": "Board",
+      "calendar": "Calendar",
+      "archive": "Archive"
+    },
+    "views": {
+      "overview": {
+        "title": "Project Overview",
+        "description": "General status, progress percentage, and statistics.",
+        "totalTasks": "Total Tasks",
+        "completed": "Completed",
+        "overdue": "Overdue"
+      },
+      "timeline": {
+        "title": "Timeline",
+        "description": "Project planning will be here soon."
+      },
+      "board": {
+        "title": "Kanban Board",
+        "description": "Tasks in the active sprint will appear here as cards."
+      },
+      "calendar": {
+        "title": "Calendar",
+        "description": "Deadlines and upcoming tasks.",
+        "noEvents": "No upcoming tasks scheduled."
+      },
+      "archive": {
+        "title": "Archived Tasks",
+        "description": "You can review previously completed and removed tasks here.",
+        "empty": "No archived tasks found."
+      }
+    },
+    "error": {
+      "notFound": "Project not found"
+    }
+  },
+  
+  "Auth": {
+    "SignIn": {
+      "title": "Sign in to Planora",
+      "description": "Welcome back! Please sign in to continue."
+    },
+    "SignUp": {
+      "title": "Create your account",
+      "description": "Welcome! Please fill in the details to get started."
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email address",
+      "password": "Password"
+    },
+    "placeholders": {
+      "name": "Your name",
+      "email": "Enter your email",
+      "password": "Password"
+    },
+    "buttons": {
+      "googleSignIn": "Sign in with Google",
+      "googleSignUp": "Sign up with Google",
+      "signIn": "Sign In",
+      "signUp": "Sign Up",
+      "or": "OR"
+    },
+    "aria": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "Footer": {
+      "dontHaveAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "Verification": {
+      "title": "Check your email",
+      "description": "Enter the code sent to <bold>{email}</bold>",
+      "verifyBtn": "Verify",
+      "noCode": "Didn't receive the code?",
+      "resendBtn": "Resend",
+      "resendTimer": "resend ({time}s)",
+      "success": "Account verified! Please sign in.",
+      "resendSuccess": "New code sent!",
+      "errors": {
+        "noEmail": "Email address not found.",
+        "sendFailed": "Could not send code.",
+        "generic": "An error occurred."
+      }
+    },
+    "Form": {
+      "validation": {
+        "password": "Password must be at least 6 characters, contain 1 uppercase letter and 1 number"
+      },
+      "success": {
+        "signIn": "Login successful!",
+        "signUp": "Registration successful! Please enter the code sent to your email."
+      },
+      "errors": {
+        "signUpDefault": "An error occurred during registration",
+        "unexpected": "An unexpected error occurred",
+        "signInFailed": "Invalid email or password"
+      }
+    }
+  
+  },
+  "DashboardPage": {
+    "header": {
+      "greeting": "Hello, {name}!",
+      "subtitle": "Welcome to your Dashboard."
+    },
+    "info": {
+      "text": "Here you can create projects and teams, and assign new tasks."
+    },
+    "actions": {
+      "createProject": "Create New Project",
+      "manageTeam": "Manage Team"
+    },
+    "footer": {
+      "note": "All your actions are updated instantly. Happy working!"
+    },
+    "common": {
+      "defaultUser": "User"
+    }
+  },
+  "ProjectActions": {
+    "menu": {
+      "favoriteAdd": "Add to favorites",
+      "favoriteRemove": "Remove from favorites",
+      "settings": "Workspace settings",
+      "delete": "Delete Workspace"
+    },
+    "info": {
+      "type": "Software project",
+      "managedBy": "Team-managed"
+    },
+    "deleteDialog": {
+      "title": "Are you sure?",
+      "description": "This action cannot be undone. The project <b>{projectName}</b> and all its data will be permanently deleted.",
+      "cancel": "Cancel",
+      "confirm": "Yes, Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "AddMemberDialog": {
+    "trigger": {
+      "title": "Add Member: {projectName}"
+    },
+    "header": {
+      "title": "Add People",
+      "projectLabel": "{projectName} project"
+    },
+    "search": {
+      "placeholder": "Search by name or email...",
+      "loading": "Loading...",
+      "noResults": "No results found",
+      "noMembers": "No members yet",
+      "titles": {
+        "searchResults": "Search Results",
+        "existingMembers": "Existing Members"
+      }
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "footer": {
+      "selectedCount": "{count} selected",
+      "memberCount": "{count} members",
+      "close": "Close",
+      "add": "Add"
+    }
+  },
+  "ProjectList": {
+    "title": "Projects",
+    "createButton": "Create Project",
+    "searchPlaceholder": "Search projects...",
+    "columns": {
+      "name": "Name",
+      "key": "Key",
+      "members":"Members",
+      "lead": "Lead",
+      "tasks": "Task Count",
+      "unassigned": "Unassigned"
+    },
+    "hoverCard": {
+      "viewProfile": "View Profile"
+    },
+    "memberManagement": {
+      
+  "leader": "Leader",
+  "admin": "Admin",
+  "makeAdmin": "Make Admin",
+  "removeAdmin": "Remove Admin",
+  "removeMember": "Remove Member",
+  "deleteDialog": {
+        "title": "Are you sure?",
+        "description": "This action cannot be undone. This user will be removed from the project and lose all access.",
+        "cancel": "Cancel",
+        "confirm": "Yes, Remove",
+        "deleting": "Removing..."
+      }
+}
+  },
+  "DataTable": {
+    "noResults": "No results found.",
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next"
+    }
+  },
+  "ProjectIconPicker": {
+    "tabs": {
+      "icon": "Icon & Color",
+      "upload": "Upload"
+    },
+    "sections": {
+      "background": "Background",
+      "icon": "Icon"
+    },
+    "upload": {
+      "loading": "Loading...",
+      "placeholder": "Click to select file",
+      "remove": "Remove Image"
+    },
+    "overlay": {
+      "change": "Change"
+    }
+  },
+  "ProjectInitialization": {
+    "header": {
+      "greeting": "Hello, {name}!",
+      "subtitle": "Welcome to your Dashboard."
+    },
+    "info": {
+      "text": "Here you can create projects and teams, and assign new tasks."
+    },
+    "actions": {
+      "createProject": "Create New Project",
+      "manageTeam": "Manage Team"
+    },
+    "footer": {
+      "note": "All your actions are updated instantly. Have a great work!"
+    },
+    "common": {
+      "defaultUser": "User"
+    }
+  },
+  "ChangeOwnerDialog": {
+    "trigger": "Change Owner",
+    "header": {
+      "title": "Transfer Ownership",
+      "warning": "Warning: This action cannot be undone. Full authority of the project will be transferred to the selected person."
+    },
+    "search": {
+      "placeholder": "Search members...",
+      "loading": "Loading..."
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "transfer": "Transfer"
+    },
+    "toasts": {
+      "success": "Ownership transferred. You are now an admin.",
+      "error": "An error occurred."
+    }
+  },
+  "LanguageSwitcher": {
+    "label": "Select Language"
+  },
+  "ProjectSettings": {
+    "title": "Settings",
+    "description": "Manage project settings and team memberships here.",
+    "notFound": "Project not found.",
+    "tabs": {
+      "general": "General",
+      "members": "Members & Access"
+    },
+    "General": {
+      "title": "Project Identity",
+      "description": "Visible name, icon, and basic settings of your project."
+    },
+    "Members": {
+      "title": "Team Management",
+      "description": "Control who can access your project and their permissions."
+    },
+    "form": {
+      "projectLook": "Project Appearance",
+      "projectName": "Project Name",
+      "projectKey": "Project Key",
+      "maxChar": "Max {count}",
+      "owner": "Workspace Owner",
+      "change": "Change",
+      "save": "Save Changes"
+    }
+  }
+}

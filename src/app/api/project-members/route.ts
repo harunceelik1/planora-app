@@ -132,3 +132,65 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Giriş yapmalısınız." },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { projectId, userId } = body; // userId: Atılacak kişinin ID'si
+
+    if (!projectId || !userId) {
+      return NextResponse.json({ error: "Eksik bilgi." }, { status: 400 });
+    }
+
+    // 1. İsteği yapan kişi bu projenin Sahibi (OWNER) mı?
+    const project = await db.project.findUnique({
+      where: { id: projectId },
+      select: { ownerId: true },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: "Proje bulunamadı." }, { status: 404 });
+    }
+
+    if (project.ownerId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Yetkiniz yok. Sadece proje sahibi üye çıkarabilir." },
+        { status: 403 }
+      );
+    }
+
+    // 2. Proje sahibi kendisini atamasın
+    if (userId === session.user.id) {
+      return NextResponse.json(
+        { error: "Kendinizi projeden atamazsınız." },
+        { status: 400 }
+      );
+    }
+
+    // 3. Üyeyi Sil (ProjectMember tablosundan)
+    // Şemanda @@unique([userId, projectId]) olduğu için Prisma 'userId_projectId' adında özel bir seçici oluşturur.
+    await db.projectMember.delete({
+      where: {
+        userId_projectId: {
+          projectId: projectId,
+          userId: userId,
+        },
+      },
+    });
+
+    return NextResponse.json({ message: "Üye başarıyla çıkarıldı." });
+  } catch (error) {
+    console.error("Üye silme hatası:", error);
+    return NextResponse.json(
+      { error: "İşlem sırasında bir hata oluştu." },
+      { status: 500 }
+    );
+  }
+}

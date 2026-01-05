@@ -16,9 +16,11 @@ import * as Icons from "lucide-react";
 import { PRESET_COLORS, PRESET_ICONS } from "@/constants/project";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+// 👇 1. IMPORT ET
+import { useTranslations } from "next-intl";
 
 interface ProjectIconPickerProps {
-  image: string | null; // Değişken adı: image
+  image: string | null;
   onChange: (data: { image?: string; icon?: string; color?: string }) => void;
   name: string;
   currentIcon?: string | null;
@@ -32,14 +34,15 @@ export function ProjectIconPicker({
   currentIcon,
   currentColor,
 }: ProjectIconPickerProps) {
+  // 👇 2. HOOK'U BAŞLAT
+  const t = useTranslations("ProjectIconPicker");
+
   const [isOpen, setIsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Varsayılan değerler
   const activeIcon = currentIcon || "Layout";
   const activeColor = currentColor || "#2563EB";
 
-  // UploadThing Hook
   const { startUpload, isUploading } = useUploadThing("projectImage", {
     onClientUploadComplete: (res) => {
       if (res?.[0]?.url) {
@@ -59,7 +62,6 @@ export function ProjectIconPicker({
     }
   };
 
-  // İkon Render Yardımcısı
   const RenderIcon = ({
     iconName,
     className,
@@ -77,7 +79,6 @@ export function ProjectIconPicker({
       <PopoverTrigger asChild>
         <div className="relative group cursor-pointer w-fit">
           {image ? (
-            // 1. Resim Varsa (image prop'unu kullanıyoruz)
             <Avatar className="h-24 w-24 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-300 transition-colors">
               <AvatarImage src={image} className="object-cover rounded-xl" />
               <AvatarFallback className="rounded-xl">
@@ -85,7 +86,6 @@ export function ProjectIconPicker({
               </AvatarFallback>
             </Avatar>
           ) : (
-            // 2. Resim Yoksa (İkon + Renk Göster)
             <div
               className="h-24 w-24 rounded-xl flex items-center justify-center border-2 border-transparent shadow-sm transition-transform group-hover:scale-105"
               style={{ backgroundColor: activeColor }}
@@ -99,7 +99,7 @@ export function ProjectIconPicker({
 
           {/* Hover Overlay */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-xs font-medium opacity-0 group-hover:opacity-100 rounded-xl transition-opacity">
-            Değiştir
+            {t("overlay.change")} {/* Çeviri: Değiştir */}
           </div>
         </div>
       </PopoverTrigger>
@@ -110,19 +110,21 @@ export function ProjectIconPicker({
             <TabsTrigger
               value="icon"
               className="cursor-pointer flex-1 rounded-md py-2 text-sm font-medium transition-all 
-             data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm 
-             text-muted-foreground hover:text-foreground"
+              data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm 
+              text-muted-foreground hover:text-foreground"
             >
-              <Smile className="w-4 h-4 mr-2 inline-block" /> İkon & Renk
+              <Smile className="w-4 h-4 mr-2 inline-block" /> {t("tabs.icon")}{" "}
+              {/* Çeviri: İkon & Renk */}
             </TabsTrigger>
 
             <TabsTrigger
               value="upload"
               className="cursor-pointer flex-1 rounded-md py-2 text-sm font-medium transition-all 
-             data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm 
-             text-muted-foreground hover:text-foreground"
+              data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm 
+              text-muted-foreground hover:text-foreground"
             >
-              <Upload className="w-4 h-4 mr-2 inline-block" /> Yükle
+              <Upload className="w-4 h-4 mr-2 inline-block" />{" "}
+              {t("tabs.upload")} {/* Çeviri: Yükle */}
             </TabsTrigger>
           </TabsList>
 
@@ -131,7 +133,7 @@ export function ProjectIconPicker({
             {/* Renkler */}
             <div>
               <span className="text-xs text-muted-foreground font-semibold mb-2 block uppercase tracking-wide">
-                Arka Plan
+                {t("sections.background")} {/* Çeviri: Arka Plan */}
               </span>
               <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map((color) => (
@@ -153,7 +155,7 @@ export function ProjectIconPicker({
             {/* İkonlar */}
             <div>
               <span className="text-xs text-muted-foreground font-semibold mb-2 block uppercase tracking-wide">
-                Simge
+                {t("sections.icon")} {/* Çeviri: Simge */}
               </span>
               <div className="grid grid-cols-6 gap-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
                 {PRESET_ICONS.map((icon) => (
@@ -190,7 +192,8 @@ export function ProjectIconPicker({
                 <ImageIcon className="h-8 w-8 text-slate-400" />
               )}
               <span className="text-sm text-muted-foreground text-center">
-                {isUploading ? "Yükleniyor..." : "Dosya seçmek için tıkla"}
+                {isUploading ? t("upload.loading") : t("upload.placeholder")}{" "}
+                {/* Çeviri */}
               </span>
             </div>
 
@@ -209,12 +212,11 @@ export function ProjectIconPicker({
                 size="sm"
                 className="w-full text-red-500 hover:text-red-600"
                 onClick={() => {
-                  // Resmi kaldırınca ikona dön
                   onChange({ image: "", icon: activeIcon, color: activeColor });
                   setIsOpen(false);
                 }}
               >
-                Resmi Kaldır
+                {t("upload.remove")} {/* Çeviri: Resmi Kaldır */}
               </Button>
             )}
           </TabsContent>

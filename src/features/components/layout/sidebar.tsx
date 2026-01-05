@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link, useRouter, usePathname } from "@/i18n/routing";
 import useSWR from "swr";
-import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
   ChevronRight,
   Plus,
   FolderKanban,
+  Star, // ⭐ Star ikonu eklendi
 } from "lucide-react";
 import * as React from "react";
 import {
@@ -24,35 +24,37 @@ import {
 import { ROUTES } from "@/constants/routest";
 import { getInitials } from "@/lib/utils";
 import { Label } from "@radix-ui/react-label";
+import { useTranslations } from "next-intl";
+import { Spinner } from "@/components/ui/spinner";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
-
-  // Eğer API 200 OK dönmezse (örn: 401 Unauthorized), hata fırlat
   if (!res.ok) {
     throw new Error("Veri çekilemedi");
   }
-
   return res.json();
 };
 
 type NavItem = { href: string; label: string; icon: React.ReactNode };
 
-const mainItems: NavItem[] = [
-  {
-    href: ROUTES.PROFILE,
-    label: "Profil",
-    icon: <UserCog className="h-4 w-4" />,
-  },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const t = useTranslations("Sidebar");
+
   const [collapsed, setCollapsed] = React.useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = React.useState(true);
   const [favOpen, setFavOpen] = React.useState(true);
-  const router = useRouter(); // Router'ı tanımla
+
+  // 1. TÜM PROJELERİ ÇEK (Normal Liste)
   const { data: projects, isLoading } = useSWR("/api/project", fetcher);
+
+  // 2. FAVORİ PROJELERİ ÇEK (Yeni Eklediğimiz Kısım)
+  // Backend'e ?favorite=true gönderiyoruz
+  const { data: favoriteProjects, isLoading: isFavLoading } = useSWR(
+    "/api/project?favorite=true",
+    fetcher
+  );
 
   const recentProjects = Array.isArray(projects)
     ? [...projects]
@@ -62,6 +64,14 @@ export function Sidebar() {
         )
         .slice(0, 5)
     : [];
+
+  const mainItems: NavItem[] = [
+    {
+      href: ROUTES.PROFILE,
+      label: t("menu.profile"),
+      icon: <UserCog className="h-4 w-4" />,
+    },
+  ];
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -80,7 +90,6 @@ export function Sidebar() {
     <aside
       className={cn(
         "transition-[width] duration-300",
-        // 1. DÜZELTME: h-screen EKLENDİ (Tüm ekranı kapla)
         "relative flex flex-col shrink-0 border-r backdrop-blur pl-2 h-screen",
         collapsed ? "w-16" : "w-64",
         "overflow-x-visible bg-background"
@@ -94,6 +103,7 @@ export function Sidebar() {
       >
         <button
           onClick={() => setCollapsed((state) => !state)}
+          aria-label={t("aria.toggleSidebar")}
           className={cn(
             "group absolute top-3 -right-3 z-20 grid place-items-center",
             "h-8 w-8 rounded-full border bg-background shadow-md",
@@ -112,6 +122,7 @@ export function Sidebar() {
       {!collapsed && (
         <div className="animate-in fade-in-0 zoom-in-95 duration-400 flex flex-col flex-1 min-h-0 ">
           <div className="flex-1 overflow-y-auto custom-scrollbar pb-4">
+            {/* --- PROJELER BÖLÜMÜ --- */}
             <div className="mt-3 px-2">
               <Collapsible
                 open={isProjectsOpen}
@@ -128,12 +139,8 @@ export function Sidebar() {
                     )}
                   >
                     <div className="flex items-center gap-2 text-sm font-medium">
-                      {/* İKON DEĞİŞİM ALANI (Burası aynı kalıyor - Hover ile değişir) */}
                       <div className="relative w-4 h-4 flex items-center justify-center">
-                        {/* 1. Varsayılan İkon */}
                         <LayoutGrid className="h-4 w-4 group-hover:hidden transition-all" />
-
-                        {/* 2. Hover İkonu */}
                         <div className="hidden group-hover:block">
                           {isProjectsOpen ? (
                             <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
@@ -142,8 +149,7 @@ export function Sidebar() {
                           )}
                         </div>
                       </div>
-
-                      <span>Kontrol Paneli</span>
+                      <span>{t("menu.dashboard")}</span>
                     </div>
                     <div>
                       <Button
@@ -165,7 +171,7 @@ export function Sidebar() {
                 <CollapsibleContent className="pl-4 pr-1 mt-1 space-y-0.5 border-l ml-3 border-border/50">
                   {isLoading ? (
                     <div className="px-2 py-2 text-xs text-muted-foreground">
-                      Yükleniyor...
+                      {t("status.loading")}
                     </div>
                   ) : recentProjects.length > 0 ? (
                     <>
@@ -199,19 +205,19 @@ export function Sidebar() {
                       <Link href={ROUTES.PROJECTS.LIST}>
                         <div className="flex items-center gap-2 mt-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer rounded-md hover:bg-accent/50 transition-colors">
                           <FolderKanban className="h-3 w-3" />
-                          <span>Tüm Projeleri Gör</span>
+                          <span>{t("actions.viewAllProjects")}</span>
                         </div>
                       </Link>
                       <Link href={ROUTES.CREATE_PROJECT}>
                         <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer rounded-md hover:bg-accent/50 transition-colors">
                           <Plus className="h-3 w-3" />
-                          <span>Proje Oluştur</span>
+                          <span>{t("actions.createProject")}</span>
                         </div>
                       </Link>
                     </>
                   ) : (
                     <div className="px-2 py-2 text-xs text-muted-foreground">
-                      <Label>Henüz proje yok.</Label>
+                      <Label>{t("status.noProjects")}</Label>
                     </div>
                   )}
                 </CollapsibleContent>
@@ -239,12 +245,12 @@ export function Sidebar() {
               })}
             </nav>
 
-            {/* 3. FAVORİLER */}
+            {/* 3. FAVORİLER (GÜNCELLENEN KISIM) */}
             <div className="mt-4 px-2">
               <Collapsible open={favOpen} onOpenChange={setFavOpen}>
                 <div className="flex items-center justify-between mb-1 px-2 group cursor-pointer">
                   <div className="text-[11px] font-semibold uppercase text-muted-foreground group-hover:text-foreground transition-colors">
-                    Favoriler
+                    {t("menu.favorites")}
                   </div>
                   <CollapsibleTrigger asChild>
                     <div className="cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
@@ -257,24 +263,56 @@ export function Sidebar() {
                   </CollapsibleTrigger>
                 </div>
                 <CollapsibleContent>
-                  <div className="text-xs text-muted-foreground px-2 py-1">
-                    Henüz favori yok.
-                  </div>
+                  {isFavLoading ? (
+                    <div className="text-xs text-muted-foreground px-2 py-1">
+                      {/* {t("status.loading")} */}
+                      <Spinner className="sm" />
+                    </div>
+                  ) : favoriteProjects && favoriteProjects.length > 0 ? (
+                    <div className="space-y-0.5">
+                      {favoriteProjects.map((project: any) => {
+                        const projectLink = ROUTES.PROJECTS.DETAILS(project.id);
+                        const active = pathname === projectLink;
+
+                        return (
+                          <Link key={project.id} href={projectLink}>
+                            <div
+                              className={cn(
+                                "flex gap-2 text-sm rounded-md items-center px-2 py-1.5 transition-colors",
+                                "hover:bg-accent hover:text-accent-foreground",
+                                active &&
+                                  "bg-accent/50 text-accent-foreground font-medium"
+                              )}
+                            >
+                              {/* Sarı Yıldız İkonu */}
+                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              <span className="truncate text-xs">
+                                {project.projectName}
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground px-2 py-1">
+                      {t("status.noFavorites")}
+                    </div>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
             </div>
           </div>
 
           {/* Footer / Settings */}
-          {/* 3. DÜZELTME: Bu alan scroll alanının dışına taşındı ve mt-auto ile alta itildi */}
-          <div className="mt-auto border-t p-2 bg-background z-10">
+          {/* <div className="mt-auto border-t p-2 bg-background z-10">
             <Link href="/main/settings">
               <div className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
                 <Settings className="h-4 w-4" />
-                <span>Ayarlar</span>
+                <span>{t("menu.settings")}</span>
               </div>
             </Link>
-          </div>
+          </div> */}
         </div>
       )}
     </aside>

@@ -1,24 +1,35 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+// 👇 1. Dil destekli Router (Önemli: Linkler bozulmasın diye)
+import { useRouter } from "@/i18n/routing";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { SearchIcon } from "lucide-react"; // Sadece SearchIcon kaldı
+import { SearchIcon } from "lucide-react";
 import { DataTable } from "./project-data/data-table";
-import { columns } from "./project-data/columns";
+import { getColumns } from "./project-data/columns";
 import { useState } from "react";
 import { Project } from "@/types/project";
+import { ROUTES } from "@/constants/routest";
+import { useTranslations } from "next-intl";
 
 export const ProjectList = ({ projects }: { projects: Project[] }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+
+  // 👇 2. Hook zaten ekliydi, doğru yerden çekiyor.
+  const t = useTranslations("ProjectList");
+
+  // columns dizisini t fonksiyonunu vererek oluşturuyoruz
+  const columns = getColumns(t);
+
   const filteredProjects = projects.filter((project) => {
-    // Arama terimini ve proje verilerini küçük harfe çevir (Büyük/Küçük harf duyarlılığını kaldırmak için)
-    // Türkçe karakter desteği için toLocaleLowerCase('tr') kullanıyoruz.
+    // Not: "tr" parametresi hardcoded kalabilir,
+    // ancak çok dilli yapıda kullanıcının aktif diline göre davranması daha doğru olur.
+    // Şimdilik filtreleme mantığını değiştirmiyoruz.
     const searchLower = searchTerm.toLocaleLowerCase("tr");
 
     const nameMatch = project.projectName
@@ -28,7 +39,6 @@ export const ProjectList = ({ projects }: { projects: Project[] }) => {
       ?.toLocaleLowerCase("tr")
       .includes(searchLower);
 
-    // İsimde VEYA Anahtarda (Key) eşleşme varsa true döner
     return nameMatch || keyMatch;
   });
 
@@ -37,23 +47,24 @@ export const ProjectList = ({ projects }: { projects: Project[] }) => {
       <nav className="flex flex-col gap-4">
         {/* Üst Başlık ve Proje Oluştur Butonu */}
         <div className="flex justify-between ">
-          <h1 className="text-3xl font-semibold ">Alan</h1>
+          <h1 className="text-3xl font-semibold ">
+            {t("title")} {/* Çeviri: Alan / Workspace */}
+          </h1>
           <Button
             variant={"default"}
             onClick={() => {
-              router.push("/main/create-project");
+              router.push(ROUTES.CREATE_PROJECT);
             }}
           >
-            Proje Oluştur
+            {t("createButton")} {/* Çeviri: Proje Oluştur */}
           </Button>
         </div>
 
-        {/* SADECE ARAMA ÇUBUĞU KALDI */}
+        {/* Arama Çubuğu */}
         <div className="w-fit flex flex-row justify-center items-center gap-2">
-          {/* Genel Proje Arama Inputu (Local) */}
           <InputGroup>
             <InputGroupInput
-              placeholder="Search..."
+              placeholder={t("searchPlaceholder")} // Çeviri: Proje ara...
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -67,7 +78,6 @@ export const ProjectList = ({ projects }: { projects: Project[] }) => {
       {/* Proje Tablosu */}
       <section className="">
         <div className="">
-          {/* DataTable, artık 'columns.tsx' içinde User Ekleme butonunu çağıracak */}
           <DataTable columns={columns} data={filteredProjects} />
         </div>
       </section>

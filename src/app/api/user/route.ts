@@ -5,6 +5,9 @@ import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/mail";
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,21 +16,17 @@ export async function GET(request: Request) {
     const query = searchParams.get("q");
     let users;
 
-    // Query kontrolü: null değilse VE boşlukları silince uzunluğu 0'dan büyükse
+    // Query kontrolü
     if (query && query.trim().length > 0) {
       const cleanQuery = query.trim();
-      console.log("✅ Arama Modu Aktif. Aranan kelime:", cleanQuery);
-
       users = await db.user.findMany({
         where: {
           OR: [
-            // mode: 'insensitive' -> Büyük/küçük harf fark etmez
             { name: { contains: cleanQuery, mode: "insensitive" } },
             { email: { contains: cleanQuery, mode: "insensitive" } },
           ],
           NOT: {
-            // İsteğe bağlı: Belirli kullanıcıları hariç tutmak isterseniz burada yapabilirsiniz
-            id: currentUserId, // Örneğin, mevcut kullanıcıyı hariç tut
+            id: currentUserId,
           },
         },
         select: {
@@ -38,18 +37,7 @@ export async function GET(request: Request) {
         },
         take: 5,
       });
-
-      console.log(`📊 Arama Sonucu: ${users.length} kişi bulundu.`);
-      // Kimleri bulduğunu da yazdıralım (sorunu anlamak için)
-      users.forEach((u) =>
-        console.log(`   -> Bulunan: ${u.name} (${u.email})`)
-      );
     } else {
-      console.log(
-        "⚠️ Arama kelimesi yok veya boş. Varsayılan liste (Son 5 kişi) getiriliyor."
-      );
-
-      // Arama yoksa SADECE 5 kişi getir, Hepsini değil.
       users = await db.user.findMany({
         select: {
           id: true,
@@ -57,7 +45,7 @@ export async function GET(request: Request) {
           name: true,
           image: true,
         },
-        orderBy: { id: "desc" }, // En son eklenenleri getir
+        orderBy: { id: "desc" },
         take: 5,
       });
     }
@@ -71,46 +59,70 @@ export async function GET(request: Request) {
     );
   }
 }
+
 export async function POST(req: Request) {
+  console.log("🚀 1. REGISTER API BAŞLADI"); // LOG 1
+
   try {
     const body = await req.json();
     const { name, email, password } = body;
 
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: "Name,Email and password are required" },
-        { status: 400 }
-      );
+      console.log("❌ Eksik bilgi");
+      return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
     }
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    });
 
+    const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
+      console.log("❌ Kullanıcı zaten var:", email);
       return NextResponse.json(
-        { error: "Email already in use" },
+        { error: "Bu email zaten kayıtlı" },
         { status: 409 }
       );
     }
-    // Şifreyi hashle
+
+    // Kullanıcı Oluşturma
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("🛠️ 2. Kullanıcı veritabanına yazılıyor...");
+
     const newUser = await db.user.create({
       data: {
         email,
         password: hashedPassword,
-        name: name,
+        name,
         image: "",
         emailVerified: null,
       } as Prisma.UserUncheckedCreateInput,
     });
+    console.log("✅ 3. Kullanıcı oluşturuldu ID:", newUser.id);
+
+    // Token Oluşturma
+    console.log("🛠️ 4. Token üretiliyor...");
+    const verificationToken = await generateVerificationToken(email);
+    console.log("✅ 5. Token hazır:", verificationToken.token);
+
+    // Mail Gönderme
+    console.log("📧 6. Resend'e mail emri veriliyor...");
+    const mailResult = await sendVerificationEmail(
+      verificationToken.email,
+      verificationToken.token
+    );
+
+    // Mail sonucunu kontrol et
+    if (mailResult.error) {
+      console.error("❌ 7. MAIL GİTMEDİ HATASI:", mailResult.error);
+    } else {
+      console.log("✅ 7. MAIL BAŞARIYLA GÖNDERİLDİ:", mailResult.data);
+    }
 
     return NextResponse.json({
       user: { id: newUser.id, email: newUser.email, name: newUser.name },
+      message: "Kayıt başarılı, doğrulama maili gönderildi.", // Frontend bunu yakalamalı
     });
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("💥 8. PATLADI (EN BÜYÜK HATA):", error);
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "Sunucu hatası oluştu" },
       { status: 500 }
     );
   }

@@ -21,10 +21,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { User } from "@/types/user";
 import { useAddMember } from "@/hooks/useAddMember";
-import useSWR, { useSWRConfig } from "swr"; // 👈 1. useSWRConfig EKLENDİ
-import { useRouter } from "next/navigation"; // 👈 2. useRouter EKLENDİ
+import useSWR, { useSWRConfig } from "swr";
+import { useRouter } from "next/navigation";
 import { ProjectData, UserWithRole } from "@/types/project";
 import { Spinner } from "@/components/ui/spinner";
+// 👇 1. IMPORT ET
+import { useTranslations } from "next-intl";
 
 interface AddMemberDialogProps {
   projectId: string;
@@ -39,9 +41,12 @@ export function AddMemberDialog({
   projectName,
   trigger,
 }: AddMemberDialogProps) {
+  // 👇 2. HOOK'U BAŞLAT
+  const t = useTranslations("AddMemberDialog");
+
   const [open, setOpen] = useState(false);
-  const router = useRouter(); // 👈 Router tanımlandı
-  const { mutate: globalMutate } = useSWRConfig(); // 👈 Global Mutate tanımlandı
+  const router = useRouter();
+  const { mutate: globalMutate } = useSWRConfig();
 
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,7 +60,7 @@ export function AddMemberDialog({
   const {
     data: projectData,
     isLoading: isProjectLoading,
-    mutate: localMutate, // Buna localMutate diyelim karışmasın
+    mutate: localMutate,
   } = useSWR<ProjectData>(open ? `/api/project/${projectId}` : null, fetcher);
 
   const activeOwnerId = projectData?.ownerId;
@@ -107,7 +112,7 @@ export function AddMemberDialog({
   const handleAddMembers = async () => {
     if (selectedUsers.length === 0) return;
 
-    // Optimistic Update (Anlık Görsel Hızlandırma)
+    // Optimistic Update
     const newMembers = selectedUsers.map((u) => ({
       user: u,
       role: "MEMBER",
@@ -118,7 +123,6 @@ export function AddMemberDialog({
       members: [...(projectData?.members || []), ...newMembers],
     };
 
-    // Sadece dialog içini güncelle (hızlıca)
     await localMutate(optimisticData, false);
 
     setSearchQuery("");
@@ -131,18 +135,11 @@ export function AddMemberDialog({
         userIds: newMembers.map((m) => m.user.id),
       });
 
-      // 👇 KRİTİK NOKTA: GLOBAL GÜNCELLEME 👇
-      // 1. Proje detay sayfasını yenile (Header'daki veriler için)
       await globalMutate(`/api/project/${projectId}`);
-
-      // 2. Proje listesini yenile (Sidebar'daki veriler için)
       await globalMutate("/api/project");
-
-      // 3. Server Component'leri yenile (Garanti olsun)
       router.refresh();
     } catch (error) {
       console.error("Üye ekleme hatası:", error);
-      // Hata varsa geri al
       await localMutate();
       await globalMutate(`/api/project/${projectId}`);
     }
@@ -152,8 +149,11 @@ export function AddMemberDialog({
   const displayList: (User | UserWithRole)[] =
     searchQuery.length > 0 ? searchResults : existingMembersList;
 
+  // 👇 Çeviriyi burada kullanıyoruz
   const listTitle =
-    searchQuery.length > 0 ? "Arama Sonuçları" : "Mevcut Üyeler";
+    searchQuery.length > 0
+      ? t("search.titles.searchResults")
+      : t("search.titles.existingMembers");
 
   return (
     <Popover
@@ -177,7 +177,7 @@ export function AddMemberDialog({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-primary"
-            title={`Üye Ekle: ${projectName}`}
+            title={t("trigger.title", { projectName })} // Çeviri
           >
             <UserPlus className="h-4 w-4" />
           </Button>
@@ -193,10 +193,18 @@ export function AddMemberDialog({
         {/* HEADER */}
         <div className="bg-slate-50/80 dark:bg-slate-900/50 backdrop-blur-sm border-b p-4 flex flex-col gap-3">
           <div>
-            <h4 className="font-semibold text-sm leading-none">Kişi Ekle</h4>
+            <h4 className="font-semibold text-sm leading-none">
+              {t("header.title")}
+            </h4>{" "}
+            {/* Çeviri */}
             <p className="text-xs text-muted-foreground mt-1">
-              <span className="font-medium text-foreground">{projectName}</span>{" "}
-              projesi
+              {/* Rich text çeviri: proje ismini bold yapmak için */}
+              {t.rich("header.projectLabel", {
+                projectName: projectName,
+                span: (chunks) => (
+                  <span className="font-medium text-foreground">{chunks}</span>
+                ),
+              })}
             </p>
           </div>
 
@@ -236,12 +244,18 @@ export function AddMemberDialog({
           <div className="relative px-2 py-2">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="İsim veya e-posta ile ara..."
+              placeholder={t("search.placeholder")} // Çeviri
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-9 bg-muted/30 border-muted-foreground/20 focus-visible:ring-1"
             />
-            {isSearching && <Spinner className="size-8" />}
+            {isSearching && (
+              <Spinner
+                className="
+            absolute right-5 top-1/2 -translate-y-1/2 h-3 w-3  
+            "
+              />
+            )}
           </div>
 
           <div className="h-[240px] overflow-y-auto custom-scrollbar px-2 flex flex-col gap-2">
@@ -252,7 +266,7 @@ export function AddMemberDialog({
             <div className="space-y-1">
               {isProjectLoading && !searchQuery && (
                 <div className="flex items-center justify-center h-20 text-xs text-muted-foreground">
-                  Yükleniyor...
+                  {t("search.loading")} {/* Çeviri */}
                 </div>
               )}
 
@@ -262,7 +276,10 @@ export function AddMemberDialog({
                   <div className="flex flex-col items-center justify-center h-32 text-muted-foreground opacity-60 border-2 border-dashed rounded-lg mx-2">
                     <Users className="h-8 w-8 mb-2 stroke-1" />
                     <span className="text-xs">
-                      {searchQuery ? "Sonuç bulunamadı" : "Henüz üye yok"}
+                      {searchQuery
+                        ? t("search.noResults")
+                        : t("search.noMembers")}{" "}
+                      {/* Çeviri */}
                     </span>
                   </div>
                 )}
@@ -286,24 +303,25 @@ export function AddMemberDialog({
                 const isOwner = user.id === activeOwnerId;
                 const isAdmin = userRole === "ADMIN";
 
-                // ROZET
+                // ROZET (Çeviri ile)
                 let badge = null;
                 if (isOwner) {
                   badge = (
                     <span className="ml-2 flex items-center gap-1 rounded-full border border-yellow-200 bg-yellow-100 px-2 py-0.5 text-[10px] font-bold text-yellow-700 dark:border-yellow-900/30 dark:bg-yellow-900/30 dark:text-yellow-500">
-                      <Crown className="h-3 w-3" /> Lider
+                      <Crown className="h-3 w-3" /> {t("roles.owner")}{" "}
+                      {/* Çeviri */}
                     </span>
                   );
                 } else if (isAdmin) {
                   badge = (
                     <span className="ml-2 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/30 dark:text-blue-400">
-                      Yönetici
+                      {t("roles.admin")} {/* Çeviri */}
                     </span>
                   );
                 } else if (isAlreadyMember) {
                   badge = (
                     <span className="ml-2 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400">
-                      Üye
+                      {t("roles.member")} {/* Çeviri */}
                     </span>
                   );
                 }
@@ -364,10 +382,13 @@ export function AddMemberDialog({
           <div className="text-xs text-muted-foreground px-1">
             {selectedUsers.length > 0 ? (
               <span className="text-blue-600 font-medium">
-                {selectedUsers.length} kişi seçildi
+                {t("footer.selectedCount", { count: selectedUsers.length })}{" "}
+                {/* Çeviri */}
               </span>
             ) : (
-              <span>{existingMembersList.length} üye</span>
+              <span>
+                {t("footer.memberCount", { count: existingMembersList.length })}
+              </span>
             )}
           </div>
           <div className="flex gap-2">
@@ -377,7 +398,7 @@ export function AddMemberDialog({
               className="h-8"
               onClick={() => setOpen(false)}
             >
-              Kapat
+              {t("footer.close")} {/* Çeviri */}
             </Button>
             <Button
               size="sm"
@@ -386,7 +407,7 @@ export function AddMemberDialog({
               disabled={selectedUsers.length === 0 || isLoading}
             >
               {isLoading && <Loader2 className="h-3 w-3 animate-spin mr-2" />}
-              Ekle
+              {t("footer.add")} {/* Çeviri */}
             </Button>
           </div>
         </div>

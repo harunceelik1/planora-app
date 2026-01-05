@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+// 👇 1. IMPORT ET
+import { useTranslations } from "next-intl";
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -29,6 +32,9 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  // 👇 2. HOOK'U BAŞLAT
+  const t = useTranslations("DataTable");
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
@@ -45,9 +51,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    /* 1. TÜMÜNÜ SARAN DİV (Aralarına boşluk koymak için space-y-4 ekledik) */
     <div className="space-y-4">
-      {/* 2. TABLO ALANI (Çerçeve burada kalacak) */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -92,7 +96,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Sonuç bulunamadı.
+                  {t("noResults")} {/* Çeviri */}
                 </TableCell>
               </TableRow>
             )}
@@ -100,10 +104,8 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      {/* 3. SAYFALAMA KONTROLLERİ (ARTIK TABLONUN DIŞINDA) */}
-      {/* İsterseniz 'justify-center' yerine 'justify-end' yaparak sağa yaslayabilirsiniz */}
+      {/* SAYFALAMA KONTROLLERİ */}
       <div className="flex items-center justify-center gap-2">
-        {/* GERİ BUTONU */}
         <Button
           variant="ghost"
           size="sm"
@@ -111,16 +113,15 @@ export function DataTable<TData, TValue>({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          <span className="sr-only">Önceki</span>
+          <span className="sr-only">{t("pagination.prev")}</span>{" "}
+          {/* Çeviri (Screen reader için) */}
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        {/* SAYFA BİLGİSİ */}
         <div className="text-sm font-medium text-muted-foreground">
           {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
         </div>
 
-        {/* İLERİ BUTONU */}
         <Button
           variant="ghost"
           size="sm"
@@ -128,7 +129,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          <span className="sr-only">Sonraki</span>
+          <span className="sr-only">{t("pagination.next")}</span> {/* Çeviri */}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

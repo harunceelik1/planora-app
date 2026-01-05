@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+// 👇 1. Link (Dil destekli)
+import { Link } from "@/i18n/routing";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -31,6 +32,8 @@ import {
 } from "lucide-react";
 import { useDeleteProject } from "@/hooks/useDeleteProject";
 import { Spinner } from "@/components/ui/spinner";
+// 👇 2. Translation importu
+import { useTranslations } from "next-intl";
 
 interface ProjectActionsProps {
   projectId: string;
@@ -41,14 +44,14 @@ export function ProjectActions({
   projectId,
   projectName,
 }: ProjectActionsProps) {
+  const t = useTranslations("ProjectActions");
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { deleteProject, isDeleting } = useDeleteProject();
 
-  // Dialog içindeki buton için sarmalayıcı fonksiyon
   const onConfirmDelete = async () => {
     const success = await deleteProject(projectId);
-    // Sadece başarılı olursa pencreyi kapat (Hata alırsa açık kalsın ki kullanıcı tekrar deneyebilsin)
     if (success) {
       setShowDeleteDialog(false);
     }
@@ -84,7 +87,8 @@ export function ProjectActions({
                 }`}
               />
               <span className="font-medium">
-                {isFavorite ? "Favorilerden çıkar" : "Favorilere ekle"}
+                {isFavorite ? t("menu.favoriteRemove") : t("menu.favoriteAdd")}{" "}
+                {/* Çeviri */}
               </span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -96,7 +100,8 @@ export function ProjectActions({
                 className="py-2.5 cursor-pointer focus:bg-muted w-full flex items-center"
               >
                 <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Alan ayarları</span>
+                <span className="font-medium">{t("menu.settings")}</span>{" "}
+                {/* Çeviri */}
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -112,7 +117,8 @@ export function ProjectActions({
             className="py-2.5 cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50 w-full flex items-center"
           >
             <Trash2 className="mr-3 h-4 w-4 text-red-600" />
-            <span className="font-medium">Alanı Sil</span>
+            <span className="font-medium">{t("menu.delete")}</span>{" "}
+            {/* Çeviri */}
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="my-1" />
@@ -123,10 +129,10 @@ export function ProjectActions({
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-semibold text-foreground">
-                Yazılım alanı
+                {t("info.type")} {/* Çeviri */}
               </span>
               <span className="text-[10px] text-muted-foreground">
-                Takım tarafından yönetilen
+                {t("info.managedBy")} {/* Çeviri */}
               </span>
             </div>
           </div>
@@ -137,14 +143,19 @@ export function ProjectActions({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Emin misiniz?</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>{" "}
+            {/* Çeviri */}
             <AlertDialogDescription>
-              Bu işlem geri alınamaz. <b>{projectName}</b> projesi ve içindeki
-              tüm veriler kalıcı olarak silinecektir.
+              {t.rich("deleteDialog.description", {
+                projectName: projectName,
+                b: (chunks) => <b>{chunks}</b>,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>İptal</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>
+              {t("deleteDialog.cancel")} {/* Çeviri */}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -156,10 +167,10 @@ export function ProjectActions({
               {isDeleting ? (
                 <>
                   <Spinner className="size-8" />
-                  Siliniyor...
+                  {t("deleteDialog.deleting")} {/* Çeviri */}
                 </>
               ) : (
-                "Evet, Sil"
+                t("deleteDialog.confirm") /* Çeviri */
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -18,6 +18,15 @@ export async function GET(request: Request, { params }: RouteParams) {
   const project = await db.project.findUnique({
     where: { id: projectId },
     include: {
+      sprints: {
+        include: { issues: true },
+        orderBy: { createdAt: "asc" },
+      },
+      issues: {
+        // Sprint'e atanmamış (Backlog) görevler
+        where: { sprintId: null },
+        orderBy: { order: "asc" },
+      },
       owner: true,
       members: {
         include: { user: true },

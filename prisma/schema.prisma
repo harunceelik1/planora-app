@@ -17,11 +17,19 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  createdProjects  Project[]       @relation("CreatedProjects") // Sahibi olduğu projeler
-  reportedIssues   Issue[]         @relation("ReportedIssues") // Raporladığı görevler
-  assignedIssues   Issue[]         @relation("AssignedIssues") // Kendisine atanan görevler
-  projectsAsMember ProjectMember[] @relation("ProjectsAsMember") // Üyesi olduğu projeler (ProjectMember tablosu üzerinden)
+  location  String?
+  jobTitle  String?
+  timezone  String?   @default("UTC+3") // Zaman dilimi çok kritik!
+  birthdate DateTime?
+  phone     String?
+
+  // --- İlişkiler ---
+  createdProjects  Project[]         @relation("CreatedProjects") // Sahibi olduğu projeler
+  reportedIssues   Issue[]           @relation("ReportedIssues") // Raporladığı görevler
+  assignedIssues   Issue[]           @relation("AssignedIssues") // Kendisine atanan görevler
+  projectsAsMember ProjectMember[]   @relation("ProjectsAsMember") // Üyesi olduğu projeler (ProjectMember tablosu üzerinden)
   comments         Comment[]
+  favoriteProjects FavoriteProject[]
 }
 
 model Account {
@@ -52,11 +60,12 @@ model Session {
 }
 
 model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
 
-  @@unique([identifier, token])
+  @@unique([email, token]) // Aynı email ve token ikilisi tekrar edemez
 }
 
 model Project {
@@ -80,6 +89,9 @@ model Project {
   issueCount Int             @default(0)
   // Projedeki tüm görevler
   issues     Issue[]
+
+  sprints     Sprint[]
+  favoritedBy FavoriteProject[]
 }
 
 model ProjectMember {
@@ -94,6 +106,18 @@ model ProjectMember {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // Proje silinirse üyelik de silinir
 
   // Bir kullanıcı bir projeye sadece bir kez üye olabilir
+  @@unique([userId, projectId])
+}
+
+model FavoriteProject {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Bir kullanıcı aynı projeyi iki kere favorileyemesin diye:
   @@unique([userId, projectId])
 }
 
@@ -121,8 +145,33 @@ model Issue {
   // Görevin atandığı kişi (opsiyonel, atanmamış olabilir)
   assigneeId String?
   assignee   User?   @relation("AssignedIssues", fields: [assigneeId], references: [id])
+  sprint     Sprint? @relation(fields: [sprintId], references: [id])
+  sprintId   String?
 
   @@unique([projectId, number])
+}
+
+model Sprint {
+  id        String       @id @default(cuid())
+  name      String // Örn: "PLAN Sprint 1"
+  startDate DateTime?
+  endDate   DateTime?
+  status    SprintStatus @default(PENDING) // PENDING, ACTIVE, COMPLETED
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  issues Issue[] // Bir sprinte bağlı görevler
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Sprint durumları
+enum SprintStatus {
+  PENDING // Planlanan (Gelecek)
+  ACTIVE // Şu an devam eden
+  COMPLETED // Tamamlanan
 }
 
 // Projedeki kullanıcı rolleri

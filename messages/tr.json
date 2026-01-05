@@ -1,0 +1,489 @@
+{
+  "HomePage": {
+    "heroTitle": "Planla Ve Yönet",
+    "heroDescription": "Planora, projelerini hızla planlamanı, verimli bir şekilde yönetmeni ve ekibinle kesintisiz iş birliği yapmanı sağlayan hepsi bir arada bir platformdur.",
+    "getStarted": "Hemen Başlayın",
+    "features": {
+      "timeline": {
+        "title": "Zaman Çizelgesi",
+        "subTitle": "Projelerinizi Vaktinde Teslim Edin",
+        "shortDesc": "Gantt şemaları ile her görevin başlangıç ve bitişini görsel olarak planlayın.",
+        "longDesc": "Planora'nın gelişmiş Zaman Çizelgesi aracı, projelerinizi A'dan Z'ye görselleştirmenizi sağlar. Kritik yolu kolayca belirleyerek darboğazları önleyin."
+      },
+      "tasks": {
+        "title": "Görev Yönetimi",
+        "subTitle": "Her Görevi Kontrol Altında Tutun",
+        "shortDesc": "Kanban, liste ve takvim görünümleriyle tüm görevlerinizi farklı açılardan kontrol edin.",
+        "longDesc": "Proje ihtiyaçlarınıza göre Kanban panoları, liste veya takvim görünümleri arasında anında geçiş yapın."
+      },
+      "account": {
+        "title": "Hesap Yönetimi",
+        "subTitle": "Google veya Manuel Giriş",
+        "shortDesc": "Hızlı başlangıç için Google ile tek tıkla giriş veya geleneksel e-posta ile kayıt.",
+        "longDesc": "Hesap Yönetimi modülü, size iki esnek giriş seçeneği sunar: Google hesabınızla anında giriş yapabilir ya da e-posta ile kayıt olabilirsiniz."
+      }
+    },
+    "buttons": {
+      "moreInfo": "Daha Fazla Bilgi",
+      "googleLogin": "Google İle Giriş",
+      "quickStart": "Hızlı başlangıç",
+      "register": "Kayıt",
+      "emailPassword": "E-posta & Parola"
+    }
+  },
+  "Navbar": {
+    "links": {
+      "home": "Ana Sayfa",
+      "about": "Hakkında"
+    },
+    "auth": {
+      "loading": "Yükleniyor...",
+      "signIn": "Giriş Yap",
+      "signOut": "Çıkış Yap",
+      "profile": "Profil Ayarları"
+    },
+    "aria": {
+      "userMenu": "Kullanıcı menüsü",
+      "openMenu": "Menüyü aç"
+    }
+  },
+  "Auth": {
+    "SignIn": {
+      "title": "Planora'ya Giriş Yap",
+      "description": "Tekrar hoş geldiniz! Devam etmek için lütfen giriş yapın."
+    },
+    "SignUp": {
+      "title": "Hesabını Oluştur",
+      "description": "Hoş geldiniz! Başlamak için lütfen bilgileri doldurun."
+    },
+    "labels": {
+      "name": "İsim",
+      "email": "E-posta adresi",
+      "password": "Şifre"
+    },
+    "placeholders": {
+      "name": "İsminiz",
+      "email": "E-posta adresinizi girin",
+      "password": "Şifre"
+    },
+    "buttons": {
+      "googleSignIn": "Google İle Giriş Yap",
+      "googleSignUp": "Google İle Kayıt Ol",
+      "signIn": "Giriş Yap",
+      "signUp": "Kayıt Ol",
+      "or": "YA DA"
+    },
+    "aria": {
+      "showPassword": "Şifreyi göster",
+      "hidePassword": "Şifreyi gizle"
+    },
+    "Footer": {
+      "dontHaveAccount": "Hesabınız yok mu?",
+      "signUp": "Kayıt Ol",
+      "alreadyHaveAccount": "Zaten hesabınız var mı?",
+      "signIn": "Giriş Yap"
+    },
+    "Verification": {
+      "title": "E-postanı Kontrol Et",
+      "description": "<bold>{email}</bold> adresine gelen kodu gir.",
+      "verifyBtn": "Doğrula",
+      "noCode": "Kod gelmedi mi?",
+      "resendBtn": "Tekrar Gönder",
+      "resendTimer": "tekrar gönder ({time}s)",
+      "success": "Hesabınız doğrulandı! Lütfen giriş yapın.",
+      "resendSuccess": "Yeni kod gönderildi!",
+      "errors": {
+        "noEmail": "E-posta adresi bulunamadı.",
+        "sendFailed": "Kod gönderilemedi.",
+        "generic": "Bir hata oluştu."
+      }
+    },
+    "Form": {
+      "validation": {
+        "password": "Şifre en az 6 karakter olmalı, en az 1 büyük harf ve 1 sayı içermeli"
+      },
+      "success": {
+        "signIn": "Giriş başarılı!",
+        "signUp": "Kayıt başarılı! Lütfen mailinize gelen kodu giriniz."
+      },
+      "errors": {
+        "signUpDefault": "Kayıt sırasında bir hata oluştu",
+        "unexpected": "Beklenmeyen bir hata oluştu",
+        "signInFailed": "E-posta veya şifre hatalı" 
+      }
+    }
+  },
+  "Projects": {
+    "error": {
+      "title": "Veri Yüklenemedi",
+      "unknown": "Bilinmeyen bir hata oluştu.",
+      "signInButton": "Şimdi Giriş Yap",
+      "retryButton": "Tekrar Dene",
+      "support": "Sorun devam ederse lütfen yöneticinizle iletişime geçin."
+    }
+  },
+  "ProjectActions": {
+    "menu": {
+      "favoriteAdd": "Favorilere ekle",
+      "favoriteRemove": "Favorilerden çıkar",
+      "settings": "Alan ayarları",
+      "delete": "Alanı Sil"
+    },
+    "info": {
+      "type": "Yazılım alanı",
+      "managedBy": "Takım tarafından yönetilen"
+    },
+    "deleteDialog": {
+      "title": "Emin misiniz?",
+      "description": "Bu işlem geri alınamaz. <b>{projectName}</b> projesi ve içindeki tüm veriler kalıcı olarak silinecektir.",
+      "cancel": "İptal",
+      "confirm": "Evet, Sil",
+      "deleting": "Siliniyor..."
+    }
+  },
+ "ProjectDetails": {
+    "nav": {
+      "workspace": "Çalışma Alanı"
+    },
+    "header": {
+      "logoAlt": "Proje Logosu"
+    },
+    "tabs": {
+      "overview": "Özet",
+      "timeline": "Zaman Çizelgesi",
+      "backlog": "Kapsam (Backlog)",
+      "board": "Pano",
+      "calendar": "Takvim",
+      "archive": "Arşiv"
+    },
+    "views": {
+      "overview": {
+        "title": "Proje Özeti",
+        "description": "Projenin genel durumu, ilerleme yüzdesi ve istatistikler.",
+        "totalTasks": "Toplam Görev",
+        "completed": "Tamamlanan",
+        "overdue": "Geciken"
+      },
+      "timeline": {
+        "title": "Zaman Çizelgesi",
+        "description": "Proje planlaması yakında burada olacak."
+      },
+      "board": {
+        "title": "Kanban Panosu",
+        "description": "Aktif sprintteki görevler burada kartlar halinde görünecek."
+      },
+      "calendar": {
+        "title": "Takvim",
+        "description": "Teslim tarihleri ve yaklaşan görevler.",
+        "noEvents": "Yakın tarihte planlanmış bir görev yok."
+      },
+      "archive": {
+        "title": "Arşivlenen Görevler",
+        "description": "Daha önce tamamlanıp kaldırılan görevleri buradan inceleyebilirsiniz.",
+        "empty": "Arşivde görev bulunmuyor."
+      }
+    },
+    "error": {
+      "notFound": "Proje bulunamadı"
+    }
+  },
+  "CreateProject": {
+    "nav": {
+      "back": "Geri Dön"
+    },
+    "header": {
+      "title": "Yeni Proje Oluştur",
+      "description": "Projeye başlamak için aşağıdaki alanları doldurunuz."
+    },
+    "form": {
+      "nameLabel": "Ad",
+      "namePlaceholder": "Takım adı, proje amacı, proje ismi...",
+      "keyLabel": "Anahtar",
+      "requiredNote": "Gerekli alanlar yıldız işaretiyle belirtilmiştir",
+      "cancelButton": "İptal",
+      "createButton": "Proje Oluştur"
+    },
+    "popover": {
+      "title": "Proje Anahtarı Nedir?",
+      "description": "Proje anahtarı, projenizdeki tüm kayıtlar için kullanılacak kısa ve benzersiz bir tanımlayıcıdır. (Örn: GP, TEST)"
+    },
+    "errors": {
+      "nameRequired": "Yeni Projeniz için bir ad girmeniz gerekmektedir.",
+      "keyRequired": "Alanınızın bir anahtarı olması gerekir."
+    },
+    "preview": {
+      "defaultName": "Proje Adı",
+      "defaultKey": "KEY",
+      "tasksTitle": "Proje Görevleri"
+    }
+  },
+  "ProfilePage": {
+    "header": {
+      "title": "Profilim",
+      "description": "Kişisel bilgilerini, güvenliğini ve tercihlerini yönet."
+    },
+    "account": {
+      "title": "Hesap",
+      "description": "Hesabınla ilgili güncel veriler ve işlemler."
+    },
+    "details": {
+      "title": "Düzenlemeler",
+      "location": {
+        "label": "Konum",
+        "placeholder": "Şehir, Ülke"
+      },
+      "job": {
+        "label": "Meslek",
+        "placeholder": "Ör. Öğrenci / Yazılım Geliştiricisi"
+      },
+      "birthdate": {
+        "label": "Doğum Tarihi"
+      },
+      "phone": {
+        "label": "Telefon Numarası",
+        "placeholder": "(555) 123 45 67"
+      }
+    },
+    "changePassword": {
+      "trigger": "Şifreni Güncelle",
+      "title": "Şifreni Güncelle",
+      "labels": {
+        "newPassword": "Yeni Şifre",
+        "confirmPassword": "Şifreyi Onaylayın"
+      },
+      "errors": {
+        "minLength": "Şifreniz en az 8 karakter içermelidir.",
+        "mismatch": "Şifreler eşleşmiyor."
+      },
+      "buttons": {
+        "cancel": "İptal",
+        "save": "Kaydet"
+      }
+    },
+    "editProfile": {
+      "trigger": "Profili Güncelle",
+      "title": "Profili Güncelle",
+      "helpText": "Önerilen boyut 1:1, en fazla 10MB.",
+      "labels": {
+        "name": "İsim"
+      },
+      "placeholders": {
+        "name": "İsminiz"
+      },
+      "buttons": {
+        "upload": "Yükle",
+        "remove": "Kaldır",
+        "cancel": "İptal",
+        "save": "Kaydet"
+      }
+    },
+    "googleManaged": {
+      "title": "Hesabınız Google ile bağlı",
+      "description": "Şifre işlemleriniz Google tarafından yönetilmektedir."
+    },
+    "notSpecified": "Belirtilmemiş",
+    "jobTitle": "İş Unvanı",
+    "location": "Konum",
+    "phone": "Telefon",
+    "birthdate": "Doğum Tarihi"
+  },
+  "DashboardPage": {
+    "header": {
+      "greeting": "Merhaba, {name}!",
+      "subtitle": "Kontrol Paneline Hoş Geldin."
+    },
+    "info": {
+      "text": "Burada proje ve ekibini oluşturabilir, yeni görevler atayabilirsin."
+    },
+    "actions": {
+      "createProject": "Yeni Proje Oluştur",
+      "manageTeam": "Ekibini Yönet"
+    },
+    "footer": {
+      "note": "Tüm işlemlerin anlık olarak güncellenmektedir. İyi çalışmalar!"
+    },
+    "common": {
+      "defaultUser": "Kullanıcı"
+    }
+  },
+  "Sidebar": {
+    "menu": {
+      "profile": "Profil",
+      "dashboard": "Kontrol Paneli",
+      "projects": "Projeler",
+      "favorites": "Favoriler",
+      "settings": "Ayarlar"
+    },
+    "actions": {
+      "createProject": "Proje Oluştur",
+      "viewAllProjects": "Tüm Projeleri Gör"
+    },
+    "status": {
+      "loading": "Yükleniyor...",
+      "noProjects": "Henüz proje yok.",
+      "noFavorites": "Henüz favori yok."
+    },
+    "aria": {
+      "toggleSidebar": "Yan menüyü aç/kapat"
+    }
+  },
+  "AddMemberDialog": {
+    "trigger": {
+      "title": "Üye Ekle: {projectName}"
+    },
+    "header": {
+      "title": "Kişi Ekle",
+      "projectLabel": "{projectName} projesi"
+    },
+    "search": {
+      "placeholder": "İsim veya e-posta ile ara...",
+      "loading": "Yükleniyor...",
+      "noResults": "Sonuç bulunamadı",
+      "noMembers": "Henüz üye yok",
+      "titles": {
+        "searchResults": "Arama Sonuçları",
+        "existingMembers": "Mevcut Üyeler"
+      }
+    },
+    "roles": {
+      "owner": "Lider",
+      "admin": "Yönetici",
+      "member": "Üye"
+    },
+    "footer": {
+      "selectedCount": "{count} kişi seçildi",
+      "memberCount": "{count} üye",
+      "close": "Kapat",
+      "add": "Ekle"
+    }
+  },
+  "ProjectList": {
+    "title": "Projeler",
+    "createButton": "Proje Oluştur",
+    "searchPlaceholder": "Proje ara...",
+    "columns": {
+      "name": "Ad",
+      "key": "Anahtar",
+      "members":"Üyeler",
+      "lead": "Lider",
+      "tasks": "Görev Sayısı",
+      "unassigned": "Atanmamış"
+    },
+    "hoverCard": {
+      "viewProfile": "Profili Görüntüle"
+    },
+    "memberManagement":{
+      
+      "leader":"Lider",
+      "admin":"Yönetici",
+      "makeAdmin":"Yönetici Yap",
+      "removeAdmin":"Yöneticiliği Al",
+      "removeMember":"Üyeyi Kaldır",
+      "deleteDialog": {
+        "title": "Emin misiniz?",
+        "description": "Bu işlem geri alınamaz. Bu kullanıcı projeden çıkarılacak ve tüm erişim yetkilerini kaybedecek.",
+        "cancel": "İptal",
+        "confirm": "Evet, Çıkar",
+        "deleting": "Çıkarılıyor..."
+      }
+    }
+  },
+  "DataTable": {
+    "noResults": "Sonuç bulunamadı.",
+    "pagination": {
+      "prev": "Önceki",
+      "next": "Sonraki"
+    }
+  },
+  
+  "ProjectIconPicker": {
+    "tabs": {
+      "icon": "İkon & Renk",
+      "upload": "Yükle"
+    },
+    "sections": {
+      "background": "Arka Plan",
+      "icon": "Simge"
+    },
+    "upload": {
+      "loading": "Yükleniyor...",
+      "placeholder": "Dosya seçmek için tıkla",
+      "remove": "Resmi Kaldır"
+    },
+    "overlay": {
+      "change": "Değiştir"
+    }
+  },
+  "ProjectInitialization": {
+    "header": {
+      "greeting": "Merhaba, {name}!",
+      "subtitle": "Kontrol Paneline Hoş Geldin."
+    },
+    "info": {
+      "text": "Burada proje ve ekibini oluşturabilir, yeni görevler atayabilirsin."
+    },
+    "actions": {
+      "createProject": "Yeni Proje Oluştur",
+      "manageTeam": "Ekibini Yönet"
+    },
+    "footer": {
+      "note": "Tüm işlemlerin anlık olarak güncellenmektedir. İyi çalışmalar!"
+    },
+    "common": {
+      "defaultUser": "Kullanıcı"
+    }
+  },
+  "ChangeOwnerDialog": {
+    "trigger": "Sahibi Değiştir",
+    "header": {
+      "title": "Proje Sahibini Değiştir",
+      "warning": "Dikkat: Bu işlem geri alınamaz. Projenin tam yetkisi seçilen kişiye geçer."
+    },
+    "search": {
+      "placeholder": "Üye ara...",
+      "loading": "Yükleniyor..."
+    },
+    "roles": {
+      "owner": "Lider",
+      "admin": "Yönetici",
+      "member": "Üye"
+    },
+    "buttons": {
+      "cancel": "İptal",
+      "transfer": "Devret"
+    },
+    "toasts": {
+      "success": "Sahiplik devredildi. Artık yöneticisiniz.",
+      "error": "Hata oluştu."
+    }
+  },
+  "LanguageSwitcher": {
+    "label": "Dil Seç"
+  },
+  "ProjectSettings": {
+    "title": "Ayarlar",
+    "description": "Proje ayarlarını ve ekip üyeliklerini buradan yönetin.",
+    "notFound": "Proje bulunamadı.",
+    "tabs": {
+      "general": "Genel",
+      "members": "Üyeler ve Erişim"
+    },
+    "General": {
+      "title": "Proje Kimliği",
+      "description": "Projenizin görünür adı, simgesi ve temel ayarları."
+    },
+    "Members": {
+      "title": "Ekip Yönetimi",
+      "description": "Projenize kimlerin erişebileceğini ve yetkilerini buradan kontrol edin."
+    },
+    "form": {
+      "projectLook": "Proje Görünümü",
+      "projectName": "Proje Adı",
+      "projectKey": "Proje Anahtarı",
+      "maxChar": "Maksimum {count}",
+      "owner": "Alan Sahibi",
+      "change": "Değiştir",
+      "save": "Değişiklikleri Kaydet"
+    }
+  }
+}
