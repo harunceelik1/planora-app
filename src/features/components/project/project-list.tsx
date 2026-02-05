@@ -43,7 +43,7 @@ export const ProjectList = ({ projects }: { projects: Project[] }) => {
   });
 
   return (
-    <main className="p-8 h-screen gap-6 flex flex-col">
+    <main className="p-8 h-screen gap-6 flex flex-col ">
       <nav className="flex flex-col gap-4">
         {/* Üst Başlık ve Proje Oluştur Butonu */}
         <div className="flex justify-between ">

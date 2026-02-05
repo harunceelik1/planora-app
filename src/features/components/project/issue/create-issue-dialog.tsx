@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { Plus, Loader2 } from "lucide-react";
-import { createIssue } from "@/hooks/useCreateIssue";
+import { createIssue } from "@/actions/issue-creator";
 
 interface CreateIssueDialogProps {
   projectId: string;

@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Plus, X, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
-import { createIssue } from "@/hooks/useCreateIssue";
 import { useSWRConfig } from "swr";
 import { CornerDownLeft } from "lucide-react";
+import { createIssue } from "@/actions/issue-creator";
 
 interface InlineIssueCreatorProps {
   projectId: string;

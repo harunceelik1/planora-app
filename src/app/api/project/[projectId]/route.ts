@@ -26,6 +26,9 @@ export async function GET(request: Request, { params }: RouteParams) {
         // Sprint'e atanmamış (Backlog) görevler
         where: { sprintId: null },
         orderBy: { order: "asc" },
+        include: {
+          assignee: true,
+        },
       },
       owner: true,
       members: {

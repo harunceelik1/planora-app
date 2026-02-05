@@ -1,5 +1,4 @@
 "use client";
-
 import { use } from "react";
 import { useEffect } from "react";
 import Image from "next/image";
@@ -7,7 +6,6 @@ import { Link, useRouter } from "@/i18n/routing";
 import useSWR from "swr";
 import { useTranslations } from "next-intl";
 import * as Icons from "lucide-react";
-import { useSession } from "next-auth/react";
 import {
   ListTodo,
   KanbanSquare,
@@ -15,9 +13,8 @@ import {
   LayoutDashboard,
   Globe,
   Archive,
-  ChevronDown, // 👈 YENİ
-  MoreHorizontal, // 👈 YENİ
-  Plus, // 👈 YENİ
+  ChevronDown,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";
@@ -28,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
+import { BacklogTab } from "@/features/components/project/tabs/backlog-tab";
 
 // --- Board View Component ---
 const BoardView = ({ project }: { project: any }) => {
@@ -87,8 +85,6 @@ export default function ProjectDetailsPage({
     revalidateOnFocus: true,
   });
 
-  const { data: session } = useSession();
-
   useEffect(() => {
     if (!isLoading && (error || !project)) {
       router.replace("/main/projects");
@@ -115,10 +111,9 @@ export default function ProjectDetailsPage({
   }
 
   return (
-    <main className="flex flex-col h-screen bg-white dark:bg-background overflow-hidden">
-      {/* 1. HEADER */}
-      <header className="flex-none px-6 py-4 border-b bg-background z-20">
-        <div className="flex items-center justify-between">
+    <main className="flex flex-col h-screen  dark:bg-background ">
+      <header className="flex-none px-6 py-4 border-b bg-background z-20 ">
+        <div className="flex items-center justify-between ">
           <div className="flex items-center gap-4">
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border bg-slate-50 overflow-hidden">
               {project.image ? (
@@ -294,71 +289,7 @@ export default function ProjectDetailsPage({
               value="backlog"
               className="h-full mt-0 focus-visible:outline-none flex flex-col"
             >
-              {/* Kapsayıcı: Sprint ve Backlog Listesi - Scrollable Alan */}
-              <div className="flex flex-col h-full overflow-y-auto custom-scrollbar p-6 gap-6">
-                {/* 🟢 SPRINT ALANI (JIRA TARZI) */}
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                  {/* Sprint Başlığı ve Aksiyonlar */}
-                  <div className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-900/50 border-b">
-                    <div className="flex items-center gap-3">
-                      <button className="hover:bg-slate-200 dark:hover:bg-slate-800 p-1 rounded transition-colors">
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-sm">Sprint 1</h3>
-                          <span className="text-xs text-muted-foreground">
-                            (0 görev)
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground">
-                          Planlanmadı
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {/* Sprint Başlat Butonu (Pasif) */}
-                      <div
-                        className={cn(
-                          buttonVariants({ variant: "secondary", size: "sm" }),
-                          "h-8 text-xs opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-800"
-                        )}
-                      >
-                        Sprinti Başlat
-                      </div>
-
-                      <button className="h-8 w-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors">
-                        <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Sprint İçeriği (Boş Alan) */}
-                  <div className="min-h-[120px] p-2">
-                    <div className="h-full border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg flex flex-col items-center justify-center text-center p-8 gap-2 bg-slate-50/30 dark:bg-slate-900/10">
-                      <p className="text-sm text-muted-foreground font-medium">
-                        Bu sprintte henüz görev yok
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Backlog'dan görevleri buraya sürükleyin veya yeni bir
-                        görev oluşturun.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 🔵 MEVCUT BACKLOG VIEW */}
-                <div className="flex-1">
-                  {/* Backlog Başlığı (Ayırıcı olarak) */}
-
-                  <BacklogView
-                    project={project}
-                    sprints={project.sprints || []}
-                    issues={project.issues || []}
-                  />
-                </div>
-              </div>
+              <BacklogTab project={project} />
             </TabsContent>
 
             {/* BOARD */}

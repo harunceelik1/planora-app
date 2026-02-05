@@ -156,6 +156,30 @@
       "calendar": "Takvim",
       "archive": "Arşiv"
     },
+     "sprintPanel": {
+      "title": "Sprint {number}",
+      "taskCount": "({count} görev)",
+      "statusUnplanned": "Planlanmadı",
+      "startBtn": "Sprinti Başlat",
+      "empty": {
+        "title": "Bu sprintte henüz görev yok",
+        "description": "Backlog'dan görevleri buraya sürükleyin veya yeni bir görev oluşturun."
+      }
+    },
+    "backlogView": {
+      "sprint": {
+        "noDate": "Tarih yok",
+        "issuesCount": "{count} görev",
+        "editBtn": "Sprinti Düzenle",
+        "dragPlaceholder": "Görevleri buraya sürükleyin"
+      },
+      "backlog": {
+        "title": "Backlog",
+        "issuesCount": "{count} görev",
+        "emptyTitle": "Backlog listeniz boş.",
+        "emptyDescription": "Yeni görevler oluşturarak işe başlayın."
+      }
+    },
     "views": {
       "overview": {
         "title": "Proje Özeti",
@@ -395,7 +419,7 @@
       "next": "Sonraki"
     }
   },
-  
+ 
   "ProjectIconPicker": {
     "tabs": {
       "icon": "İkon & Renk",

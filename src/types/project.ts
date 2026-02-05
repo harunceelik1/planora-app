@@ -47,7 +47,8 @@ export interface Issue {
   priority: IssuePriority;
   order: number;
   number: number; // Proje içi sıra no (PLAN-12 gibi)
-  assignee?: User | null; // Atanan kişi
+  assigneeId?: string | null; // Veritabanı ID'si (Update yaparken lazım olur)
+  assignee?: User | null; // Ekranda göstermek için User objesi
   sprintId?: string | null;
   createdAt: string;
   updatedAt: string;
