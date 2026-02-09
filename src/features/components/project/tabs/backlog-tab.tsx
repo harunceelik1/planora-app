@@ -41,7 +41,7 @@ export function BacklogTab({ project }: { project: any }) {
             <div
               className={cn(
                 buttonVariants({ variant: "secondary", size: "sm" }),
-                "h-8 text-xs opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-800"
+                "h-8 text-xs opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-800",
               )}
             >
               {t("sprintPanel.startBtn")}
@@ -65,7 +65,7 @@ export function BacklogTab({ project }: { project: any }) {
         </div>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1 ">
         <BacklogView
           project={project}
           sprints={project.sprints || []}

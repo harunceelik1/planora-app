@@ -1,4 +1,5 @@
 "use client";
+
 import { use } from "react";
 import { useEffect } from "react";
 import Image from "next/image";
@@ -11,49 +12,87 @@ import {
   KanbanSquare,
   CalendarDays,
   LayoutDashboard,
-  Globe,
   Archive,
-  ChevronDown,
-  MoreHorizontal,
 } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";
 import { ProjectActions } from "@/features/components/project/proejct-actions/actions";
 import { AddMemberDialog } from "@/features/components/project/project-data/add-member-dialog";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
-import { BacklogTab } from "@/features/components/project/tabs/backlog-tab";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// --- Board View Component ---
-const BoardView = ({ project }: { project: any }) => {
-  const t = useTranslations("ProjectDetails");
+// --- 1. Helper Bileşen: Circular Progress (Halka Grafik) ---
+const CircularProgress = ({
+  value,
+  total,
+}: {
+  value: number;
+  total: number;
+}) => {
+  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+  const radius = 12;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center text-center">
-      <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-slate-800">
-        <KanbanSquare className="h-10 w-10 text-slate-400" />
+    <div className="hidden md:flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-1.5 ml-4 shadow-sm">
+      <div className="relative h-8 w-8">
+        <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
+          {/* Gri Arka Plan Halkası */}
+          <circle
+            cx="18"
+            cy="18"
+            r={radius}
+            fill="transparent"
+            stroke="#e2e8f0"
+            strokeWidth="3"
+          />
+          {/* Turuncu İlerleme Halkası */}
+          <circle
+            cx="18"
+            cy="18"
+            r={radius}
+            fill="transparent"
+            stroke="#f97316"
+            strokeWidth="3"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+          />
+        </svg>
       </div>
-      <h3 className="text-lg font-semibold">{t("views.board.title")}</h3>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        {t("views.board.description")}
-      </p>
+      <div className="flex flex-col">
+        <span className="text-xs font-bold text-slate-800 leading-tight">
+          {percentage}% Complete
+        </span>
+        <span className="text-[10px] text-slate-500 font-medium leading-tight">
+          {value}/{total} Tasks
+        </span>
+      </div>
     </div>
   );
 };
 
+// --- 2. Helper Bileşen: Board View Placeholder ---
+const BoardView = ({ project }: { project: any }) => (
+  <div className="flex h-full flex-col items-center justify-center text-center">
+    <KanbanSquare className="h-10 w-10 text-slate-400 mb-4" />
+    <h3 className="text-lg font-semibold">Board View</h3>
+    <p className="text-sm text-slate-500">Kanban board content goes here.</p>
+  </div>
+);
+
+// --- 3. Ana Sayfa Bileşeni ---
 interface ProjectDetailsPageProps {
   params: Promise<{ projectId: string }>;
 }
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
-  if (!res.ok) {
-    const error = new Error("Project not found");
-    throw error;
-  }
+  if (!res.ok) throw new Error("Project not found");
   return res.json();
 };
 
@@ -63,6 +102,15 @@ export default function ProjectDetailsPage({
   const router = useRouter();
   const { projectId } = use(params);
   const t = useTranslations("ProjectDetails");
+
+  const {
+    data: project,
+    isLoading,
+    error,
+  } = useSWR(`/api/project/${projectId}`, fetcher, {
+    shouldRetryOnError: false,
+    revalidateOnFocus: true,
+  });
 
   const RenderIcon = ({
     iconName,
@@ -76,232 +124,211 @@ export default function ProjectDetailsPage({
     return <IconComponent className={className} />;
   };
 
-  const {
-    data: project,
-    isLoading,
-    error,
-  } = useSWR(`/api/project/${projectId}`, fetcher, {
-    shouldRetryOnError: false,
-    revalidateOnFocus: true,
-  });
-
   useEffect(() => {
     if (!isLoading && (error || !project)) {
       router.replace("/main/projects");
     }
   }, [isLoading, error, project, router]);
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-8" />
       </div>
     );
-  }
-
-  if (error || !project) {
+  if (error || !project)
     return (
-      <div className="flex h-screen items-center justify-center flex-col gap-4">
-        <Spinner className="size-8 " />
-        <p className="text-muted-foreground font-medium animate-pulse">
-          {t("error.notFound")}
-        </p>
+      <div className="flex h-screen items-center justify-center">
+        Project not found
       </div>
     );
-  }
+
+  // Tasarımdaki özel tab stili (Altı çizili, turuncu aktif)
+  const tabTriggerStyle = cn(
+    "group relative flex items-center gap-2 px-1 py-4 text-sm font-medium transition-colors outline-none",
+    "text-slate-500 hover:text-slate-800",
+    "data-[state=active]:text-orange-600", // Aktifken yazı turuncu
+    // Alt çizgi efekti (Sadece aktifken görünür)
+    "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-transparent after:transition-all",
+    "data-[state=active]:after:bg-orange-600",
+  );
 
   return (
-    <main className="flex flex-col h-screen  dark:bg-background ">
-      <header className="flex-none px-6 py-4 border-b bg-background z-20 ">
-        <div className="flex items-center justify-between ">
+    <main className="flex flex-col h-screen bg-white overflow-hidden">
+      {/* --- HEADER ALANI --- */}
+      <header className="flex-none px-8 pt-6 pb-0 bg-white z-20">
+        {/* Breadcrumb (Sol Üst) */}
+        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-4">
+          <Link
+            href="/main/projects"
+            className="hover:text-slate-600 transition-colors"
+          >
+            Workspaces
+          </Link>
+          <span>/</span>
+          <span className="text-slate-600">{project.projectKey}</span>
+        </div>
+
+        <div className="flex items-start justify-between mb-2">
+          {/* SOL TARAFI: Logo, Başlık, İlerleme */}
           <div className="flex items-center gap-4">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border bg-slate-50 overflow-hidden">
+            {/* Turuncu Logo Kutusu */}
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-sm text-white overflow-hidden">
               {project.image ? (
                 <Image
                   src={project.image}
-                  alt={t("header.logoAlt")}
-                  fill
-                  className="object-cover"
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="object-cover h-full w-full"
                 />
               ) : (
-                <div
-                  className="flex h-full w-full items-center justify-center"
-                  style={{ backgroundColor: project.color || "#f1f5f9" }}
-                >
-                  <RenderIcon
-                    iconName={project.icon || "Layout"}
-                    className="h-5 w-5 text-white mix-blend-hard-light"
-                  />
-                </div>
+                <RenderIcon
+                  iconName={project.icon || "Layout"}
+                  className="h-6 w-6 text-white"
+                />
               )}
             </div>
 
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Link
-                  href="/main/projects"
-                  className="hover:text-foreground transition-colors"
-                >
-                  {t("nav.workspace")}
-                </Link>
-                <span className="text-slate-300">/</span>
-                <span>{project.projectKey}</span>
-              </div>
+            {/* Başlık ve Bilgiler */}
+            <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold leading-tight text-foreground">
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
                   {project.projectName}
                 </h1>
-
                 <FavoriteButton
                   projectId={project.id}
                   isFavorited={project.isFavorited}
                 />
               </div>
+              <p className="text-xs text-slate-400 mt-1 font-medium">
+                Updated just now
+              </p>
             </div>
+
+            {/* 🔥 Tamamlanma Oranı (Dinamik) */}
+            {/* Buradaki 13 ve 20 değerlerini veritabanından gelen gerçek completedCount ile değiştirebilirsin */}
+            <CircularProgress
+              value={project.completedIssueCount || 0}
+              total={project.issues?.length || 0}
+            />
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* SAĞ TARAF: Üyeler ve Aksiyon Butonları */}
+          <div className="flex items-center gap-3">
+            {/* Avatar Grubu (Görsel) */}
+            <div className="hidden md:flex items-center -space-x-2 mr-2">
+              <Avatar className="h-8 w-8 border-2 border-white ring-1 ring-slate-100">
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+              <Avatar className="h-8 w-8 border-2 border-white ring-1 ring-slate-100">
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback>AB</AvatarFallback>
+              </Avatar>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-600 ring-1 ring-slate-100">
+                +3
+              </div>
+            </div>
+
+            {/* SENİN BUTONLARIN (Fonksiyonel) */}
             <AddMemberDialog
               projectId={project.id}
               projectName={project.projectName}
             />
+
             <ProjectActions
               projectId={project.id}
               projectName={project.projectName}
             />
           </div>
         </div>
-      </header>
 
-      {/* 2. TABS */}
-      <div className="flex-1 flex flex-col min-h-0">
-        <Tabs defaultValue="backlog" className="flex-1 flex flex-col">
-          {/* TAB LİSTESİ */}
-          <div className="flex-none border-b border-gray-200 dark:border-gray-800 bg-background z-10 px-6">
-            <TabsList className="flex h-14 w-full justify-start gap-4 bg-transparent p-0 m-0">
-              <TabsTrigger
-                value=""
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "relative h-10 rounded-md font-medium text-muted-foreground",
-                  "border-b-2 border-transparent",
-                  "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800",
-                  "data-[state=active]:border-b-blue-600",
-                  "data-[state=active]:text-blue-600"
-                )}
-              >
-                <Globe className="h-4 w-4 mr-2" />
-                {t("tabs.overview")}
-              </TabsTrigger>
+        {/* --- TABS (HEADER İÇİNDE) --- */}
+        <div className="mt-4">
+          <Tabs
+            defaultValue="backlog"
+            className="w-full flex flex-col h-[calc(100vh-140px)]"
+          >
+            {/* Tab Listesi */}
+            <div className="border-b border-slate-100 w-full px-1">
+              <TabsList className="flex w-full justify-start gap-8 bg-transparent p-0 h-auto rounded-none">
+                <TabsTrigger value="overview" className={tabTriggerStyle}>
+                  <LayoutDashboard className="h-4 w-4 mb-0.5" />
+                  {t("tabs.overview")}
+                </TabsTrigger>
 
-              {/* Sekme: Zaman Çizelgesi */}
-              <TabsTrigger
-                value="timeline"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "relative h-10 rounded-md font-medium text-muted-foreground",
-                  "border-b-2 border-transparent",
-                  "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800",
-                  "data-[state=active]:border-b-blue-600",
-                  "data-[state=active]:text-blue-600"
-                )}
-              >
-                <CalendarDays className="h-4 w-4 mr-2" />
-                {t("tabs.timeline")}
-              </TabsTrigger>
+                <TabsTrigger value="timeline" className={tabTriggerStyle}>
+                  <CalendarDays className="h-4 w-4 mb-0.5" />
+                  {t("tabs.timeline")}
+                </TabsTrigger>
 
-              {/* Sekme: Kapsam (Backlog) */}
-              <TabsTrigger
+                <TabsTrigger value="backlog" className={tabTriggerStyle}>
+                  <ListTodo className="h-4 w-4 mb-0.5" />
+                  {t("tabs.backlog")}
+                  {/* Sayı Rozeti */}
+                  {(project.issues?.length || 0) > 0 && (
+                    <span className="ml-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-orange-100 px-1.5 text-[11px] font-bold text-orange-600">
+                      {project.issues.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+
+                <TabsTrigger value="board" className={tabTriggerStyle}>
+                  <KanbanSquare className="h-4 w-4 mb-0.5" />
+                  {t("tabs.board")}
+                </TabsTrigger>
+
+                <TabsTrigger value="archive" className={tabTriggerStyle}>
+                  <Archive className="h-4 w-4 mb-0.5" />
+                  {t("tabs.archive")}
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* TAB İÇERİKLERİ */}
+            <div className="flex-1 bg-[#F9FAFB] overflow-hidden relative">
+              {/* BACKLOG TAB (Düzeltilen Kısım) */}
+              <TabsContent
                 value="backlog"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "relative h-10 rounded-md font-medium text-muted-foreground",
-                  "border-b-2 border-transparent",
-                  "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800",
-                  "data-[state=active]:border-b-blue-600",
-                  "data-[state=active]:text-blue-600"
-                )}
+                className="h-full m-0 border-none outline-none"
               >
-                <ListTodo className="h-4 w-4 mr-2" />
-                {t("tabs.backlog")}
-                {/* Rozet */}
-                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-100 px-1.5 text-[10px] font-bold text-slate-600 group-hover:bg-white group-data-[state=active]:bg-blue-100 group-data-[state=active]:text-blue-700">
-                  {project.issues?.length || 0}
-                </span>
-              </TabsTrigger>
+                <BacklogView
+                  project={project}
+                  issues={project.issues || []} // HATA ÇÖZÜMÜ: || [] eklendi
+                />
+              </TabsContent>
 
-              {/* Sekme: Pano */}
-              <TabsTrigger
+              {/* BOARD TAB */}
+              <TabsContent
                 value="board"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "relative h-10 rounded-md font-medium text-muted-foreground",
-                  "border-b-2 border-transparent",
-                  "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800",
-                  "data-[state=active]:border-b-blue-600",
-                  "data-[state=active]:text-blue-600"
-                )}
+                className="h-full m-0 p-6 overflow-y-auto"
               >
-                <KanbanSquare className="h-4 w-4 mr-2" />
-                {t("tabs.board")}
-              </TabsTrigger>
+                <BoardView project={project} />
+              </TabsContent>
 
-              {/* Sekme: Arşiv */}
-              <TabsTrigger
-                value="/"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "relative h-10 rounded-md font-medium text-muted-foreground",
-                  "border-b-2 border-transparent",
-                  "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800",
-                  "data-[state=active]:border-b-blue-600",
-                  "data-[state=active]:text-blue-600"
-                )}
-              >
-                <Archive className="h-4 w-4 mr-2" />
-                {t("tabs.archive")}
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* TAB İÇERİKLERİ */}
-          <div className="flex-1 bg-slate-50/30 dark:bg-slate-950 p-0 overflow-hidden">
-            {/* TIMELINE */}
-            <TabsContent
-              value="timeline"
-              className="h-full p-6 mt-0 focus-visible:outline-none overflow-y-auto custom-scrollbar"
-            >
-              <div className="flex h-full flex-col items-center justify-center text-center border-2 border-dashed border-slate-200 rounded-xl bg-white/50">
-                <div className="mb-4 rounded-full bg-slate-100 p-4">
-                  <LayoutDashboard className="h-8 w-8 text-slate-400" />
+              {/* DİĞER TABLAR (Placeholder) */}
+              <TabsContent value="overview" className="h-full p-6">
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Overview Content
                 </div>
-                <h3 className="text-lg font-semibold">
-                  {t("views.timeline.title")}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {t("views.timeline.description")}
-                </p>
-              </div>
-            </TabsContent>
+              </TabsContent>
 
-            {/* BACKLOG (GÜNCELLENEN KISIM) */}
-            <TabsContent
-              value="backlog"
-              className="h-full mt-0 focus-visible:outline-none flex flex-col"
-            >
-              <BacklogTab project={project} />
-            </TabsContent>
+              <TabsContent value="timeline" className="h-full p-6">
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Timeline Content
+                </div>
+              </TabsContent>
 
-            {/* BOARD */}
-            <TabsContent
-              value="board"
-              className="h-full p-6 mt-0 focus-visible:outline-none overflow-y-auto custom-scrollbar"
-            >
-              <BoardView project={project} />
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
+              <TabsContent value="archive" className="h-full p-6">
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Archive Content
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
+      </header>
     </main>
   );
 }
