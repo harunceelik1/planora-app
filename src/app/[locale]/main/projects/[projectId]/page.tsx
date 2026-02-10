@@ -1,7 +1,6 @@
 "use client";
 
-import { use } from "react";
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import useSWR from "swr";
@@ -13,6 +12,9 @@ import {
   CalendarDays,
   LayoutDashboard,
   Archive,
+  ChevronDown,
+  Layout,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";
@@ -25,7 +27,7 @@ import { FavoriteButton } from "@/features/components/project/favorite-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Project } from "@/types/project";
 
-// --- 1. Helper Bileşen: Circular Progress (Halka Grafik) ---
+// --- 1. Helper Bileşen: Circular Progress ---
 const CircularProgress = ({
   value,
   total,
@@ -42,7 +44,6 @@ const CircularProgress = ({
     <div className="hidden md:flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-1.5 ml-4 shadow-sm">
       <div className="relative h-8 w-8">
         <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
-          {/* Gri Arka Plan Halkası */}
           <circle
             cx="18"
             cy="18"
@@ -51,7 +52,6 @@ const CircularProgress = ({
             stroke="#e2e8f0"
             strokeWidth="3"
           />
-          {/* Turuncu İlerleme Halkası */}
           <circle
             cx="18"
             cy="18"
@@ -77,25 +77,16 @@ const CircularProgress = ({
   );
 };
 
-// --- 2. Helper Bileşen: Board View Placeholder ---
-const BoardView = ({ project }: { project: Project }) => (
-  <div className="flex h-full flex-col items-center justify-center text-center">
-    <KanbanSquare className="h-10 w-10 text-slate-400 mb-4" />
-    <h3 className="text-lg font-semibold">Board View</h3>
-    <p className="text-sm text-slate-500">Kanban board content goes here.</p>
-  </div>
-);
-
-// --- 3. Ana Sayfa Bileşeni ---
-interface ProjectDetailsPageProps {
-  params: Promise<{ projectId: string }>;
-}
-
+// --- 2. Sayfa fetcher ---
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) throw new Error("Project not found");
   return res.json();
 };
+
+interface ProjectDetailsPageProps {
+  params: Promise<{ projectId: string }>;
+}
 
 export default function ProjectDetailsPage({
   params,
@@ -144,21 +135,29 @@ export default function ProjectDetailsPage({
       </div>
     );
 
-  // Tasarımdaki özel tab stili (Altı çizili, turuncu aktif)
+  // --- Tasarımdaki özel tab stili ---
   const tabTriggerStyle = cn(
     "group relative flex items-center gap-2 px-1 py-4 text-sm font-medium transition-colors outline-none",
     "text-slate-500 hover:text-slate-800",
-    "data-[state=active]:text-orange-600", // Aktifken yazı turuncu
-    // Alt çizgi efekti (Sadece aktifken görünür)
-    "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-transparent after:transition-all",
+    "data-[state=active]:text-orange-600",
+    "after:absolute after:bottom-[-1px] after:left-0 after:h-[2px] after:w-full after:bg-transparent after:transition-all",
     "data-[state=active]:after:bg-orange-600",
   );
 
+  // Üyeleri hazırla (members ilişkisinin geldiğini varsayıyoruz)
+  const members = project.members || [];
+  const displayMembers = members.slice(0, 3); // İlk 3 kişiyi göster
+  const remainingCount = members.length - 3; // Geriye kaç kişi kaldı?
+
+  const getInitials = (name?: string | null) => {
+    if (!name) return "??";
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <main className="flex flex-col h-screen bg-white overflow-hidden">
-      {/* --- HEADER ALANI --- */}
+      {/* HEADER */}
       <header className="flex-none px-8 pt-6 pb-0 bg-white z-20">
-        {/* Breadcrumb (Sol Üst) */}
         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-4">
           <Link
             href="/main/projects"
@@ -173,7 +172,6 @@ export default function ProjectDetailsPage({
         <div className="flex items-start justify-between mb-2">
           {/* SOL TARAFI: Logo, Başlık, İlerleme */}
           <div className="flex items-center gap-4">
-            {/* Turuncu Logo Kutusu */}
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-sm text-white overflow-hidden">
               {project.image ? (
                 <Image
@@ -190,8 +188,6 @@ export default function ProjectDetailsPage({
                 />
               )}
             </div>
-
-            {/* Başlık ve Bilgiler */}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
@@ -206,9 +202,6 @@ export default function ProjectDetailsPage({
                 Updated just now
               </p>
             </div>
-
-            {/* 🔥 Tamamlanma Oranı (Dinamik) */}
-            {/* Buradaki 13 ve 20 değerlerini veritabanından gelen gerçek completedCount ile değiştirebilirsin */}
             <CircularProgress
               value={project.completedIssueCount || 0}
               total={project.issues?.length || 0}
@@ -217,27 +210,37 @@ export default function ProjectDetailsPage({
 
           {/* SAĞ TARAF: Üyeler ve Aksiyon Butonları */}
           <div className="flex items-center gap-3">
-            {/* Avatar Grubu (Görsel) */}
-            <div className="hidden md:flex items-center -space-x-2 mr-2">
-              <Avatar className="h-8 w-8 border-2 border-white ring-1 ring-slate-100">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <Avatar className="h-8 w-8 border-2 border-white ring-1 ring-slate-100">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>AB</AvatarFallback>
-              </Avatar>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-600 ring-1 ring-slate-100">
-                +3
-              </div>
-            </div>
+            {/* 🔥 GÜNCELLENEN KISIM: Gerçek Üyeler 🔥 */}
+            {members.length > 0 && (
+              <div className="hidden md:flex items-center -space-x-2 mr-2">
+                {displayMembers.map((member: any) => (
+                  <Avatar
+                    key={member.id}
+                    className="h-8 w-8 border-2 border-white ring-1 ring-slate-100 transition-transform hover:z-10 hover:scale-105"
+                  >
+                    {/* member.user.image veya direkt member.image yapısına göre ayarlandı */}
+                    <AvatarImage
+                      src={member.user?.image || member.image || ""}
+                    />
+                    <AvatarFallback className="bg-slate-100 text-[10px] text-slate-600 font-bold">
+                      {getInitials(member.user?.name || member.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
 
-            {/* SENİN BUTONLARIN (Fonksiyonel) */}
+                {/* 3 kişiden fazla varsa +X göstergesi */}
+                {remainingCount > 0 && (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-600 ring-1 ring-slate-100 z-0">
+                    +{remainingCount}
+                  </div>
+                )}
+              </div>
+            )}
+
             <AddMemberDialog
               projectId={project.id}
               projectName={project.projectName}
             />
-
             <ProjectActions
               projectId={project.id}
               projectName={project.projectName}
@@ -245,84 +248,104 @@ export default function ProjectDetailsPage({
           </div>
         </div>
 
-        {/* --- TABS (HEADER İÇİNDE) --- */}
+        {/* TABS */}
         <div className="mt-4">
           <Tabs
             defaultValue="backlog"
             className="w-full flex flex-col h-[calc(100vh-140px)]"
           >
-            {/* Tab Listesi */}
             <div className="border-b border-slate-100 w-full px-1">
-              <TabsList className="flex  justify-start gap-8 bg-transparent p-0 h-auto rounded-none ">
+              <TabsList className="flex w-fit justify-start gap-8 bg-transparent p-0 h-auto rounded-none">
                 <TabsTrigger value="overview" className={tabTriggerStyle}>
-                  <LayoutDashboard className="h-4 w-4 mb-0.5" />
+                  <LayoutDashboard className="h-4 w-4 mb-0.5" />{" "}
                   {t("tabs.overview")}
                 </TabsTrigger>
-
                 <TabsTrigger value="timeline" className={tabTriggerStyle}>
-                  <CalendarDays className="h-4 w-4 mb-0.5" />
+                  <CalendarDays className="h-4 w-4 mb-0.5" />{" "}
                   {t("tabs.timeline")}
                 </TabsTrigger>
-
                 <TabsTrigger value="backlog" className={tabTriggerStyle}>
-                  <ListTodo className="h-4 w-4 mb-0.5" />
-                  {t("tabs.backlog")}
-                  {/* Sayı Rozeti */}
+                  <ListTodo className="h-4 w-4 mb-0.5" /> {t("tabs.backlog")}
                   {(project.issues?.length || 0) > 0 && (
-                    <span className="ml-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-orange-100 px-1.5 text-[11px] font-bold text-orange-600">
+                    <span className="ml-1.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-orange-100 px-1 text-[10px] font-bold text-orange-600">
                       {project.issues.length}
                     </span>
                   )}
                 </TabsTrigger>
-
                 <TabsTrigger value="board" className={tabTriggerStyle}>
-                  <KanbanSquare className="h-4 w-4 mb-0.5" />
-                  {t("tabs.board")}
+                  <KanbanSquare className="h-4 w-4 mb-0.5" /> {t("tabs.board")}
                 </TabsTrigger>
-
                 <TabsTrigger value="archive" className={tabTriggerStyle}>
-                  <Archive className="h-4 w-4 mb-0.5" />
-                  {t("tabs.archive")}
+                  <Archive className="h-4 w-4 mb-0.5" /> {t("tabs.archive")}
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            {/* TAB İÇERİKLERİ */}
             <div className="flex-1 bg-[#F9FAFB] overflow-hidden relative">
-              {/* BACKLOG TAB (Düzeltilen Kısım) */}
               <TabsContent
                 value="backlog"
                 className="h-full m-0 border-none outline-none"
               >
-                <BacklogView
-                  project={project}
-                  issues={project.issues || []} // HATA ÇÖZÜMÜ: || [] eklendi
-                />
+                <div className="flex flex-col h-full overflow-y-auto">
+                  {/* SPRINT KISMI (Placeholder) */}
+                  <div className="p-6 pb-0">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <ChevronDown size={18} className="text-slate-400" />
+                        <h3 className="font-bold text-sm text-slate-800">
+                          Sprint 1
+                        </h3>
+                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">
+                          Active
+                        </span>
+                        <span className="text-xs text-slate-400 ml-2">
+                          Feb 10 - Feb 24 • 0 tasks
+                        </span>
+                      </div>
+                      <MoreHorizontal
+                        size={18}
+                        className="text-slate-400 cursor-pointer"
+                      />
+                    </div>
+                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center bg-white">
+                      <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center mb-3 text-slate-300">
+                        <Layout size={20} />
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium">
+                        No tasks in this sprint
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        Drag issues here to plan your sprint.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* BACKLOG TABLOSU */}
+                  <BacklogView
+                    project={project}
+                    issues={project.issues || []}
+                  />
+                </div>
               </TabsContent>
 
-              {/* BOARD TAB */}
               <TabsContent
                 value="board"
                 className="h-full m-0 p-6 overflow-y-auto"
               >
                 <BoardView project={project} />
               </TabsContent>
-
-              {/* DİĞER TABLAR (Placeholder) */}
               <TabsContent value="overview" className="h-full p-6">
-                <div className="flex items-center justify-center h-full text-slate-400">
+                <div className="text-slate-400 text-center mt-20">
                   Overview Content
                 </div>
               </TabsContent>
-
               <TabsContent value="timeline" className="h-full p-6">
-                <div className="flex items-center justify-center h-full text-slate-400">
+                <div className="text-slate-400 text-center mt-20">
                   Timeline Content
                 </div>
               </TabsContent>
-
               <TabsContent value="archive" className="h-full p-6">
-                <div className="flex items-center justify-center h-full text-slate-400">
+                <div className="text-slate-400 text-center mt-20">
                   Archive Content
                 </div>
               </TabsContent>
@@ -333,3 +356,12 @@ export default function ProjectDetailsPage({
     </main>
   );
 }
+
+// Helper Board View
+const BoardView = ({ project }: { project: Project }) => (
+  <div className="flex h-full flex-col items-center justify-center text-center">
+    <KanbanSquare className="h-10 w-10 text-slate-400 mb-4" />
+    <h3 className="text-lg font-semibold">Board View</h3>
+    <p className="text-sm text-slate-500">Kanban board content goes here.</p>
+  </div>
+);
