@@ -10,9 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserCircle2, UserPlus } from "lucide-react";
 import { Issue } from "@/types/project";
-
-// 👇 BURASI ÖNEMLİ: Senin oluşturduğun action'ı import ediyoruz.
-// Dosya ismin farklıysa (örn: actions/issues.ts) burayı düzelt.
 import { updateIssueAssignee } from "@/actions/issue-actions";
 
 // Tip tanımları (Hata almamak için buraya koyduk)
@@ -25,12 +22,14 @@ export interface AssigneeUser {
 
 interface IssueAssigneeSelectorProps {
   issue: Issue;
+  projectId: string;
   members: AssigneeUser[];
 }
 
 export function IssueAssigneeSelector({
   issue,
   members,
+  projectId,
 }: IssueAssigneeSelectorProps) {
   // Başlangıç değerini ayarla
   const [assignee, setAssignee] = useState<AssigneeUser | null>(
@@ -40,7 +39,7 @@ export function IssueAssigneeSelector({
           name: issue.assignee.name || null,
           image: issue.assignee.image || null,
         }
-      : null
+      : null,
   );
 
   const handleAssign = async (memberId: string) => {
@@ -59,7 +58,7 @@ export function IssueAssigneeSelector({
     // 3. SERVER ACTION ÇAĞRISI (Gerçek işlem)
     try {
       // Server Action'ı çağırıyoruz. Axios yok, URL yok. Fonksiyon çağırır gibi.
-      const result = await updateIssueAssignee(issue.id, memberId);
+      const result = await updateIssueAssignee(issue.id, memberId, projectId);
 
       if (result?.error) {
         throw new Error(result.error);

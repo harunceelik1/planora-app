@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Project } from "@/types/project";
 
 // --- 1. Helper Bileşen: Circular Progress (Halka Grafik) ---
 const CircularProgress = ({
@@ -77,7 +78,7 @@ const CircularProgress = ({
 };
 
 // --- 2. Helper Bileşen: Board View Placeholder ---
-const BoardView = ({ project }: { project: any }) => (
+const BoardView = ({ project }: { project: Project }) => (
   <div className="flex h-full flex-col items-center justify-center text-center">
     <KanbanSquare className="h-10 w-10 text-slate-400 mb-4" />
     <h3 className="text-lg font-semibold">Board View</h3>
@@ -252,7 +253,7 @@ export default function ProjectDetailsPage({
           >
             {/* Tab Listesi */}
             <div className="border-b border-slate-100 w-full px-1">
-              <TabsList className="flex w-full justify-start gap-8 bg-transparent p-0 h-auto rounded-none">
+              <TabsList className="flex  justify-start gap-8 bg-transparent p-0 h-auto rounded-none ">
                 <TabsTrigger value="overview" className={tabTriggerStyle}>
                   <LayoutDashboard className="h-4 w-4 mb-0.5" />
                   {t("tabs.overview")}

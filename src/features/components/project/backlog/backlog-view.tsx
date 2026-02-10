@@ -3,10 +3,11 @@
 import { useState } from "react"; // 1. State ekle
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronDown, ChevronRight } from "lucide-react"; // 2. Ikonları ekle
-import { columns } from "./columns";
 import { Issue, Project } from "@/types/project";
 import { InlineIssueCreator } from "../issue/inline-issue-creator";
 import { DataTable } from "../project-data/data-table";
+import { IssueItem } from "./issue-item";
+import { columns } from "./columns";
 
 interface BacklogViewProps {
   project: Project;
@@ -16,13 +17,12 @@ interface BacklogViewProps {
 export default function BacklogView({ project, issues }: BacklogViewProps) {
   // 👇 3. Açık/Kapalı durumunu tutan state
   const [isExpanded, setIsExpanded] = useState(true);
-
+  const getColumns = columns(project.members, project.projectKey, project.id);
   return (
     <div className="flex flex-col gap-4 w-full h-full p-6 bg-slate-50/50 min-h-screen">
       {/* ÜST BAŞLIK ALANI (Tıklanabilir) */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          {/* 👇 Başlığı butona çevirdik */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center gap-2 text-lg font-bold text-slate-800 hover:text-slate-600 transition-colors group"
@@ -34,14 +34,11 @@ export default function BacklogView({ project, issues }: BacklogViewProps) {
               <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-slate-800" />
             )}
             Backlog
-            <span className="text-xs font-medium text-slate-400 font-normal ml-2">
+            <span className="text-xs font-medium text-slate-400  ml-2">
               {issues.length} tasks
             </span>
           </button>
         </div>
-
-        {/* Create Task Butonu (Opsiyonel, zaten aşağıda var) */}
-        {/* <Button...> ... </Button> */}
       </div>
 
       {/* 👇 LİSTE GÖRÜNÜMÜ (State true ise göster) */}
@@ -60,7 +57,7 @@ export default function BacklogView({ project, issues }: BacklogViewProps) {
 
           {/* TABLO ALANI */}
           <div className="">
-            <DataTable columns={columns} data={issues} />
+            <DataTable columns={getColumns} data={issues} />
           </div>
         </div>
       )}

@@ -1,11 +1,14 @@
-"use server"; // 👈 Bu satır çok önemli, bunu sunucu fonksiyonu yapar.
+"use server";
 
-import { db } from "@/lib/prisma"; // Prisma ayarın nerede ise oradan çek
+import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function updateIssueAssignee(issueId: string, assigneeId: string) {
+export async function updateIssueAssignee(
+  issueId: string,
+  assigneeId: string,
+  projectId: string,
+) {
   try {
-    // Veritabanı güncelleme
     await db.issue.update({
       where: { id: issueId },
       data: {
@@ -13,12 +16,12 @@ export async function updateIssueAssignee(issueId: string, assigneeId: string) {
       },
     });
 
-    // Sayfayı yenile ki kullanıcı değişikliği görsün
-    revalidatePath("/main/projects"); // Veya ilgili sayfanın yolu neyse
+    // 🔥 BALYOZ: "/" diyerek tüm projeyi ve tüm cache'leri sıfırlıyoruz.
+    // Bu sayede hangi URL'de olursan ol veri güncellenmek ZORUNDA kalacak.
+    revalidatePath("/", "layout");
 
     return { success: true };
   } catch (error) {
-    console.error("Hata:", error);
     return { error: "Atama yapılamadı." };
   }
 }
