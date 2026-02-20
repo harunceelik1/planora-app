@@ -1,7 +1,6 @@
 "use client";
 import { ProjectInitialization } from "@/features/components/project/project-initialization";
 import useSWR from "swr";
-// 👇 1. Dil destekli Link'i kullan
 import { Link } from "@/i18n/routing";
 import { Spinner } from "@/components/ui/spinner";
 import { ProjectList } from "@/features/components/project/project-list";
@@ -86,12 +85,7 @@ export default function Projects() {
   // 5. Başarılı Veri
   return (
     <>
-      {projects && projects.length > 0 ? (
-        <ProjectList projects={projects} />
-      ) : (
-        // Proje yoksa ana sayfayı veya initialization'ı göster
-        <Home />
-      )}
+      <ProjectList projects={projects} />
     </>
   );
 }

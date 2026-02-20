@@ -129,14 +129,20 @@ model Issue {
   priority    IssuePriority @default(MEDIUM) // Enum ile öncelik yönetimi
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  order       Float         @default(0) // Sıralama için (Float kullanmak araya eklemeyi kolaylaştırır)
-  comments    Comment[] // İlişki
+  order       Float         @default(0) // Sıralama için
+  
+  // 👇 YENİ EKLENENLER: Arayüzdeki yeni alanlar için
+  dueDate     DateTime?     // Bitiş tarihi (Opsiyonel)
+  storyPoints Int?          // Story Points / Puanlama (Opsiyonel)
+
+  comments    Comment[]     // İlişki
 
   number    Int // Proje içindeki benzersiz görev numarası
   // --- İlişkiler ---
+  
   // Görevin ait olduğu proje
   projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // Proje silinirse görevler de silinir
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   // Görevi raporlayan/açan kişi
   reporterId String
@@ -145,8 +151,9 @@ model Issue {
   // Görevin atandığı kişi (opsiyonel, atanmamış olabilir)
   assigneeId String?
   assignee   User?   @relation("AssignedIssues", fields: [assigneeId], references: [id])
-  sprint     Sprint? @relation(fields: [sprintId], references: [id])
-  sprintId   String?
+  
+  sprint   Sprint? @relation(fields: [sprintId], references: [id])
+  sprintId String?
 
   @@unique([projectId, number])
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSWRConfig } from "swr";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -8,11 +10,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle2, UserPlus } from "lucide-react";
+import { UserCircle2, UserPlus, Loader2 } from "lucide-react"; // Loader2 eklendi
 import { Issue } from "@/types/project";
 import { updateIssueAssignee } from "@/actions/issue-actions";
+import { Spinner } from "@/components/ui/spinner";
 
-// Tip tanımları (Hata almamak için buraya koyduk)
 export interface AssigneeUser {
   id: string;
   name: string | null;
@@ -31,7 +33,12 @@ export function IssueAssigneeSelector({
   members,
   projectId,
 }: IssueAssigneeSelectorProps) {
-  // Başlangıç değerini ayarla
+  const router = useRouter();
+  const { mutate } = useSWRConfig();
+
+  // Yükleniyor durumu için state
+  const [isLoading, setIsLoading] = useState(false);
+
   const [assignee, setAssignee] = useState<AssigneeUser | null>(
     issue.assignee
       ? {
@@ -43,11 +50,14 @@ export function IssueAssigneeSelector({
   );
 
   const handleAssign = async (memberId: string) => {
-    // 1. ESKİ DEĞERİ SAKLA (Hata olursa geri dönmek için)
+    // 1. Yükleniyor başlat
+    setIsLoading(true);
+
     const previousAssignee = assignee;
 
-    // 2. OPTIMISTIC UPDATE (Arayüzü anında güncelle - Hız hissi)
-    // Eğer memberId boşsa kaldırma işlemi, doluysa atama işlemi
+    // Local state güncellemesi (Optimistic)
+    // Bunu loading'den sonra yapıyoruz ama loading true olduğu için
+    // kullanıcı zaten spinner görecek.
     if (memberId === "") {
       setAssignee(null);
     } else {
@@ -55,17 +65,21 @@ export function IssueAssigneeSelector({
       setAssignee(selectedMember);
     }
 
-    // 3. SERVER ACTION ÇAĞRISI (Gerçek işlem)
     try {
-      // Server Action'ı çağırıyoruz. Axios yok, URL yok. Fonksiyon çağırır gibi.
       const result = await updateIssueAssignee(issue.id, memberId, projectId);
 
       if (result?.error) {
         throw new Error(result.error);
       }
+
+      await mutate(`/api/project/${projectId}`);
+      router.refresh();
     } catch (error) {
       console.error("Atama hatası:", error);
       setAssignee(previousAssignee);
+    } finally {
+      // 2. İşlem bittiğinde (başarılı veya hatalı) yükleniyor'u kapat
+      setIsLoading(false);
     }
   };
 
@@ -77,15 +91,28 @@ export function IssueAssigneeSelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-slate-200 transition-all outline-none">
-          {assignee ? (
+        <button
+          disabled={isLoading} // Yüklenirken tıklamayı engelle
+          className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-slate-200 transition-all outline-none disabled:cursor-not-allowed"
+        >
+          {/* DURUM KONTROLÜ: Loading mi? */}
+          {isLoading ? (
+            <div className="h-7 w-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
+              <Spinner className="absolute h-4 w-4 animate-spin text-slate-400" />
+            </div>
+          ) : assignee ? (
+            // Atanmış kişi varsa
             <Avatar className="h-7 w-7 border-2 border-white shadow-sm cursor-pointer">
-              <AvatarImage src={assignee.image || ""} />
+              <AvatarImage
+                src={assignee.image || ""}
+                referrerPolicy="no-referrer"
+              />
               <AvatarFallback className="text-[10px] bg-indigo-100 text-indigo-700 font-bold">
                 {getInitials(assignee.name)}
               </AvatarFallback>
             </Avatar>
           ) : (
+            // Kimse yoksa (+) butonu
             <div
               className="h-7 w-7 rounded-full bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer"
               title="Ata"
@@ -108,7 +135,10 @@ export function IssueAssigneeSelector({
             className="flex items-center gap-2 cursor-pointer"
           >
             <Avatar className="h-6 w-6">
-              <AvatarImage src={member.image || ""} />
+              <AvatarImage
+                src={member.image || ""}
+                referrerPolicy="no-referrer"
+              />
               <AvatarFallback className="text-[10px]">
                 {getInitials(member.name)}
               </AvatarFallback>

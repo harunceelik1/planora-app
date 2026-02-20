@@ -8,7 +8,7 @@ import { ArrowRight, ListChecks, LogIn, Mail, ChartColumn } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FcGoogle } from "react-icons/fc";
 import { ROUTES } from "@/constants/routest";
-import { useTranslations } from "next-intl"; // 👈 1. IMPORT ET
+import { useTranslations } from "next-intl";
 
 const scrollToSection = (id: string) => {
   document.getElementById(id)?.scrollIntoView({

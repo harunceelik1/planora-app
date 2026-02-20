@@ -44,7 +44,7 @@
     },
     "aria": {
       "userMenu": "User menu",
-      "openMenu": "Open menu" 
+      "openMenu": "Open menu"
     }
   },
   "CreateProject": {
@@ -76,7 +76,7 @@
       "defaultKey": "KEY",
       "tasksTitle": "Project Tasks"
     }
-},
+  },
   "ProfilePage": {
     "header": {
       "title": "My Profile",
@@ -177,14 +177,14 @@
       "support": "If the problem persists, please contact your administrator."
     }
   },
-"ProjectDetails": {
+  "ProjectDetails": {
     "nav": {
       "workspace": "Workspace"
     },
     "header": {
       "logoAlt": "Project Logo"
     },
-   "tabs": {
+    "tabs": {
       "overview": "Overview",
       "timeline": "Timeline",
       "backlog": "Backlog",
@@ -192,7 +192,7 @@
       "calendar": "Calendar",
       "archive": "Archive"
     },
-      "sprintPanel": {
+    "sprintPanel": {
       "title": "Sprint {number}",
       "taskCount": "({count} issues)",
       "statusUnplanned": "Unplanned",
@@ -215,8 +215,7 @@
         "emptyTitle": "Your backlog is empty.",
         "emptyDescription": "Start by creating new issues."
       }
-    }
-  ,
+    },
     "views": {
       "overview": {
         "title": "Project Overview",
@@ -248,7 +247,7 @@
       "notFound": "Project not found"
     }
   },
-  
+
   "Auth": {
     "SignIn": {
       "title": "Sign in to Planora",
@@ -314,7 +313,6 @@
         "signInFailed": "Invalid email or password"
       }
     }
-  
   },
   "DashboardPage": {
     "header": {
@@ -391,7 +389,7 @@
     "columns": {
       "name": "Name",
       "key": "Key",
-      "members":"Members",
+      "members": "Members",
       "lead": "Lead",
       "tasks": "Task Count",
       "unassigned": "Unassigned"
@@ -400,20 +398,19 @@
       "viewProfile": "View Profile"
     },
     "memberManagement": {
-      
-  "leader": "Leader",
-  "admin": "Admin",
-  "makeAdmin": "Make Admin",
-  "removeAdmin": "Remove Admin",
-  "removeMember": "Remove Member",
-  "deleteDialog": {
+      "leader": "Leader",
+      "admin": "Admin",
+      "makeAdmin": "Make Admin",
+      "removeAdmin": "Remove Admin",
+      "removeMember": "Remove Member",
+      "deleteDialog": {
         "title": "Are you sure?",
         "description": "This action cannot be undone. This user will be removed from the project and lose all access.",
         "cancel": "Cancel",
         "confirm": "Yes, Remove",
         "deleting": "Removing..."
       }
-}
+    }
   },
 
   "DataTable": {
@@ -442,22 +439,31 @@
     }
   },
   "ProjectInitialization": {
-    "header": {
-      "greeting": "Hello, {name}!",
-      "subtitle": "Welcome to your Dashboard."
-    },
-    "info": {
-      "text": "Here you can create projects and teams, and assign new tasks."
+    "defaultUser": "User",
+    "greeting": "Hello, {name}",
+    "subGreeting": "What would you like to achieve today?",
+    "quickStart": {
+      "title": "Quick Start",
+      "description": "Your Planora account is ready to use. Start organizing your workflow by inviting your team and creating your first project."
     },
     "actions": {
-      "createProject": "Create New Project",
-      "manageTeam": "Manage Team"
+      "createProject": {
+        "title": "Start New Project",
+        "description": "Create a project from scratch or use templates."
+      },
+      "inviteTeam": {
+        "title": "Invite Team",
+        "description": "Add your colleagues and start working together."
+      }
     },
-    "footer": {
-      "note": "All your actions are updated instantly. Have a great work!"
-    },
-    "common": {
-      "defaultUser": "User"
+    "footerNote": "All operations are updated in real-time. Happy working!",
+    "sidebar": {
+      "activeProjects": "My Active Projects",
+      "viewAll": "View all",
+      "noProject": {
+        "title": "No projects yet",
+        "description": "You don't have an active project. You can create one immediately from the panel on the left."
+      }
     }
   },
   "ChangeOwnerDialog": {
@@ -511,6 +517,43 @@
       "owner": "Workspace Owner",
       "change": "Change",
       "save": "Save Changes"
+    }
+  },
+  "TaskDetail": {
+    "taskDetails": "Task Details",
+    "noTitle": "No Title",
+    "unassigned": "Unassigned",
+    "unknownUser": "Unknown User",
+    "activityAndComments": "Activity & Comments",
+    "labels": {
+      "status": "STATUS",
+      "assignee": "ASSIGNEE",
+      "priority": "PRIORITY",
+      "dueDate": "DUE DATE",
+      "storyPoints": "STORY POINTS",
+      "description": "DESCRIPTION"
+    },
+    "statuses": {
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "placeholders": {
+      "selectStatus": "Select status",
+      "pickDate": "Pick a date",
+      "estimate": "Estimate",
+      "addDescription": "Add a description...",
+      "addComment": "Add a comment..."
+    },
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel"
     }
   }
 }

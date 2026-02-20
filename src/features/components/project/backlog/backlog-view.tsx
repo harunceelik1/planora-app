@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react"; // 1. State ekle
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronDown, ChevronRight } from "lucide-react"; // 2. Ikonları ekle
+import { Plus, ChevronDown, ChevronRight } from "lucide-react";
 import { Issue, Project } from "@/types/project";
 import { InlineIssueCreator } from "../issue/inline-issue-creator";
 import { DataTable } from "../project-data/data-table";
-import { IssueItem } from "./issue-item";
 import { columns } from "./columns";
+import { TaskDetailSheet } from "./TaskDetailSheet";
+import { useSession } from "next-auth/react";
+
+// 👇 1. Sheet bileşenini import et (yolu kendi dosyana göre ayarla)
 
 interface BacklogViewProps {
   project: Project;
@@ -15,19 +18,27 @@ interface BacklogViewProps {
 }
 
 export default function BacklogView({ project, issues }: BacklogViewProps) {
-  // 👇 3. Açık/Kapalı durumunu tutan state
   const [isExpanded, setIsExpanded] = useState(true);
-  const getColumns = columns(project.members, project.projectKey, project.id);
+  const { data: session } = useSession();
+  // 👇 2. Seçili görevi tutacak State'i ekle
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+
+  const getColumns = columns(
+    project.members,
+    project.projectKey,
+    project.id,
+    (issue) => setSelectedIssue(issue), // 👈 Edit butonuna tıklandığında seçili görevi güncelle
+  );
+
   return (
     <div className="flex flex-col gap-4 w-full h-full p-6 bg-slate-50/50 min-h-screen">
-      {/* ÜST BAŞLIK ALANI (Tıklanabilir) */}
+      {/* ÜST BAŞLIK ALANI */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center gap-2 text-lg font-bold text-slate-800 hover:text-slate-600 transition-colors group"
           >
-            {/* Açık/Kapalı ikon değişimi */}
             {isExpanded ? (
               <ChevronDown className="h-5 w-5 text-slate-500 group-hover:text-slate-800" />
             ) : (
@@ -41,7 +52,7 @@ export default function BacklogView({ project, issues }: BacklogViewProps) {
         </div>
       </div>
 
-      {/* 👇 LİSTE GÖRÜNÜMÜ (State true ise göster) */}
+      {/* LİSTE GÖRÜNÜMÜ */}
       {isExpanded && (
         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
           {/* HIZLI EKLEME ALANI */}
@@ -57,13 +68,21 @@ export default function BacklogView({ project, issues }: BacklogViewProps) {
 
           {/* TABLO ALANI */}
           <div className="">
+            {/* 👇 3. DataTable'a tıklama özelliği gönderiyoruz */}
             <DataTable columns={getColumns} data={issues} />
           </div>
         </div>
       )}
 
-      {/* Kapalıyken sadece ince bir çizgi veya boşluk gösterebilirsin */}
       {!isExpanded && <div className="h-4 border-b border-slate-200"></div>}
+
+      {/* 👇 4. Sheet Bileşenini en sona ekle */}
+      <TaskDetailSheet
+        task={selectedIssue} // Seçili görevi gönder
+        isOpen={!!selectedIssue} // Doluysa true, boşsa false
+        onClose={() => setSelectedIssue(null)} // Kapanınca sıfırla
+        currentUser={session?.user}
+      />
     </div>
   );
 }

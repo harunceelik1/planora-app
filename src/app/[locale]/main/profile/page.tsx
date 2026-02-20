@@ -11,7 +11,7 @@ import { formatName, getInitials } from "@/lib/utils";
 import { MapPin, BriefcaseBusiness, Calendar, Phone } from "lucide-react";
 import EditProfileDialog from "@/features/components/profile/editeProfile";
 import ChangePasswordDialog from "@/features/components/profile/changePassword";
-import { useTranslations, useFormatter } from "next-intl"; // ✅ useFormatter eklendi
+import { useTranslations, useFormatter } from "next-intl";
 import { FcGoogle } from "react-icons/fc";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -31,8 +31,10 @@ function Field({
       <Label className="text-xs font-medium text-muted-foreground">
         {label}
       </Label>
-      <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-        <Icon className="h-4 w-4 text-blue-500" />
+      {/* DÜZELTME 1: text-gray-900 -> text-foreground */}
+      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        {/* DÜZELTME 2: İkon rengi dark modda patlamasın diye text-primary veya blue-400 yapıldı */}
+        <Icon className="h-4 w-4 text-primary dark:text-blue-400" />
         <div className="break-all">{children}</div>
       </div>
     </div>
@@ -42,7 +44,7 @@ function Field({
 export default function ProfilePage() {
   const { data: session } = useSession();
   const t = useTranslations("ProfilePage");
-  const format = useFormatter(); // ✅ Tarih formatlayıcı çağırıldı
+  const format = useFormatter();
 
   const {
     data: user,
@@ -53,7 +55,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-8" />
+        <Spinner className="size-8 text-primary" />
       </div>
     );
   }
@@ -65,21 +67,23 @@ export default function ProfilePage() {
   const initials = getInitials(user.name, user.email);
 
   return (
-    <div className="p-4 sm:p-28">
+    // DÜZELTME 3: Sayfa arka planı (opsiyonel, genelde layout verir ama garanti olsun)
+    <div className="p-4 sm:p-28 min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-4xl space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {t("header.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
             {t("header.description")}
           </p>
         </div>
-        <Separator />
+        <Separator className="bg-border" />
 
+        {/* Card bileşeni zaten bg-card ve border-border kullanır, sorun yok */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
+            <CardTitle className="text-base font-semibold text-card-foreground">
               {t("account.title")}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -90,18 +94,19 @@ export default function ProfilePage() {
             <section className="space-y-6">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20 ring-4 ring-gray-50 border-2 border-white shadow-sm">
+                  {/* DÜZELTME 4: Avatar çerçeveleri ve arka planları */}
+                  <Avatar className="h-20 w-20 ring-4 ring-muted border-2 border-background shadow-sm">
                     <AvatarImage
                       src={user.image || ""}
                       className="object-cover"
                     />
-                    <AvatarFallback className="bg-gray-100 text-gray-600 text-xl font-bold">
+                    <AvatarFallback className="bg-muted text-muted-foreground text-xl font-bold">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="min-w-0 space-y-1">
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-foreground">
                       {fName ?? "—"}
                     </h2>
                     <p className="text-sm text-muted-foreground">
@@ -120,41 +125,38 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field
                   label={t("jobTitle") || "İş Unvanı"}
                   icon={BriefcaseBusiness}
                 >
-                  {/* 👇 Çeviri eklendi */}
                   {user.jobTitle || (
-                    <span className="text-gray-400 italic">
+                    // DÜZELTME 5: text-gray-400 -> text-muted-foreground/50
+                    <span className="text-muted-foreground/50 italic">
                       {t("notSpecified")}
                     </span>
                   )}
                 </Field>
 
                 <Field label={t("location") || "Konum"} icon={MapPin}>
-                  {/* 👇 Çeviri eklendi */}
                   {user.location || (
-                    <span className="text-gray-400 italic">
+                    <span className="text-muted-foreground/50 italic">
                       {t("notSpecified")}
                     </span>
                   )}
                 </Field>
 
                 <Field label={t("phone") || "Telefon"} icon={Phone}>
-                  {/* 👇 Çeviri eklendi */}
                   {user.phone || (
-                    <span className="text-gray-400 italic">
+                    <span className="text-muted-foreground/50 italic">
                       {t("notSpecified")}
                     </span>
                   )}
                 </Field>
 
                 <Field label={t("birthdate") || "Doğum Tarihi"} icon={Calendar}>
-                  {/* 👇 Tarih formatlama ve çeviri düzeltildi */}
                   {user.birthdate ? (
                     format.dateTime(new Date(user.birthdate), {
                       day: "numeric",
@@ -162,7 +164,7 @@ export default function ProfilePage() {
                       year: "numeric",
                     })
                   ) : (
-                    <span className="text-gray-400 italic">
+                    <span className="text-muted-foreground/50 italic">
                       {t("notSpecified")}
                     </span>
                   )}
@@ -170,8 +172,9 @@ export default function ProfilePage() {
               </div>
 
               {!hasPassword && (
-                <div className="mt-4 flex items-center gap-4 rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-900/20">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-blue-100">
+                // DÜZELTME 6: Google kutusu. Light: mavi, Dark: koyu mavi/transparan
+                <div className="mt-4 flex items-center gap-4 rounded-xl border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-800/50 dark:bg-blue-950/20">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background shadow-sm border border-border">
                     <FcGoogle size={24} />
                   </div>
                   <div>

@@ -213,17 +213,18 @@ export default function ProjectDetailsPage({
             {/* 🔥 GÜNCELLENEN KISIM: Gerçek Üyeler 🔥 */}
             {members.length > 0 && (
               <div className="hidden md:flex items-center -space-x-2 mr-2">
-                {displayMembers.map((member: any) => (
+                {displayMembers.map((member: Project["members"][number]) => (
                   <Avatar
-                    key={member.id}
-                    className="h-8 w-8 border-2 border-white ring-1 ring-slate-100 transition-transform hover:z-10 hover:scale-105"
+                    key={member.id} // member.id benzersizdir, key olarak uygundur
+                    className="h-8 w-8 border-2 border-white ring-1 ring-slate-100 transition-transform hover:z-10 hover:scale-105 cursor-pointer"
                   >
-                    {/* member.user.image veya direkt member.image yapısına göre ayarlandı */}
                     <AvatarImage
-                      src={member.user?.image || member.image || ""}
+                      src={member.user.image || ""}
+                      referrerPolicy="no-referrer"
                     />
                     <AvatarFallback className="bg-slate-100 text-[10px] text-slate-600 font-bold">
-                      {getInitials(member.user?.name || member.name)}
+                      {/* İsim de member.user.name içindedir */}
+                      {getInitials(member.user.name)}
                     </AvatarFallback>
                   </Avatar>
                 ))}

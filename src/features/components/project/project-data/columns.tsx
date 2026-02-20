@@ -18,7 +18,7 @@ import { Link as I18nLink, useRouter } from "@/i18n/routing";
 import { FavoriteButton } from "../favorite-button";
 
 export const getColumns = (
-  t: (key: string) => string
+  t: (key: string) => string,
 ): ColumnDef<Project>[] => [
   {
     id: "favorite",

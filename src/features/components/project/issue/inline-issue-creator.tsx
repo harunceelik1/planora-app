@@ -47,7 +47,24 @@ export function InlineIssueCreator({
       disableEditing();
     }
   };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Eğer form açıksa VE tıklanan yer formun içinde değilse
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        disableEditing();
+      }
+    };
 
+    // Sadece edit modundaysak dinleyiciyi ekle
+    if (isEditing) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Temizlik: Component kapanırken veya edit modu biterken dinleyiciyi kaldır
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditing]);
   // Dışarı tıklandığında kapatmak için (Opsiyonel ama UX için iyi)
   // useOnClickOutside hook'u kullanılabilir, şimdilik basit tutuyoruz.
 

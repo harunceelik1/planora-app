@@ -7,7 +7,6 @@ interface RouteParams {
   params: Promise<{ projectId: string }>;
 }
 
-// --- GET: PROJE DETAYI ---
 export async function GET(request: Request, { params }: RouteParams) {
   const session = await getServerSession(authOptions);
   if (!session)
@@ -28,6 +27,15 @@ export async function GET(request: Request, { params }: RouteParams) {
         orderBy: { order: "asc" },
         include: {
           assignee: true,
+          // 👇 EKSİK OLAN KISIM BURASIYDI: Yorumları ve yapan kullanıcıyı çekiyoruz
+          comments: {
+            include: {
+              user: true,
+            },
+            orderBy: {
+              createdAt: "asc", // Yorumları eskiden yeniye sıralar
+            },
+          },
         },
       },
       owner: true,
@@ -42,7 +50,6 @@ export async function GET(request: Request, { params }: RouteParams) {
 
   return NextResponse.json(project);
 }
-
 // --- PATCH: GÜNCELLEME VE SAHİPLİK DEVRİ ---
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
@@ -72,7 +79,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (existingProject.ownerId !== currentUserId) {
       return NextResponse.json(
         { error: "Bu işlem için yetkiniz yok. Sadece proje sahibi yapabilir." },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -156,7 +163,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   if (project?.ownerId !== currentUserId) {
     return NextResponse.json(
       { error: "Sadece proje sahibi silebilir" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 

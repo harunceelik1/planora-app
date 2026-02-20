@@ -6,9 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getInitials(name?: string | null, email?: string | null) {
+  const source = name || email || "U";
+
   return (
-    (name || email || "U")
+    source
+      .trim() // 1. Baştaki ve sondaki gereksiz boşlukları sil
       .split(" ")
+      .filter((word) => word.length > 0) // 2. Boş stringleri (fazla boşlukları) temizle
       .map((word) => word[0].toUpperCase())
       .join("")
       .slice(0, 2) || "U"

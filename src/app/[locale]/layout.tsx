@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import { Providers } from "./providers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { ThemeProvider } from "@/features/components/theme/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -34,12 +35,19 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={cn(inter.className, "antialiased min-h-screen ")}>
-        <NextIntlClientProvider messages={messages}>
-          <Providers>
-            {children}
-            <ToastContainer position="top-right" autoClose={3000} />
-          </Providers>
-        </NextIntlClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NextIntlClientProvider messages={messages}>
+            <Providers>
+              {children}
+              <ToastContainer position="top-right" autoClose={3000} />
+            </Providers>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

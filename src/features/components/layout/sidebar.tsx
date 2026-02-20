@@ -8,12 +8,13 @@ import {
   ChevronLeft,
   UserCog,
   LayoutGrid,
-  Settings,
   ChevronDown,
   ChevronRight,
   Plus,
   FolderKanban,
-  Star, // ⭐ Star ikonu eklendi
+  Star,
+  Moon,
+  Sun,
 } from "lucide-react";
 import * as React from "react";
 import {
@@ -26,6 +27,10 @@ import { getInitials } from "@/lib/utils";
 import { Label } from "@radix-ui/react-label";
 import { useTranslations } from "next-intl";
 import { Spinner } from "@/components/ui/spinner";
+import { useTheme } from "next-themes";
+import { Project } from "@/types/project";
+// 👇 Import eklendi
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -41,26 +46,23 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("Sidebar");
+  const { setTheme, theme } = useTheme();
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = React.useState(true);
   const [favOpen, setFavOpen] = React.useState(true);
 
-  // 1. TÜM PROJELERİ ÇEK (Normal Liste)
   const { data: projects, isLoading } = useSWR("/api/project", fetcher);
-
-  // 2. FAVORİ PROJELERİ ÇEK (Yeni Eklediğimiz Kısım)
-  // Backend'e ?favorite=true gönderiyoruz
   const { data: favoriteProjects, isLoading: isFavLoading } = useSWR(
     "/api/project?favorite=true",
-    fetcher
+    fetcher,
   );
 
   const recentProjects = Array.isArray(projects)
     ? [...projects]
         .sort(
-          (a: any, b: any) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          (a: Project, b: Project) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
         )
         .slice(0, 5)
     : [];
@@ -73,6 +75,7 @@ export function Sidebar() {
     },
   ];
 
+  // ... (Resize useEffect aynı kalıyor) ...
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia("(min-width: 768px)");
@@ -89,16 +92,18 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
+        "sticky top-0 h-screen",
         "transition-[width] duration-300",
-        "relative flex flex-col shrink-0 border-r backdrop-blur pl-2 h-screen",
+        "flex flex-col shrink-0 border-r backdrop-blur pl-2",
         collapsed ? "w-16" : "w-64",
-        "overflow-x-visible bg-background"
+        "overflow-x-visible bg-background z-50",
       )}
     >
+      {/* ... (Header / Toggle aynı kalıyor) ... */}
       <div
         className={cn(
           "flex items-center justify-between px-3 py-3 shrink-0",
-          collapsed && "px-2 relative"
+          collapsed && "px-2 relative",
         )}
       >
         <button
@@ -107,35 +112,35 @@ export function Sidebar() {
           className={cn(
             "group absolute top-3 -right-3 z-20 grid place-items-center",
             "h-8 w-8 rounded-full border bg-background shadow-md",
-            "transition-transform hover:-translate-x-[2px]"
+            "transition-transform hover:-translate-x-[2px]",
           )}
         >
           <ChevronLeft
             className={cn(
               "h-4 w-4 transition-transform cursor-pointer",
-              collapsed && "rotate-180"
+              collapsed && "rotate-180",
             )}
           />
         </button>
       </div>
 
       {!collapsed && (
-        <div className="animate-in fade-in-0 zoom-in-95 duration-400 flex flex-col flex-1 min-h-0 ">
-          <div className="flex-1 overflow-y-auto custom-scrollbar pb-4">
-            {/* --- PROJELER BÖLÜMÜ --- */}
-            <div className="mt-3 px-2">
+        <div className="flex flex-col h-full min-h-0">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pb-4 px-2">
+            <div className="mt-3">
               <Collapsible
                 open={isProjectsOpen}
                 onOpenChange={setIsProjectsOpen}
               >
                 <CollapsibleTrigger asChild>
+                  {/* ... (Trigger aynı kalıyor) ... */}
                   <div
                     className={cn(
                       "flex items-center justify-between w-full p-2 rounded-md cursor-pointer group",
                       "hover:bg-accent hover:text-accent-foreground",
                       !isProjectsOpen &&
                         pathname.includes("/projects") &&
-                        "bg-accent text-accent-foreground font-medium"
+                        "bg-accent text-accent-foreground font-medium",
                     )}
                   >
                     <div className="flex items-center gap-2 text-sm font-medium">
@@ -175,7 +180,7 @@ export function Sidebar() {
                     </div>
                   ) : recentProjects.length > 0 ? (
                     <>
-                      {recentProjects.map((project: any) => {
+                      {recentProjects.map((project: Project) => {
                         const projectLink = ROUTES.PROJECTS.DETAILS(project.id);
                         const active = pathname === projectLink;
 
@@ -186,15 +191,25 @@ export function Sidebar() {
                                 "flex gap-2 text-sm rounded-md items-center px-2 py-1.5 transition-colors",
                                 "hover:bg-accent hover:text-accent-foreground",
                                 active &&
-                                  "bg-accent/50 text-accent-foreground font-medium"
+                                  "bg-accent/50 text-accent-foreground font-medium",
                               )}
                             >
-                              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] bg-primary/10 text-[9px] font-bold text-primary uppercase">
-                                {getInitials(project.projectName, "").slice(
-                                  0,
-                                  1
-                                )}
-                              </div>
+                              {/* 👇👇 GÜNCELLENEN KISIM: AVATAR KULLANIMI 👇👇 */}
+                              <Avatar className="h-4 w-4 rounded-[3px]">
+                                <AvatarImage
+                                  src={project.image}
+                                  alt={project.projectName}
+                                  className="object-cover rounded-[3px]"
+                                />
+                                <AvatarFallback className="rounded-[3px] bg-primary/10 text-[9px] font-bold text-primary uppercase flex items-center justify-center h-full w-full">
+                                  {getInitials(project.projectName, "").slice(
+                                    0,
+                                    1,
+                                  )}
+                                </AvatarFallback>
+                              </Avatar>
+                              {/* 👆👆 ------------------------------------- 👆👆 */}
+
                               <span className="truncate">
                                 {project.projectName}
                               </span>
@@ -202,6 +217,7 @@ export function Sidebar() {
                           </Link>
                         );
                       })}
+                      {/* ... (View All / Create Project linkleri aynı kalıyor) ... */}
                       <Link href={ROUTES.PROJECTS.LIST}>
                         <div className="flex items-center gap-2 mt-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer rounded-md hover:bg-accent/50 transition-colors">
                           <FolderKanban className="h-3 w-3" />
@@ -224,8 +240,8 @@ export function Sidebar() {
               </Collapsible>
             </div>
 
-            {/* 2. DİĞER MENÜLER */}
-            <nav className="mt-1 px-2 space-y-1">
+            {/* ... (Menu / Favorites / Footer aynı kalıyor) ... */}
+            <nav className="mt-1 space-y-1">
               {mainItems.map((item) => {
                 const active = pathname === item.href;
                 return (
@@ -234,7 +250,8 @@ export function Sidebar() {
                       className={cn(
                         "flex items-center gap-2 rounded-md px-2 py-2 text-sm cursor-pointer",
                         "hover:bg-accent hover:text-accent-foreground",
-                        active && "bg-accent text-accent-foreground font-medium"
+                        active &&
+                          "bg-accent text-accent-foreground font-medium",
                       )}
                     >
                       {item.icon}
@@ -245,8 +262,7 @@ export function Sidebar() {
               })}
             </nav>
 
-            {/* 3. FAVORİLER (GÜNCELLENEN KISIM) */}
-            <div className="mt-4 px-2">
+            <div className="mt-4">
               <Collapsible open={favOpen} onOpenChange={setFavOpen}>
                 <div className="flex items-center justify-between mb-1 px-2 group cursor-pointer">
                   <div className="text-[11px] font-semibold uppercase text-muted-foreground group-hover:text-foreground transition-colors">
@@ -265,15 +281,13 @@ export function Sidebar() {
                 <CollapsibleContent>
                   {isFavLoading ? (
                     <div className="text-xs text-muted-foreground px-2 py-1">
-                      {/* {t("status.loading")} */}
                       <Spinner className="sm" />
                     </div>
                   ) : favoriteProjects && favoriteProjects.length > 0 ? (
                     <div className="space-y-0.5">
-                      {favoriteProjects.map((project: any) => {
+                      {favoriteProjects.map((project: Project) => {
                         const projectLink = ROUTES.PROJECTS.DETAILS(project.id);
                         const active = pathname === projectLink;
-
                         return (
                           <Link key={project.id} href={projectLink}>
                             <div
@@ -281,10 +295,9 @@ export function Sidebar() {
                                 "flex gap-2 text-sm rounded-md items-center px-2 py-1.5 transition-colors",
                                 "hover:bg-accent hover:text-accent-foreground",
                                 active &&
-                                  "bg-accent/50 text-accent-foreground font-medium"
+                                  "bg-accent/50 text-accent-foreground font-medium",
                               )}
                             >
-                              {/* Sarı Yıldız İkonu */}
                               <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                               <span className="truncate text-xs">
                                 {project.projectName}
@@ -303,16 +316,20 @@ export function Sidebar() {
               </Collapsible>
             </div>
           </div>
-
-          {/* Footer / Settings */}
-          {/* <div className="mt-auto border-t p-2 bg-background z-10">
-            <Link href="/main/settings">
-              <div className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
-                <Settings className="h-4 w-4" />
-                <span>{t("menu.settings")}</span>
+          <div className="mt-auto border-t bg-background p-2 shrink-0 z-10">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full justify-start gap-2 px-3 text-muted-foreground hover:text-foreground"
+            >
+              <div className="relative flex items-center justify-center">
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </div>
-            </Link>
-          </div> */}
+              <span>Görünüm</span>
+            </Button>
+          </div>
         </div>
       )}
     </aside>

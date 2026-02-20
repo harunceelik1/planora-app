@@ -109,7 +109,7 @@
       "errors": {
         "signUpDefault": "Kayıt sırasında bir hata oluştu",
         "unexpected": "Beklenmeyen bir hata oluştu",
-        "signInFailed": "E-posta veya şifre hatalı" 
+        "signInFailed": "E-posta veya şifre hatalı"
       }
     }
   },
@@ -141,7 +141,7 @@
       "deleting": "Siliniyor..."
     }
   },
- "ProjectDetails": {
+  "ProjectDetails": {
     "nav": {
       "workspace": "Çalışma Alanı"
     },
@@ -156,7 +156,7 @@
       "calendar": "Takvim",
       "archive": "Arşiv"
     },
-     "sprintPanel": {
+    "sprintPanel": {
       "title": "Sprint {number}",
       "taskCount": "({count} görev)",
       "statusUnplanned": "Planlanmadı",
@@ -388,7 +388,7 @@
     "columns": {
       "name": "Ad",
       "key": "Anahtar",
-      "members":"Üyeler",
+      "members": "Üyeler",
       "lead": "Lider",
       "tasks": "Görev Sayısı",
       "unassigned": "Atanmamış"
@@ -396,13 +396,12 @@
     "hoverCard": {
       "viewProfile": "Profili Görüntüle"
     },
-    "memberManagement":{
-      
-      "leader":"Lider",
-      "admin":"Yönetici",
-      "makeAdmin":"Yönetici Yap",
-      "removeAdmin":"Yöneticiliği Al",
-      "removeMember":"Üyeyi Kaldır",
+    "memberManagement": {
+      "leader": "Lider",
+      "admin": "Yönetici",
+      "makeAdmin": "Yönetici Yap",
+      "removeAdmin": "Yöneticiliği Al",
+      "removeMember": "Üyeyi Kaldır",
       "deleteDialog": {
         "title": "Emin misiniz?",
         "description": "Bu işlem geri alınamaz. Bu kullanıcı projeden çıkarılacak ve tüm erişim yetkilerini kaybedecek.",
@@ -419,7 +418,7 @@
       "next": "Sonraki"
     }
   },
- 
+
   "ProjectIconPicker": {
     "tabs": {
       "icon": "İkon & Renk",
@@ -438,23 +437,33 @@
       "change": "Değiştir"
     }
   },
+
   "ProjectInitialization": {
-    "header": {
-      "greeting": "Merhaba, {name}!",
-      "subtitle": "Kontrol Paneline Hoş Geldin."
-    },
-    "info": {
-      "text": "Burada proje ve ekibini oluşturabilir, yeni görevler atayabilirsin."
+    "defaultUser": "Kullanıcı",
+    "greeting": "Merhaba, {name}",
+    "subGreeting": "Bugün neler başarmak istersin?",
+    "quickStart": {
+      "title": "Hızlı Başlangıç",
+      "description": "Planora hesabın kullanıma hazır. Takımını davet ederek ve ilk projeni oluşturarak iş akışını düzenlemeye başla."
     },
     "actions": {
-      "createProject": "Yeni Proje Oluştur",
-      "manageTeam": "Ekibini Yönet"
+      "createProject": {
+        "title": "Yeni Proje Başlat",
+        "description": "Sıfırdan bir proje oluştur veya şablonları kullan."
+      },
+      "inviteTeam": {
+        "title": "Ekibi Davet Et",
+        "description": "İş arkadaşlarını ekle ve birlikte çalışmaya başla."
+      }
     },
-    "footer": {
-      "note": "Tüm işlemlerin anlık olarak güncellenmektedir. İyi çalışmalar!"
-    },
-    "common": {
-      "defaultUser": "Kullanıcı"
+    "footerNote": "Tüm işlemlerin anlık olarak güncellenmektedir. İyi çalışmalar!",
+    "sidebar": {
+      "activeProjects": "Aktif Projelerim",
+      "viewAll": "Tümünü gör",
+      "noProject": {
+        "title": "Henüz proje yok",
+        "description": "Aktif bir projeniz bulunmuyor. Sol taraftaki panelden hemen bir tane oluşturabilirsiniz."
+      }
     }
   },
   "ChangeOwnerDialog": {
@@ -508,6 +517,42 @@
       "owner": "Alan Sahibi",
       "change": "Değiştir",
       "save": "Değişiklikleri Kaydet"
+    }
+  },
+  "TaskDetail": {
+    "taskDetails": "Görev Detayları",
+    "noTitle": "Başlıksız Görev",
+    "unassigned": "Atanmamış",
+    "activityAndComments": "Aktivite & Yorumlar",
+    "labels": {
+      "status": "DURUM",
+      "assignee": "ATANAN",
+      "priority": "ÖNCELİK",
+      "dueDate": "TESLİM TARİHİ",
+      "storyPoints": "STORY POINTS",
+      "description": "AÇIKLAMA"
+    },
+    "statuses": {
+      "todo": "Yapılacak",
+      "inProgress": "Devam Ediyor",
+      "done": "Tamamlandı"
+    },
+    "priorities": {
+      "low": "Düşük",
+      "medium": "Orta",
+      "high": "Yüksek",
+      "urgent": "Acil"
+    },
+    "placeholders": {
+      "selectStatus": "Durum seçin",
+      "pickDate": "Tarih seçin",
+      "estimate": "Tahmin",
+      "addDescription": "Açıklama ekleyin...",
+      "addComment": "Yorum ekle..."
+    },
+    "buttons": {
+      "save": "Kaydet",
+      "cancel": "İptal"
     }
   }
 }
