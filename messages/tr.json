@@ -547,6 +547,7 @@
       "selectStatus": "Durum seçin",
       "pickDate": "Tarih seçin",
       "estimate": "Tahmin",
+      "selectPriority": "Öncelik seçin",
       "addDescription": "Açıklama ekleyin...",
       "addComment": "Yorum ekle..."
     },

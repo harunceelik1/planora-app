@@ -79,10 +79,20 @@ export const columns = (
     header: "PRIORITY",
     cell: ({ row }) => {
       const priority = row.original?.priority || "MEDIUM";
+      const colorMap: Record<string, string> = {
+        LOW: "bg-blue-50 text-blue-600 border-blue-200",
+        MEDIUM: "bg-amber-50 text-amber-600 border-amber-200",
+        HIGH: "bg-orange-50 text-orange-600 border-orange-200",
+        HIGHEST: "bg-red-50 text-red-600 border-red-200",
+      };
+
+      // Gelen priority değerine göre rengi al, bulamazsa varsayılan olarak MEDIUM rengini kullan
+      const badgeStyle = colorMap[priority] || colorMap.MEDIUM;
+
       return (
         <Badge
           variant="secondary"
-          className="bg-amber-50 text-amber-600 border-amber-100 px-2 py-0.5 text-[10px] font-bold"
+          className={`px-2 py-0.5 text-[10px] font-bold border ${badgeStyle}`}
         >
           {priority}
         </Badge>

@@ -37,7 +37,7 @@ import {
   Zap,
   Send,
 } from "lucide-react";
-import { Issue } from "@/types/project";
+import { Comment, Issue } from "@/types/project";
 import { createComment, updateIssueData } from "@/actions/issue-actions";
 
 interface TaskDetailSheetProps {
@@ -71,7 +71,11 @@ export function TaskDetailSheet({
   const [description, setDescription] = useState("");
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [localComments, setLocalComments] = useState<any[]>([]);
+  const [localComments, setLocalComments] = useState<Comment[]>([]);
+
+  // Burada state'lerimiz duruyor, süper.
+  const [priority, setPriority] = useState("LOW");
+  const [storyPoints, setStoryPoints] = useState<string>("");
 
   useEffect(() => {
     if (task) {
@@ -79,6 +83,9 @@ export function TaskDetailSheet({
       setStatus(task.status || "TODO");
       setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
       setLocalComments(task.comments || []);
+
+      setPriority(task.priority || "LOW");
+      setStoryPoints(task.storyPoints?.toString() || "");
     }
   }, [task]);
 
@@ -111,7 +118,7 @@ export function TaskDetailSheet({
 
     const result = await createComment(task.id, textToSend, currentUser.id);
     if (result.success && result.data) {
-      setLocalComments((prev) => [...prev, result.data]);
+      setLocalComments((prev) => [...prev, result.data as unknown as Comment]);
       refreshData();
     } else {
       setCommentText(textToSend);
@@ -137,6 +144,7 @@ export function TaskDetailSheet({
             variant="ghost"
             size="icon"
             className="h-8 w-8 hover:bg-slate-100 rounded-full"
+            onClick={onClose}
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
@@ -174,6 +182,7 @@ export function TaskDetailSheet({
             </div>
 
             <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+              {/* ASSIGNEE */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   {t("labels.assignee")}
@@ -191,18 +200,51 @@ export function TaskDetailSheet({
                 </div>
               </div>
 
+              {/* PRIORITY - DÜZELTİLEN KISIM */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   {t("labels.priority")}
                 </label>
-                <div className="flex items-center gap-2">
-                  <Flag className="h-4 w-4 text-amber-500 fill-amber-500" />
-                  <span className="text-sm font-medium text-slate-700 capitalize">
-                    {t(`priorities.${task.priority?.toLowerCase() || "low"}`)}
-                  </span>
-                </div>
+                <Select
+                  value={priority} // task.priority'den priority state'ine geçtik
+                  onValueChange={async (val) => {
+                    setPriority(val); // UI anında güncelleniyor
+                    const res = await updateIssueData(task.id, {
+                      priority: val,
+                    });
+                    if (res.success) refreshData();
+                  }}
+                >
+                  <SelectTrigger className="h-8 border-dashed bg-transparent hover:bg-slate-50 transition-colors w-full justify-start gap-2 shadow-none">
+                    <Flag
+                      className={cn(
+                        "h-3.5 w-3.5 shrink-0",
+                        // İkon rengini de state'e bağladık
+                        priority === "HIGH" || priority === "HIGHEST"
+                          ? "text-red-500 fill-red-500"
+                          : priority === "MEDIUM"
+                            ? "text-amber-500 fill-amber-500"
+                            : "text-blue-500 fill-blue-500",
+                      )}
+                    />
+                    <SelectValue
+                      placeholder={t("placeholders.selectPriority")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LOW">{t("priorities.low")}</SelectItem>
+                    <SelectItem value="MEDIUM">
+                      {t("priorities.medium")}
+                    </SelectItem>
+                    <SelectItem value="HIGH">{t("priorities.high")}</SelectItem>
+                    <SelectItem value="HIGHEST">
+                      {t("priorities.urgent")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
+              {/* DUE DATE */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   {t("labels.dueDate")}
@@ -238,19 +280,37 @@ export function TaskDetailSheet({
                 </Popover>
               </div>
 
+              {/* STORY POINTS - DÜZELTİLEN KISIM */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   {t("labels.storyPoints")}
                 </label>
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm text-slate-600">
-                    {task.storyPoints || t("placeholders.estimate")}
-                  </span>
-                </div>
+                <Select
+                  value={storyPoints} // task.storyPoints'den storyPoints state'ine geçtik
+                  onValueChange={async (val) => {
+                    setStoryPoints(val); // UI anında güncelleniyor
+                    const res = await updateIssueData(task.id, {
+                      storyPoints: parseInt(val),
+                    });
+                    if (res.success) refreshData();
+                  }}
+                >
+                  <SelectTrigger className="h-8 border-dashed bg-transparent hover:bg-slate-50 transition-colors w-full justify-start gap-2 shadow-none">
+                    <Zap className="h-3.5 w-3.5 shrink-0 text-orange-500" />
+                    <SelectValue placeholder={t("placeholders.estimate")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 5, 8, 13, 21].map((point) => (
+                      <SelectItem key={point} value={point.toString()}>
+                        {point}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
+            {/* DESCRIPTION */}
             <div className="space-y-1.5 pt-2">
               <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 {t("labels.description")}
@@ -295,15 +355,16 @@ export function TaskDetailSheet({
               )}
             </div>
 
+            {/* COMMENTS */}
             <div className="space-y-4 pt-6 mt-6 border-t border-slate-100">
               <h3 className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 {t("activityAndComments")}
               </h3>
               <div className="space-y-5">
-                {localComments.map((comment: any) => (
+                {localComments.map((comment: Comment) => (
                   <div key={comment.id} className="flex gap-3">
                     <Avatar className="h-8 w-8 border">
-                      <AvatarImage src={comment.user?.image} />
+                      <AvatarImage src={comment.user?.image || undefined} />
                       <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-medium">
                         {comment.user?.name ? comment.user.name.charAt(0) : "U"}
                       </AvatarFallback>
@@ -331,6 +392,7 @@ export function TaskDetailSheet({
           </div>
         </div>
 
+        {/* COMMENT INPUT */}
         <div className="shrink-0 p-4 border-t bg-white">
           <div className="flex gap-3 items-center">
             <Avatar className="h-8 w-8">

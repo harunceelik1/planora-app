@@ -32,7 +32,9 @@ export async function updateIssueData(
   data: {
     description?: string;
     dueDate?: string | null; // 🚀 Date yerine string alıyoruz
-    status?: any;
+    status?: string;
+    priority?: string;
+    storyPoints?: number;
   },
 ) {
   try {

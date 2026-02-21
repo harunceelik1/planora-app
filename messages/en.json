@@ -549,7 +549,8 @@
       "pickDate": "Pick a date",
       "estimate": "Estimate",
       "addDescription": "Add a description...",
-      "addComment": "Add a comment..."
+      "addComment": "Add a comment...",
+      "selectPriority": "Select priority"
     },
     "buttons": {
       "save": "Save",

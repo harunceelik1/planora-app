@@ -72,11 +72,11 @@ export interface ProjectMember {
 }
 export interface Comment {
   id: string;
-  text: string;
+  content: string;
   issueId: string;
   userId: string;
   user?: User; // Yorumu yapan kullanıcının bilgileri (Avatar, isim vs. için)
-  createdAt: string;
+  createdAt: Date | string;
   updatedAt?: string;
 }
 export interface ProjectData {
