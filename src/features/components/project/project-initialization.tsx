@@ -10,7 +10,7 @@ import {
   LayoutList,
   CalendarClock,
   Bell,
-} from "lucide-react"; // ⭐ Yeni ikonlar eklendi
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
 
@@ -25,48 +25,54 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-export const ProjectInitialization = () => {
-  const { data: session } = useSession();
+export default function ProjectInitialization() {
+  const { data: session, status } = useSession();
   const t = useTranslations("ProjectInitialization");
 
   const { data: projects, isLoading } = useSWR("/api/project", fetcher, {
     revalidateOnFocus: true,
   });
 
-  const userName = session?.user?.name || t("defaultUser");
+  // ⭐ Hem oturum hem de projeler yüklenene kadar bekleme durumu
+  const isPageLoading = status === "loading" || isLoading;
 
-  // ⭐ Kritik Kontrol: Projesi var mı?
+  // ⭐ Tam ekran, ortalanmış profesyonel yükleme (Spinner) ekranı
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <Spinner className="size-12 text-primary" />
+        <p className="text-sm text-muted-foreground animate-pulse">
+          {t("loadingWorkspace")}{" "}
+          {/* Çeviri Dosyasına Eklenecek: "Çalışma alanınız hazırlanıyor..." */}
+        </p>
+      </div>
+    );
+  }
+
+  // Veriler yüklendikten sonraki kısım
+  const userName = session?.user?.name || t("defaultUser");
   const hasProjects = projects && projects.length > 0;
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-12 transition-colors duration-300">
       <div className="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* --- SOL TARAF --- */}
-        <div className="lg:col-span-8 flex flex-col space-y-8">
-          {/* Başlık Alanı (Her iki durumda da görünür ama metni değişebilir) */}
+        <div className="lg:col-span-8 flex flex-col space-y-8 animate-in fade-in duration-700">
+          {/* Başlık Alanı */}
           <div className="space-y-1">
             <h1 className="text-4xl font-bold text-foreground tracking-tight">
               {t("greeting", { name: userName })}
             </h1>
             <p className="text-lg text-muted-foreground">
-              {
-                hasProjects
-                  ? "İşte bugünkü işlerinin özeti." // ⭐ Aktif kullanıcı mesajı
-                  : t("subGreeting") // Yeni kullanıcı mesajı
-              }
+              {hasProjects
+                ? t("activeSummary") // Çeviri Dosyasına Eklenecek: "İşte bugünkü işlerinin özeti."
+                : t("subGreeting")}
             </p>
           </div>
 
-          {/* ⭐ MANTIK AYRIMI BURADA BAŞLIYOR ⭐ */}
-
-          {isLoading ? (
-            <div className="h-64 flex items-center justify-center">
-              <Spinner className="size-10" />
-            </div>
-          ) : hasProjects ? (
-            /* ----------------------------------------------- */
-            /* DURUM B: AKTİF KULLANICI (KPI KARTLARI)         */
-            /* ----------------------------------------------- */
+          {/* MANTIK AYRIMI */}
+          {hasProjects ? (
+            /* DURUM B: AKTİF KULLANICI (KPI KARTLARI) */
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* Kart 1: Görevler */}
               <Card className="border-border shadow-sm hover:shadow-md transition-all">
@@ -76,13 +82,15 @@ export const ProjectInitialization = () => {
                       <LayoutList className="w-6 h-6" />
                     </div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      Açık Görevler
+                      {t("kpi.openTasks")}{" "}
+                      {/* Çeviri Dosyasına Eklenecek: "Açık Görevler" */}
                     </span>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-foreground">12</div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      3 kritik öncelikli
+                      {t("kpi.criticalTasks")}{" "}
+                      {/* Çeviri Dosyasına Eklenecek: "3 kritik öncelikli" */}
                     </p>
                   </div>
                 </CardContent>
@@ -96,13 +104,15 @@ export const ProjectInitialization = () => {
                       <CalendarClock className="w-6 h-6" />
                     </div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      Yaklaşan
+                      {t("kpi.upcoming")}{" "}
+                      {/* Çeviri Dosyasına Eklenecek: "Yaklaşan" */}
                     </span>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-foreground">4</div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Bu hafta teslim
+                      {t("kpi.dueThisWeek")}{" "}
+                      {/* Çeviri Dosyasına Eklenecek: "Bu hafta teslim" */}
                     </p>
                   </div>
                 </CardContent>
@@ -116,31 +126,30 @@ export const ProjectInitialization = () => {
                       <Bell className="w-6 h-6" />
                     </div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      Duyurular
+                      {t("kpi.announcements")}{" "}
+                      {/* Çeviri Dosyasına Eklenecek: "Duyurular" */}
                     </span>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-foreground">2</div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Okunmamış mesaj
+                      {t("kpi.unreadMessages")}{" "}
+                      {/* Çeviri Dosyasına Eklenecek: "Okunmamış mesaj" */}
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Buraya son aktiviteler veya grafikler eklenebilir */}
               <div className="md:col-span-3 mt-4">
                 <p className="text-sm text-muted-foreground">
-                  Son aktiviteler buraya gelecek...
+                  {t("recentActivitiesPlaceholder")}{" "}
+                  {/* Çeviri Dosyasına Eklenecek: "Son aktiviteler buraya gelecek..." */}
                 </p>
               </div>
             </div>
           ) : (
-            /* ----------------------------------------------- */
-            /* DURUM A: YENİ KULLANICI (ONBOARDING)            */
-            /* ----------------------------------------------- */
+            /* DURUM A: YENİ KULLANICI (ONBOARDING) */
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {/* Banner */}
               <div className="bg-blue-500/10 border border-blue-200/20 rounded-2xl p-6 flex items-start gap-4">
                 <div className="bg-background p-2 rounded-full shadow-sm shrink-0">
                   <BadgeCheck className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -156,7 +165,6 @@ export const ProjectInitialization = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Yeni Proje Kartı */}
                 <Link href="/main/create-project" className="group">
                   <Card className="h-full border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all cursor-pointer rounded-2xl p-2 bg-card">
                     <CardContent className="p-6 flex flex-col items-start h-full justify-between gap-4">
@@ -175,7 +183,6 @@ export const ProjectInitialization = () => {
                   </Card>
                 </Link>
 
-                {/* Ekip Davet Et Kartı */}
                 <div className="group cursor-pointer">
                   <Card className="h-full border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all rounded-2xl p-2 bg-card">
                     <CardContent className="p-6 flex flex-col items-start h-full justify-between gap-4">
@@ -202,8 +209,8 @@ export const ProjectInitialization = () => {
           )}
         </div>
 
-        {/* --- SAĞ TARAF (Sidebar) - Aynı kalıyor --- */}
-        <div className="lg:col-span-4 flex flex-col">
+        {/* --- SAĞ TARAF (Sidebar) --- */}
+        <div className="lg:col-span-4 flex flex-col animate-in fade-in duration-700 delay-150">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-foreground">
               {t("sidebar.activeProjects")}
@@ -216,11 +223,7 @@ export const ProjectInitialization = () => {
             </Link>
           </div>
 
-          {isLoading ? (
-            <div className="space-y-4 items-center justify-center flex-col h-32 flex">
-              <Spinner className="size-12" />
-            </div>
-          ) : hasProjects ? (
+          {hasProjects ? (
             <ActiveProjects projects={projects} />
           ) : (
             <div className="rounded-3xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center p-8 text-center min-h-[50vh]">
@@ -243,4 +246,4 @@ export const ProjectInitialization = () => {
       </div>
     </div>
   );
-};
+}

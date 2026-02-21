@@ -114,6 +114,7 @@
     }
   },
   "Projects": {
+    "loadingProjects": "Projeleriniz yükleniyor...",
     "error": {
       "title": "Veri Yüklenemedi",
       "unknown": "Bilinmeyen bir hata oluştu.",
@@ -142,6 +143,11 @@
     }
   },
   "ProjectDetails": {
+    "status": {
+      "loading": "Proje detayları yükleniyor...",
+      "notFound": "Proje bulunamadı.",
+      "updated": "Az önce güncellendi"
+    },
     "nav": {
       "workspace": "Çalışma Alanı"
     },
@@ -439,6 +445,7 @@
   },
 
   "ProjectInitialization": {
+    "loadingWorkspace": "Çalışma alanınız hazırlanıyor...",
     "defaultUser": "Kullanıcı",
     "greeting": "Merhaba, {name}",
     "subGreeting": "Bugün neler başarmak istersin?",

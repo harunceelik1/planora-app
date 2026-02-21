@@ -26,7 +26,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace(ROUTES.PROJECTS.LIST);
+      router.replace(ROUTES.MAIN);
     }
   }, [status, router]);
 

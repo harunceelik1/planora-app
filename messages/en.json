@@ -169,6 +169,7 @@
     }
   },
   "Projects": {
+    "loadingProjects": "Loading your projects...",
     "error": {
       "title": "Data Could Not Be Loaded",
       "unknown": "An unknown error occurred.",
@@ -439,6 +440,7 @@
     }
   },
   "ProjectInitialization": {
+    "loadingWorkspace": "Preparing your workspace...",
     "defaultUser": "User",
     "greeting": "Hello, {name}",
     "subGreeting": "What would you like to achieve today?",

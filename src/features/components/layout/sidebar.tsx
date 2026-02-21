@@ -29,7 +29,6 @@ import { useTranslations } from "next-intl";
 import { Spinner } from "@/components/ui/spinner";
 import { useTheme } from "next-themes";
 import { Project } from "@/types/project";
-// 👇 Import eklendi
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const fetcher = async (url: string) => {
@@ -75,7 +74,6 @@ export function Sidebar() {
     },
   ];
 
-  // ... (Resize useEffect aynı kalıyor) ...
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia("(min-width: 768px)");
@@ -92,25 +90,43 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 h-screen",
+        "sticky top-4 h-[calc(100vh-2rem)]",
+        "ml-4 mr-4 md:mr-0",
+        "border border-border/60 rounded-2xl shadow-lg shadow-black/5",
         "transition-[width] duration-300",
-        "flex flex-col shrink-0 border-r backdrop-blur pl-2",
+        "flex flex-col shrink-0 backdrop-blur pl-2",
         collapsed ? "w-16" : "w-64",
-        "overflow-x-visible bg-background z-50",
+        "overflow-x-visible bg-background/95 z-50",
       )}
     >
-      {/* ... (Header / Toggle aynı kalıyor) ... */}
-      <div
-        className={cn(
-          "flex items-center justify-between px-3 py-3 shrink-0",
-          collapsed && "px-2 relative",
-        )}
-      >
+      {/* 👇 YENİ LOGO VE ÜST KISIM TASARIMI 👇 */}
+      <div className="relative flex items-center w-full px-3 pt-6 pb-4">
+        <div
+          onClick={() => router.push(ROUTES.MAIN)}
+          className={cn(
+            "cursor-pointer flex items-center gap-3 transition-all",
+            collapsed && "mx-auto", // Sidebar kapalıysa ikonu ortala
+          )}
+        >
+          {/* Kare "P" İkonu */}
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1e293b] text-white dark:bg-white dark:text-[#1e293b] font-bold text-lg shadow-sm">
+            P
+          </div>
+
+          {/* PLANORA Yazısı */}
+          {!collapsed && (
+            <span className="font-bold text-[15px] tracking-[0.15em] text-[#1e293b] dark:text-white">
+              PLANORA
+            </span>
+          )}
+        </div>
+
+        {/* Kapatma Butonu */}
         <button
           onClick={() => setCollapsed((state) => !state)}
           aria-label={t("aria.toggleSidebar")}
           className={cn(
-            "group absolute top-3 -right-3 z-20 grid place-items-center",
+            "group absolute top-6 -right-3 z-20 grid place-items-center",
             "h-8 w-8 rounded-full border bg-background shadow-md",
             "transition-transform hover:-translate-x-[2px]",
           )}
@@ -123,6 +139,7 @@ export function Sidebar() {
           />
         </button>
       </div>
+      {/* 👆 YENİ LOGO TASARIMI BİTİŞİ 👆 */}
 
       {!collapsed && (
         <div className="flex flex-col h-full min-h-0">
@@ -133,7 +150,6 @@ export function Sidebar() {
                 onOpenChange={setIsProjectsOpen}
               >
                 <CollapsibleTrigger asChild>
-                  {/* ... (Trigger aynı kalıyor) ... */}
                   <div
                     className={cn(
                       "flex items-center justify-between w-full p-2 rounded-md cursor-pointer group",
@@ -194,7 +210,6 @@ export function Sidebar() {
                                   "bg-accent/50 text-accent-foreground font-medium",
                               )}
                             >
-                              {/* 👇👇 GÜNCELLENEN KISIM: AVATAR KULLANIMI 👇👇 */}
                               <Avatar className="h-4 w-4 rounded-[3px]">
                                 <AvatarImage
                                   src={project.image}
@@ -208,7 +223,6 @@ export function Sidebar() {
                                   )}
                                 </AvatarFallback>
                               </Avatar>
-                              {/* 👆👆 ------------------------------------- 👆👆 */}
 
                               <span className="truncate">
                                 {project.projectName}
@@ -217,7 +231,6 @@ export function Sidebar() {
                           </Link>
                         );
                       })}
-                      {/* ... (View All / Create Project linkleri aynı kalıyor) ... */}
                       <Link href={ROUTES.PROJECTS.LIST}>
                         <div className="flex items-center gap-2 mt-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer rounded-md hover:bg-accent/50 transition-colors">
                           <FolderKanban className="h-3 w-3" />
@@ -240,7 +253,6 @@ export function Sidebar() {
               </Collapsible>
             </div>
 
-            {/* ... (Menu / Favorites / Footer aynı kalıyor) ... */}
             <nav className="mt-1 space-y-1">
               {mainItems.map((item) => {
                 const active = pathname === item.href;
@@ -316,7 +328,9 @@ export function Sidebar() {
               </Collapsible>
             </div>
           </div>
-          <div className="mt-auto border-t bg-background p-2 shrink-0 z-10">
+
+          {/* Alt Kısım */}
+          <div className="mt-auto border-t border-border/60 bg-background p-2 shrink-0 z-10 rounded-b-2xl">
             <Button
               variant="ghost"
               size="sm"

@@ -31,21 +31,23 @@ export default function BacklogView({ project, issues }: BacklogViewProps) {
   );
 
   return (
-    <div className="flex flex-col gap-4 w-full h-full p-6 bg-slate-50/50 min-h-screen">
+    // GÜNCELLENDİ: bg-slate-50/50 yerine bg-transparent kullanıldı, min-h-screen kaldırıldı.
+    <div className="flex flex-col gap-4 w-full h-full p-6 bg-transparent">
       {/* ÜST BAŞLIK ALANI */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
+          {/* GÜNCELLENDİ: text-slate-800 yerine text-foreground, hover ve ikon renkleri düzeltildi. */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-lg font-bold text-slate-800 hover:text-slate-600 transition-colors group"
+            className="flex items-center gap-2 text-lg font-bold text-foreground hover:text-muted-foreground transition-colors group outline-none"
           >
             {isExpanded ? (
-              <ChevronDown className="h-5 w-5 text-slate-500 group-hover:text-slate-800" />
+              <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             ) : (
-              <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-slate-800" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             )}
             Backlog
-            <span className="text-xs font-medium text-slate-400  ml-2">
+            <span className="text-xs font-medium text-muted-foreground ml-2">
               {issues.length} tasks
             </span>
           </button>
@@ -74,7 +76,10 @@ export default function BacklogView({ project, issues }: BacklogViewProps) {
         </div>
       )}
 
-      {!isExpanded && <div className="h-4 border-b border-slate-200"></div>}
+      {/* GÜNCELLENDİ: border-slate-200 yerine border-border kullanıldı. */}
+      {!isExpanded && (
+        <div className="h-4 border-b border-border transition-colors"></div>
+      )}
 
       {/* 👇 4. Sheet Bileşenini en sona ekle */}
       <TaskDetailSheet

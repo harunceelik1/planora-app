@@ -46,31 +46,16 @@ export const Navbar = () => {
   const displayImage = user?.image || session?.user?.image;
 
   return (
-    // DÜZELTME 1: bg-white yerine bg-background, border-b border-border
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
+    // 👇 YÜZEN (FLOATING) NAVBAR TASARIMI İÇİN EKLENEN/DEĞİŞENLER 👇
+    <header className="sticky top-4 z-50 mx-4 md:ml-4 md:mr-4 border border-border/60 rounded-2xl bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg shadow-black/5">
+      {/* 👆 -------------------------------------------------------- 👆 */}
+      <nav className="flex items-center justify-between px-4 sm:px-6 lg:px-6 py-3">
         <div className="flex items-center gap-10">
-          <div
-            onClick={() => router.push(ROUTES.MAIN)}
-            className="cursor-pointer flex items-center"
-          >
-            {/* NOT: Eğer logo siyah yazılıysa dark modda görünmez olabilir. 
-                Gerekirse className'e 'dark:invert' ekleyebilirsin. */}
-            <Image
-              alt="Planora Logo"
-              src="/images/logo-yazı.png"
-              width={72}
-              height={32}
-              className="inline-block mr-2"
-            />
-          </div>
-
           <div className="md:flex hidden items-center gap-1">
             {navLinks.map((link) => (
               <Button
                 key={link.href}
-                variant="ghost" // Link yerine Ghost daha modern durur
-                // DÜZELTME 2: text-gray-700 yerine text-muted-foreground
+                variant="ghost"
                 className="text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 onClick={() => router.push(ROUTES.MAIN)}
               >
@@ -91,12 +76,10 @@ export const Navbar = () => {
               <span>{t("auth.loading")}</span>
             </div>
           ) : session?.user ? (
-            /* Giriş Yapmış Kullanıcı */
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   aria-label={t("aria.userMenu")}
-                  // DÜZELTME 3: ring-gray-200 yerine ring-border
                   className="group relative h-9 w-9 overflow-hidden rounded-full cursor-pointer ring-2 ring-border hover:ring-muted-foreground/50 transition-all"
                 >
                   <Avatar className="h-full w-full">
@@ -106,7 +89,6 @@ export const Navbar = () => {
                       className="object-cover"
                       referrerPolicy="no-referrer"
                     />
-                    {/* DÜZELTME 4: Fallback renkleri */}
                     <AvatarFallback className="text-xs font-semibold bg-muted text-muted-foreground">
                       {initials}
                     </AvatarFallback>
@@ -116,7 +98,7 @@ export const Navbar = () => {
 
               <DropdownMenuContent
                 align="end"
-                className="w-64 md:w-72 shadow-lg bg-popover text-popover-foreground border-border" // Renkleri garantiye aldık
+                className="w-64 md:w-72 shadow-lg bg-popover text-popover-foreground border-border"
                 sideOffset={12}
               >
                 <DropdownMenuLabel className="p-2">
@@ -162,7 +144,6 @@ export const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            /* Giriş Yapmamış Kullanıcı */
             <Button
               variant="outline"
               onClick={() => router.push(ROUTES.SIGN_IN)}
@@ -172,20 +153,17 @@ export const Navbar = () => {
             </Button>
           )}
 
-          {/* Mobil Menü */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon"
-                  // DÜZELTME 5: Mobil menü butonu renkleri
                   className="h-9 w-9 text-muted-foreground border-input hover:bg-accent hover:text-accent-foreground"
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              {/* DÜZELTME 6: Sheet arka planı */}
               <SheetContent
                 side="right"
                 className="w-[250px] sm:w-[300px] bg-background border-l-border"
@@ -205,7 +183,6 @@ export const Navbar = () => {
                     <Button
                       key={link.href}
                       variant="ghost"
-                      // DÜZELTME 7: Mobil link renkleri
                       className="justify-start text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors h-10 px-4"
                       onClick={() => router.push(link.href)}
                     >
@@ -218,7 +195,6 @@ export const Navbar = () => {
 
                   {session?.user ? (
                     <>
-                      {/* DÜZELTME 8: Kullanıcı bilgi kartı bg-muted oldu */}
                       <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                         <Avatar className="h-9 w-9">
                           <AvatarImage

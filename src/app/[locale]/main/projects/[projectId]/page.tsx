@@ -35,13 +35,14 @@ const CircularProgress = ({
   value: number;
   total: number;
 }) => {
+  const t = useTranslations("ProjectDetails.views.overview");
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
   const radius = 12;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="hidden md:flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-1.5 ml-4 shadow-sm">
+    <div className="hidden md:flex items-center gap-3 rounded-full border border-border bg-card px-4 py-1.5 ml-4 shadow-sm transition-colors">
       <div className="relative h-8 w-8">
         <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
           <circle
@@ -49,7 +50,7 @@ const CircularProgress = ({
             cy="18"
             r={radius}
             fill="transparent"
-            stroke="#e2e8f0"
+            className="stroke-muted transition-colors"
             strokeWidth="3"
           />
           <circle
@@ -57,7 +58,7 @@ const CircularProgress = ({
             cy="18"
             r={radius}
             fill="transparent"
-            stroke="#f97316"
+            className="stroke-primary transition-colors"
             strokeWidth="3"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
@@ -66,11 +67,11 @@ const CircularProgress = ({
         </svg>
       </div>
       <div className="flex flex-col">
-        <span className="text-xs font-bold text-slate-800 leading-tight">
-          {percentage}% Complete
+        <span className="text-xs font-bold text-foreground leading-tight">
+          %{percentage} {t("completed")}
         </span>
-        <span className="text-[10px] text-slate-500 font-medium leading-tight">
-          {value}/{total} Tasks
+        <span className="text-[10px] text-muted-foreground font-medium leading-tight">
+          {value}/{total} {t("totalTasks")}
         </span>
       </div>
     </div>
@@ -124,30 +125,33 @@ export default function ProjectDetailsPage({
 
   if (isLoading)
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-8" />
+      <div className="flex flex-col h-screen items-center justify-center bg-background space-y-4">
+        <Spinner className="size-10 text-primary" />
+        <p className="text-sm text-muted-foreground animate-pulse">
+          {t("status.loading")}
+        </p>
       </div>
     );
+
   if (error || !project)
     return (
-      <div className="flex h-screen items-center justify-center">
-        Project not found
+      <div className="flex h-screen items-center justify-center bg-background text-muted-foreground">
+        {t("status.notFound")}
       </div>
     );
 
-  // --- Tasarımdaki özel tab stili ---
+  // --- Tasarımdaki özel tab stili (Dark Mode Uyumlu) ---
   const tabTriggerStyle = cn(
     "group relative flex items-center gap-2 px-1 py-4 text-sm font-medium transition-colors outline-none",
-    "text-slate-500 hover:text-slate-800",
-    "data-[state=active]:text-orange-600",
+    "text-muted-foreground hover:text-foreground",
+    "data-[state=active]:text-primary",
     "after:absolute after:bottom-[-1px] after:left-0 after:h-[2px] after:w-full after:bg-transparent after:transition-all",
-    "data-[state=active]:after:bg-orange-600",
+    "data-[state=active]:after:bg-primary",
   );
 
-  // Üyeleri hazırla (members ilişkisinin geldiğini varsayıyoruz)
   const members = project.members || [];
-  const displayMembers = members.slice(0, 3); // İlk 3 kişiyi göster
-  const remainingCount = members.length - 3; // Geriye kaç kişi kaldı?
+  const displayMembers = members.slice(0, 3);
+  const remainingCount = members.length - 3;
 
   const getInitials = (name?: string | null) => {
     if (!name) return "??";
@@ -155,28 +159,28 @@ export default function ProjectDetailsPage({
   };
 
   return (
-    <main className="flex flex-col h-screen bg-white overflow-hidden">
+    <main className="flex flex-col h-screen bg-background transition-colors overflow-hidden">
       {/* HEADER */}
-      <header className="flex-none px-8 pt-6 pb-0 bg-white z-20">
-        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-4">
+      <header className="flex-none px-8 pt-6 pb-0 bg-background z-20">
+        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-4">
           <Link
             href="/main/projects"
-            className="hover:text-slate-600 transition-colors"
+            className="hover:text-foreground transition-colors"
           >
-            Workspaces
+            {t("nav.workspace")}
           </Link>
           <span>/</span>
-          <span className="text-slate-600">{project.projectKey}</span>
+          <span className="text-foreground">{project.projectKey}</span>
         </div>
 
         <div className="flex items-start justify-between mb-2">
           {/* SOL TARAFI: Logo, Başlık, İlerleme */}
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-sm text-white overflow-hidden">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary shadow-sm text-primary-foreground overflow-hidden">
               {project.image ? (
                 <Image
                   src={project.image}
-                  alt="Logo"
+                  alt={t("header.logoAlt")}
                   width={48}
                   height={48}
                   className="object-cover h-full w-full"
@@ -184,13 +188,13 @@ export default function ProjectDetailsPage({
               ) : (
                 <RenderIcon
                   iconName={project.icon || "Layout"}
-                  className="h-6 w-6 text-white"
+                  className="h-6 w-6 text-primary-foreground"
                 />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
+                <h1 className="text-2xl font-bold text-foreground tracking-tight leading-none">
                   {project.projectName}
                 </h1>
                 <FavoriteButton
@@ -198,8 +202,8 @@ export default function ProjectDetailsPage({
                   isFavorited={project.isFavorited}
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-1 font-medium">
-                Updated just now
+              <p className="text-xs text-muted-foreground mt-1 font-medium">
+                {t("status.updated")}
               </p>
             </div>
             <CircularProgress
@@ -210,28 +214,25 @@ export default function ProjectDetailsPage({
 
           {/* SAĞ TARAF: Üyeler ve Aksiyon Butonları */}
           <div className="flex items-center gap-3">
-            {/* 🔥 GÜNCELLENEN KISIM: Gerçek Üyeler 🔥 */}
             {members.length > 0 && (
               <div className="hidden md:flex items-center -space-x-2 mr-2">
                 {displayMembers.map((member: Project["members"][number]) => (
                   <Avatar
-                    key={member.id} // member.id benzersizdir, key olarak uygundur
-                    className="h-8 w-8 border-2 border-white ring-1 ring-slate-100 transition-transform hover:z-10 hover:scale-105 cursor-pointer"
+                    key={member.id}
+                    className="h-8 w-8 border-2 border-background ring-1 ring-border transition-transform hover:z-10 hover:scale-105 cursor-pointer"
                   >
                     <AvatarImage
                       src={member.user.image || ""}
                       referrerPolicy="no-referrer"
                     />
-                    <AvatarFallback className="bg-slate-100 text-[10px] text-slate-600 font-bold">
-                      {/* İsim de member.user.name içindedir */}
+                    <AvatarFallback className="bg-muted text-[10px] text-foreground font-bold">
                       {getInitials(member.user.name)}
                     </AvatarFallback>
                   </Avatar>
                 ))}
 
-                {/* 3 kişiden fazla varsa +X göstergesi */}
                 {remainingCount > 0 && (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-600 ring-1 ring-slate-100 z-0">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-bold text-muted-foreground ring-1 ring-border z-0">
                     +{remainingCount}
                   </div>
                 )}
@@ -255,7 +256,7 @@ export default function ProjectDetailsPage({
             defaultValue="backlog"
             className="w-full flex flex-col h-[calc(100vh-140px)]"
           >
-            <div className="border-b border-slate-100 w-full px-1">
+            <div className="border-b border-border w-full px-1">
               <TabsList className="flex w-fit justify-start gap-8 bg-transparent p-0 h-auto rounded-none">
                 <TabsTrigger value="overview" className={tabTriggerStyle}>
                   <LayoutDashboard className="h-4 w-4 mb-0.5" />{" "}
@@ -268,7 +269,7 @@ export default function ProjectDetailsPage({
                 <TabsTrigger value="backlog" className={tabTriggerStyle}>
                   <ListTodo className="h-4 w-4 mb-0.5" /> {t("tabs.backlog")}
                   {(project.issues?.length || 0) > 0 && (
-                    <span className="ml-1.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-orange-100 px-1 text-[10px] font-bold text-orange-600">
+                    <span className="ml-1.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-bold text-primary">
                       {project.issues.length}
                     </span>
                   )}
@@ -282,41 +283,46 @@ export default function ProjectDetailsPage({
               </TabsList>
             </div>
 
-            <div className="flex-1 bg-[#F9FAFB] overflow-hidden relative">
+            {/* SEKMELERİN İÇERİĞİ - bg-transparent yapılarak arka plan uyumu sağlandı */}
+            <div className="flex-1 bg-transparent overflow-hidden relative">
               <TabsContent
                 value="backlog"
                 className="h-full m-0 border-none outline-none"
               >
-                <div className="flex flex-col h-full overflow-y-auto">
-                  {/* SPRINT KISMI (Placeholder) */}
+                <div className="flex flex-col h-full overflow-y-auto animate-in fade-in duration-500">
+                  {/* SPRINT KISMI */}
                   <div className="p-6 pb-0">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <ChevronDown size={18} className="text-slate-400" />
-                        <h3 className="font-bold text-sm text-slate-800">
-                          Sprint 1
+                        <ChevronDown
+                          size={18}
+                          className="text-muted-foreground"
+                        />
+                        <h3 className="font-bold text-sm text-foreground">
+                          {t("sprintPanel.title", { number: 1 })}
                         </h3>
-                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">
-                          Active
+                        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">
+                          {t("sprintPanel.statusUnplanned")}
                         </span>
-                        <span className="text-xs text-slate-400 ml-2">
-                          Feb 10 - Feb 24 • 0 tasks
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {t("sprintPanel.taskCount", { count: 0 })}
                         </span>
                       </div>
                       <MoreHorizontal
                         size={18}
-                        className="text-slate-400 cursor-pointer"
+                        className="text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                       />
                     </div>
-                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center bg-white">
-                      <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center mb-3 text-slate-300">
+                    {/* SPRINT EMPTY STATE EKRANI */}
+                    <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card/50 transition-colors">
+                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center mb-3 text-muted-foreground">
                         <Layout size={20} />
                       </div>
-                      <p className="text-xs text-slate-500 font-medium">
-                        No tasks in this sprint
+                      <p className="text-xs text-foreground font-medium mb-1">
+                        {t("sprintPanel.empty.title")}
                       </p>
-                      <p className="text-[10px] text-slate-400">
-                        Drag issues here to plan your sprint.
+                      <p className="text-[10px] text-muted-foreground">
+                        {t("sprintPanel.empty.description")}
                       </p>
                     </div>
                   </div>
@@ -336,18 +342,33 @@ export default function ProjectDetailsPage({
                 <BoardView project={project} />
               </TabsContent>
               <TabsContent value="overview" className="h-full p-6">
-                <div className="text-slate-400 text-center mt-20">
-                  Overview Content
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {t("views.overview.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mt-2 max-w-md">
+                    {t("views.overview.description")}
+                  </p>
                 </div>
               </TabsContent>
               <TabsContent value="timeline" className="h-full p-6">
-                <div className="text-slate-400 text-center mt-20">
-                  Timeline Content
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {t("views.timeline.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mt-2 max-w-md">
+                    {t("views.timeline.description")}
+                  </p>
                 </div>
               </TabsContent>
               <TabsContent value="archive" className="h-full p-6">
-                <div className="text-slate-400 text-center mt-20">
-                  Archive Content
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {t("views.archive.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mt-2 max-w-md">
+                    {t("views.archive.description")}
+                  </p>
                 </div>
               </TabsContent>
             </div>
@@ -359,10 +380,17 @@ export default function ProjectDetailsPage({
 }
 
 // Helper Board View
-const BoardView = ({ project }: { project: Project }) => (
-  <div className="flex h-full flex-col items-center justify-center text-center">
-    <KanbanSquare className="h-10 w-10 text-slate-400 mb-4" />
-    <h3 className="text-lg font-semibold">Board View</h3>
-    <p className="text-sm text-slate-500">Kanban board content goes here.</p>
-  </div>
-);
+const BoardView = ({ project }: { project: Project }) => {
+  const t = useTranslations("ProjectDetails");
+  return (
+    <div className="flex h-full flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+      <KanbanSquare className="h-10 w-10 text-muted-foreground mb-4" />
+      <h3 className="text-lg font-semibold text-foreground">
+        {t("views.board.title")}
+      </h3>
+      <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+        {t("views.board.description")}
+      </p>
+    </div>
+  );
+};

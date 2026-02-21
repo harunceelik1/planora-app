@@ -1,11 +1,10 @@
 "use client";
-import { ProjectInitialization } from "@/features/components/project/project-initialization";
+
 import useSWR from "swr";
 import { Link } from "@/i18n/routing";
 import { Spinner } from "@/components/ui/spinner";
 import { ProjectList } from "@/features/components/project/project-list";
 import { Button } from "@/components/ui/button";
-import Home from "../page";
 import { useTranslations } from "next-intl";
 
 const fetcher = async (url: string) => {
@@ -27,35 +26,33 @@ export default function Projects() {
     revalidateOnFocus: true,
   });
 
+  // ⭐ Tam ekran, ortalanmış profesyonel yükleme ekranı (Önceki sayfa ile aynı tasarım)
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center flex-col h-screen">
-        <Spinner className="size-8" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <Spinner className="size-12 text-primary" />
+        <p className="text-sm text-muted-foreground animate-pulse">
+          {t("loadingProjects")} {/* Çeviri Dosyasına Eklenecek */}
+        </p>
       </div>
     );
   }
 
-  // 4. Hata durumu
+  // Hata durumu
   if (error) {
-    // Hata mesajı varsa onu, yoksa çeviri dosyasındaki varsayılanı göster
     const errorMessage = error.message || t("error.unknown");
 
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900 p-8">
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl border border-red-200 dark:border-red-800/50">
-          {/* Hata Başlığı */}
           <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center">
-            {t("error.title")} {/* 👇 Çeviri */}
+            {t("error.title")}
           </h2>
 
           <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
             {errorMessage}
           </p>
 
-          {/* Yetki Hatası Kontrolü */}
-          {/* Not: API'den dönen "Giriş Yapın" mesajı dilden bağımsız olabilir, 
-              o yüzden include kontrolünü backend'den gelen error code ile yapmak daha sağlıklıdır 
-              ama şimdilik string kontrolüyle devam ediyoruz. */}
           {errorMessage.includes("Giriş") ||
           errorMessage.includes("Unauthorized") ? (
             <Link href="/auth/sign-in">
@@ -69,23 +66,24 @@ export default function Projects() {
               className="w-full"
               onClick={() => window.location.reload()}
             >
-              {t("error.retryButton")} {/* 👇 Çeviri */}
+              {t("error.retryButton")}
             </Button>
           )}
 
-          {/* Destek Metni */}
           <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
-            {t("error.support")} {/* 👇 Çeviri */}
+            {t("error.support")}
           </p>
         </div>
       </div>
     );
   }
 
-  // 5. Başarılı Veri
+  // Başarılı Veri
   return (
-    <>
+    <div className="animate-in fade-in duration-700">
+      {" "}
+      {/* Ufak bir fade-in animasyonu ekledik */}
       <ProjectList projects={projects} />
-    </>
+    </div>
   );
 }
