@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* Mevcut ayarların burada kalıyor */
+  reactStrictMode: false,
   images: {
     domains: ["lh3.googleusercontent.com"],
     remotePatterns: [

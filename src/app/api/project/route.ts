@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json(
         { error: "Lütfen Giriş Yapın." },
-        { status: 401 }
+        { status: 401 },
       );
     }
     const userId = session.user.id;
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       if (!project) {
         return NextResponse.json(
           { error: "Proje bulunamadı" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -108,7 +108,19 @@ export async function GET(req: Request) {
         },
         // 👇 BURASI GÜNCELLENDİ (Eskiden user: true diyip her şeyi çekiyordu)
         members: membersSelectConfig,
-
+        issues: {
+          where: {
+            status: {
+              notIn: ["DONE", "CANCELLED"], // Sadece aktif (TODO ve IN_PROGRESS) olanları getir
+            },
+          },
+          select: {
+            id: true,
+            status: true,
+            priority: true,
+            dueDate: true,
+          },
+        },
         _count: {
           select: { members: true, issues: true },
         },
@@ -123,7 +135,7 @@ export async function GET(req: Request) {
     console.error("Projeler getirilirken hata:", error);
     return NextResponse.json(
       { error: "Projeler getirilemedi." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -134,7 +146,7 @@ export async function POST(request: Request) {
   if (!session || !session.user || !session.user.id) {
     return NextResponse.json(
       { error: "Yetkisiz erişim. Lütfen giriş yapın." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -147,7 +159,7 @@ export async function POST(request: Request) {
     if (!name || !projectKey) {
       return NextResponse.json(
         { error: "Proje adı ve anahtarı gereklidir." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -167,7 +179,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { message: "Proje başarıyla oluşturuldu.", project: newProject },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: any) {
     if (
@@ -176,14 +188,14 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         { error: "Bu proje anahtarı zaten kullanılıyor." },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     console.error("Proje oluşturma hatası:", error);
     return NextResponse.json(
       { error: "Proje oluşturulurken bir hata oluştu." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

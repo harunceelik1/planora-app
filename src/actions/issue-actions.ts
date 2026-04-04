@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 export async function updateIssueAssignee(
   issueId: string,
   assigneeId: string,
-  projectId: string,
+  projectId: string, // ZatenprojectId parametre olarak geliyor, işimiz kolay!
 ) {
   try {
     await db.issue.update({
@@ -16,32 +16,32 @@ export async function updateIssueAssignee(
       },
     });
 
-    // 🔥 BALYOZ: "/" diyerek tüm projeyi ve tüm cache'leri sıfırlıyoruz.
-    // Bu sayede hangi URL'de olursan ol veri güncellenmek ZORUNDA kalacak.
-    revalidatePath("/", "layout");
+    // 🚀 PROJEYİ "DÜRT" (TOUCH): Projenin updatedAt tarihini güncelle
+    await db.project.update({
+      where: { id: projectId },
+      data: { updatedAt: new Date() },
+    });
 
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     return { error: "Atama yapılamadı." };
   }
 }
 
-// 1. Görevi (Description, DueDate, Status) Güncelleme
 export async function updateIssueData(
   issueId: string,
   data: {
     description?: string;
-    dueDate?: string | null; // 🚀 Date yerine string alıyoruz
+    dueDate?: string | null;
     status?: string;
     priority?: string;
     storyPoints?: number;
   },
 ) {
   try {
-    // Prisma için veriyi hazırlayalım
     const updatePayload: any = { ...data };
 
-    // Eğer dueDate geldiyse onu Prisma'nın anlayacağı Date formatına çevir
     if (data.dueDate !== undefined) {
       updatePayload.dueDate = data.dueDate ? new Date(data.dueDate) : null;
     }
@@ -51,14 +51,20 @@ export async function updateIssueData(
       data: updatePayload,
     });
 
+    // 🚀 PROJEYİ "DÜRT" (TOUCH): updatedIssue içinden projectId'yi alıyoruz
+    await db.project.update({
+      where: { id: updatedIssue.projectId },
+      data: { updatedAt: new Date() },
+    });
+
     revalidatePath("/");
     return { success: true, data: updatedIssue };
   } catch (error: any) {
-    // 🚀 BİZE GERÇEK HATAYI SÖYLEMESİ İÇİN BURAYI DEĞİŞTİRDİK:
     console.error("GÖREV GÜNCELLEME HATASI DETAYI:", error.message || error);
     return { success: false, error: error.message || "Görev güncellenemedi." };
   }
 }
+
 export async function createComment(
   issueId: string,
   content: string,
@@ -71,14 +77,19 @@ export async function createComment(
         issueId: issueId,
         userId: userId,
       },
-      // 🚀 Yorumu kaydedince, yapan kullanıcının bilgilerini de bize geri ver
       include: {
         user: true,
+        issue: true, // 🚀 Issue bilgisini de dahil et ki projectId'ye ulaşalım
       },
     });
 
-    revalidatePath("/", "layout"); // Tüm projeyi tazele
+    // 🚀 PROJEYİ "DÜRT" (TOUCH)
+    await db.project.update({
+      where: { id: comment.issue.projectId },
+      data: { updatedAt: new Date() },
+    });
 
+    revalidatePath("/", "layout");
     return { success: true, data: comment };
   } catch (error) {
     console.error("Yorum eklenirken hata:", error);

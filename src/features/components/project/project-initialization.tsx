@@ -42,7 +42,7 @@ export default function ProjectInitialization() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
         <Spinner className="size-12 text-primary" />
         <p className="text-sm text-muted-foreground animate-pulse">
-          {t("loadingWorkspace")}{" "}
+          {t("loadingWorkspace")}
           {/* Çeviri Dosyasına Eklenecek: "Çalışma alanınız hazırlanıyor..." */}
         </p>
       </div>
@@ -52,6 +52,47 @@ export default function ProjectInitialization() {
   // Veriler yüklendikten sonraki kısım
   const userName = session?.user?.name || t("defaultUser");
   const hasProjects = projects && projects.length > 0;
+
+  // ⭐ DİNAMİK HESAPLAMA (API'den dönen güncel şemaya göre)
+  let openTasksCount = 0;
+  let criticalTasksCount = 0;
+  let upcomingTasksCount = 0;
+  let dueThisWeekCount = 0;
+
+  if (hasProjects) {
+    // API backend'den zaten status: "DONE" veya "CANCELLED" olmayanları getirdiği için,
+    // dönen tüm issue'lar aktif/açık görevlerdir.
+    const allIssues = projects.flatMap((project: any) => project.issues || []);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Sadece gün bazlı karşılaştırma için saatleri sıfırlıyoruz
+
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+
+    allIssues.forEach((issue: any) => {
+      openTasksCount++; // Her gelen issue açık bir görev
+
+      // Önceliği HIGH veya HIGHEST olanlar (Şemadaki IssuePriority enum'una göre)
+      if (issue.priority === "HIGH" || issue.priority === "HIGHEST") {
+        criticalTasksCount++;
+      }
+
+      // Teslim tarihi hesaplamaları
+      if (issue.dueDate) {
+        const dueDate = new Date(issue.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
+
+        if (dueDate >= today) {
+          upcomingTasksCount++; // Bugünden ileri tarihteki tüm teslimler
+        }
+
+        if (dueDate >= today && dueDate <= nextWeek) {
+          dueThisWeekCount++; // Önümüzdeki 7 gün içindeki teslimler
+        }
+      }
+    });
+  }
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-12 transition-colors duration-300">
@@ -82,15 +123,19 @@ export default function ProjectInitialization() {
                       <LayoutList className="w-6 h-6" />
                     </div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      {t("kpi.openTasks")}{" "}
+                      {t("kpi.openTasks")}
                       {/* Çeviri Dosyasına Eklenecek: "Açık Görevler" */}
                     </span>
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-foreground">12</div>
+                    {/* Dinamik açık görev sayısı */}
+                    <div className="text-3xl font-bold text-foreground">
+                      {openTasksCount}
+                    </div>
+                    {/* Dinamik kritik görev sayısı */}
                     <p className="text-xs text-muted-foreground mt-1">
-                      {t("kpi.criticalTasks")}{" "}
-                      {/* Çeviri Dosyasına Eklenecek: "3 kritik öncelikli" */}
+                      {criticalTasksCount} {t("kpi.criticalTasks")}
+                      {/* Çeviri Dosyasına Eklenecek: "kritik öncelikli" */}
                     </p>
                   </div>
                 </CardContent>
@@ -104,37 +149,19 @@ export default function ProjectInitialization() {
                       <CalendarClock className="w-6 h-6" />
                     </div>
                     <span className="text-sm font-medium text-muted-foreground">
-                      {t("kpi.upcoming")}{" "}
+                      {t("kpi.upcoming")}
                       {/* Çeviri Dosyasına Eklenecek: "Yaklaşan" */}
                     </span>
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-foreground">4</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t("kpi.dueThisWeek")}{" "}
-                      {/* Çeviri Dosyasına Eklenecek: "Bu hafta teslim" */}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Kart 3: Bildirimler */}
-              <Card className="border-border shadow-sm hover:shadow-md transition-all">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full">
-                      <Bell className="w-6 h-6" />
+                    {/* Dinamik yaklaşan teslim sayısı */}
+                    <div className="text-3xl font-bold text-foreground">
+                      {upcomingTasksCount}
                     </div>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {t("kpi.announcements")}{" "}
-                      {/* Çeviri Dosyasına Eklenecek: "Duyurular" */}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-foreground">2</div>
+                    {/* Dinamik bu hafta bitecek olanların sayısı */}
                     <p className="text-xs text-muted-foreground mt-1">
-                      {t("kpi.unreadMessages")}{" "}
-                      {/* Çeviri Dosyasına Eklenecek: "Okunmamış mesaj" */}
+                      {dueThisWeekCount} {t("kpi.dueThisWeek")}
+                      {/* Çeviri Dosyasına Eklenecek: "bu hafta teslim" */}
                     </p>
                   </div>
                 </CardContent>
@@ -142,7 +169,7 @@ export default function ProjectInitialization() {
 
               <div className="md:col-span-3 mt-4">
                 <p className="text-sm text-muted-foreground">
-                  {t("recentActivitiesPlaceholder")}{" "}
+                  {t("recentActivitiesPlaceholder")}
                   {/* Çeviri Dosyasına Eklenecek: "Son aktiviteler buraya gelecek..." */}
                 </p>
               </div>

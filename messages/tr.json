@@ -173,11 +173,31 @@
       }
     },
     "backlogView": {
+      "noSprints": {
+        "title": "Henüz sprint yok",
+        "description": "Görevleri sprinte taşımak için önce en az bir sprint oluşturmalısınız. Sprint oluşturduktan sonra sürükleyip bırakabilir veya görev menüsünden 'Sprinte Taşı' seçebilirsiniz.",
+        "createButton": "Sprint oluştur",
+        "creating": "Oluşturuluyor…"
+      },
       "sprint": {
         "noDate": "Tarih yok",
         "issuesCount": "{count} görev",
         "editBtn": "Sprinti Düzenle",
         "dragPlaceholder": "Görevleri buraya sürükleyin"
+      },
+      "table": {
+        "tasks": "görev",
+        "drag_tasks_here": "Sprint planlamak için görevleri buraya sürükleyin",
+        "no_tasks_backlog": "Backlog'da görev bulunmuyor",
+        "task_name": "Görev Adı",
+        "priority": "Öncelik",
+        "assignee": "Atanan",
+        "actions_header": "İşlemler",
+        "actions": "İşlemler",
+        "copy_id": "ID Kopyala",
+        "edit_task": "Görevi Düzenle",
+        "move_to_sprint": "Sprinte Taşı",
+        "delete_task": "Görevi Sil"
       },
       "backlog": {
         "title": "Backlog",
@@ -445,34 +465,50 @@
   },
 
   "ProjectInitialization": {
-    "loadingWorkspace": "Çalışma alanınız hazırlanıyor...",
-    "defaultUser": "Kullanıcı",
-    "greeting": "Merhaba, {name}",
-    "subGreeting": "Bugün neler başarmak istersin?",
-    "quickStart": {
-      "title": "Hızlı Başlangıç",
-      "description": "Planora hesabın kullanıma hazır. Takımını davet ederek ve ilk projeni oluşturarak iş akışını düzenlemeye başla."
+    "projectCard": {
+      "progress": "İlerleme",
+      "noMembers": "Üye yok",
+      "addNewProject": "Yeni Proje Ekle"
     },
-    "actions": {
-      "createProject": {
-        "title": "Yeni Proje Başlat",
-        "description": "Sıfırdan bir proje oluştur veya şablonları kullan."
-      },
-      "inviteTeam": {
-        "title": "Ekibi Davet Et",
-        "description": "İş arkadaşlarını ekle ve birlikte çalışmaya başla."
-      }
+  "loadingWorkspace": "Çalışma alanınız hazırlanıyor...",
+  "defaultUser": "Kullanıcı",
+  "greeting": "Merhaba, {name}!",
+  "activeSummary": "İşte bugünkü işlerinin özeti.",
+  "subGreeting": "Çalışma alanına hoş geldin. Başlamak için hemen bir proje oluştur.",
+  "kpi": {
+    "openTasks": "Açık Görevler",
+    "criticalTasks": "kritik öncelikli",
+    "upcoming": "Yaklaşan",
+    "dueThisWeek": "Bu hafta teslim",
+    "announcements": "Duyurular",
+    "unreadMessages": "Okunmamış mesaj"
+  },
+  "recentActivitiesPlaceholder": "Son aktiviteler buraya gelecek...",
+  "quickStart": {
+    "title": "Hızlı Başlangıç",
+    "description": "Yeni bir proje oluşturarak veya takım arkadaşlarını davet ederek hemen çalışmaya başla."
+  },
+  "actions": {
+    "createProject": {
+      "title": "Proje Oluştur",
+      "description": "Yeni bir çalışma alanı başlat ve görevlerini organize et."
     },
-    "footerNote": "Tüm işlemlerin anlık olarak güncellenmektedir. İyi çalışmalar!",
-    "sidebar": {
-      "activeProjects": "Aktif Projelerim",
-      "viewAll": "Tümünü gör",
-      "noProject": {
-        "title": "Henüz proje yok",
-        "description": "Aktif bir projeniz bulunmuyor. Sol taraftaki panelden hemen bir tane oluşturabilirsiniz."
-      }
+    "inviteTeam": {
+      "title": "Takımını Davet Et",
+      "description": "Ekip arkadaşlarınla birlikte çalışmaya başla."
     }
   },
+  "footerNote": "Yardıma mı ihtiyacın var? Dokümantasyona göz atabilirsin.",
+  "sidebar": {
+    "activeProjects": "Aktif Projeler",
+    "lastUpdated": "Son güncelleme tarihi: {time}",
+    "viewAll": "Tümünü Gör",
+    "noProject": {
+      "title": "Henüz proje yok",
+      "description": "Aktif projelerin burada listelenecek. Başlamak için yeni bir proje oluştur."
+    }
+  }
+},
   "ChangeOwnerDialog": {
     "trigger": "Sahibi Değiştir",
     "header": {

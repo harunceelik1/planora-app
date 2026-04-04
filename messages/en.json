@@ -179,6 +179,12 @@
     }
   },
   "ProjectDetails": {
+    "status": {
+  "loading": "Loading project details...",
+  "notFound": "Project not found.",
+  "updated": "Updated just now"
+},
+
     "nav": {
       "workspace": "Workspace"
     },
@@ -204,11 +210,28 @@
       }
     },
     "backlogView": {
+      "noSprints": {
+        "title": "No sprints yet",
+        "description": "Create a sprint before you can move tasks into it. After that, drag and drop from the backlog or use Move to sprint in the task menu.",
+        "createButton": "Create sprint",
+        "creating": "Creating…"
+      },
       "sprint": {
         "noDate": "No date",
         "issuesCount": "{count, plural, =0 {no issues} one {# issue} other {# issues}}",
         "editBtn": "Edit Sprint",
         "dragPlaceholder": "Drag issues here"
+      },
+      "table": {
+        "task_name": "TASK NAME",
+        "priority": "PRIORITY",
+        "assignee": "ASSIGNEE",
+        "actions_header": "ACTIONS",
+        "actions": "Actions",
+        "copy_id": "Copy ID",
+        "edit_task": "Edit Task",
+        "move_to_sprint": "Move to Sprint",
+        "delete_task": "Delete Task"
       },
       "backlog": {
         "title": "Backlog",
@@ -439,34 +462,50 @@
       "change": "Change"
     }
   },
-  "ProjectInitialization": {
-    "loadingWorkspace": "Preparing your workspace...",
-    "defaultUser": "User",
-    "greeting": "Hello, {name}",
-    "subGreeting": "What would you like to achieve today?",
-    "quickStart": {
-      "title": "Quick Start",
-      "description": "Your Planora account is ready to use. Start organizing your workflow by inviting your team and creating your first project."
+ "ProjectInitialization": {
+  "projectCard": {
+      "progress": "Progress",
+      "noMembers": "No members",
+      "addNewProject": "Add New Project"
     },
-    "actions": {
-      "createProject": {
-        "title": "Start New Project",
-        "description": "Create a project from scratch or use templates."
-      },
-      "inviteTeam": {
-        "title": "Invite Team",
-        "description": "Add your colleagues and start working together."
-      }
+  "loadingWorkspace": "Preparing your workspace...",
+  "defaultUser": "User",
+  "greeting": "Hello, {name}!",
+  "activeSummary": "Here is the summary of your work today.",
+  "subGreeting": "Welcome to your workspace. Create a project to get started.",
+  "kpi": {
+    "openTasks": "Open Tasks",
+    "criticalTasks": "critical priority",
+    "upcoming": "Upcoming",
+    "dueThisWeek": "Due this week",
+    "announcements": "Announcements",
+    "unreadMessages": "Unread messages"
+  },
+  "recentActivitiesPlaceholder": "Recent activities will appear here...",
+  "quickStart": {
+    "title": "Quick Start",
+    "description": "Start working immediately by creating a new project or inviting your team members."
+  },
+  "actions": {
+    "createProject": {
+      "title": "Create Project",
+      "description": "Start a new workspace and organize your tasks."
     },
-    "footerNote": "All operations are updated in real-time. Happy working!",
-    "sidebar": {
-      "activeProjects": "My Active Projects",
-      "viewAll": "View all",
-      "noProject": {
-        "title": "No projects yet",
-        "description": "You don't have an active project. You can create one immediately from the panel on the left."
-      }
+    "inviteTeam": {
+      "title": "Invite Team",
+      "description": "Start collaborating with your team members."
     }
+  },
+  "footerNote": "Need help? Check out the documentation.",
+  "sidebar": {
+    "activeProjects": "Active Projects",
+      "lastUpdated": "Last updated: {time}",
+    "viewAll": "View All",
+    "noProject": {
+      "title": "No projects yet",
+      "description": "Your active projects will be listed here. Create a new project to get started."
+    }
+  }
   },
   "ChangeOwnerDialog": {
     "trigger": "Change Owner",

@@ -18,12 +18,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     where: { id: projectId },
     include: {
       sprints: {
-        include: { issues: true },
         orderBy: { createdAt: "asc" },
       },
+      // Tüm görevler (backlog + sprint); backlog-view sprintId ile ayırır
       issues: {
-        // Sprint'e atanmamış (Backlog) görevler
-        where: { sprintId: null },
         orderBy: { order: "asc" },
         include: {
           assignee: true,

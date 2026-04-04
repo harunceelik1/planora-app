@@ -28,7 +28,7 @@ export type Project = {
   isFavorite: boolean;
 
   sprints: Sprint[];
-  issues: Issue[]; // Backlog'daki görevler
+  issues: Issue[]; // Tüm görevler (sprintId ile backlog / sprint ayrımı)
 };
 export interface Sprint {
   id: string;
@@ -36,7 +36,7 @@ export interface Sprint {
   startDate?: string | null;
   endDate?: string | null;
   status: "PENDING" | "ACTIVE" | "COMPLETED";
-  issues: Issue[]; // Sprintin içindeki görevler
+  issues?: Issue[];
 }
 export interface Issue {
   id: string;

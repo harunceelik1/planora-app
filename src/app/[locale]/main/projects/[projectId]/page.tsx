@@ -12,9 +12,6 @@ import {
   CalendarDays,
   LayoutDashboard,
   Archive,
-  ChevronDown,
-  Layout,
-  MoreHorizontal,
 } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";
@@ -35,7 +32,7 @@ const CircularProgress = ({
   value: number;
   total: number;
 }) => {
-  const t = useTranslations("ProjectDetails.views.overview");
+  const t = useTranslations("ProjectDetails");
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
   const radius = 12;
   const circumference = 2 * Math.PI * radius;
@@ -68,10 +65,10 @@ const CircularProgress = ({
       </div>
       <div className="flex flex-col">
         <span className="text-xs font-bold text-foreground leading-tight">
-          %{percentage} {t("completed")}
+          %{percentage} {t("views.overview.completed")}
         </span>
         <span className="text-[10px] text-muted-foreground font-medium leading-tight">
-          {value}/{total} {t("totalTasks")}
+          {value}/{total} {t("views.overview.totalTasks")}
         </span>
       </div>
     </div>
@@ -153,6 +150,10 @@ export default function ProjectDetailsPage({
   const displayMembers = members.slice(0, 3);
   const remainingCount = members.length - 3;
 
+  const allIssues = project.issues || [];
+  const backlogCount = allIssues.filter((i) => !i.sprintId).length;
+  const completedCount = allIssues.filter((i) => i.status === "DONE").length;
+
   const getInitials = (name?: string | null) => {
     if (!name) return "??";
     return name.substring(0, 2).toUpperCase();
@@ -206,10 +207,7 @@ export default function ProjectDetailsPage({
                 {t("status.updated")}
               </p>
             </div>
-            <CircularProgress
-              value={project.completedIssueCount || 0}
-              total={project.issues?.length || 0}
-            />
+            <CircularProgress value={completedCount} total={allIssues.length} />
           </div>
 
           {/* SAĞ TARAF: Üyeler ve Aksiyon Butonları */}
@@ -268,9 +266,9 @@ export default function ProjectDetailsPage({
                 </TabsTrigger>
                 <TabsTrigger value="backlog" className={tabTriggerStyle}>
                   <ListTodo className="h-4 w-4 mb-0.5" /> {t("tabs.backlog")}
-                  {(project.issues?.length || 0) > 0 && (
+                  {backlogCount > 0 && (
                     <span className="ml-1.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-bold text-primary">
-                      {project.issues.length}
+                      {backlogCount}
                     </span>
                   )}
                 </TabsTrigger>
@@ -290,44 +288,6 @@ export default function ProjectDetailsPage({
                 className="h-full m-0 border-none outline-none"
               >
                 <div className="flex flex-col h-full overflow-y-auto animate-in fade-in duration-500">
-                  {/* SPRINT KISMI */}
-                  <div className="p-6 pb-0">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <ChevronDown
-                          size={18}
-                          className="text-muted-foreground"
-                        />
-                        <h3 className="font-bold text-sm text-foreground">
-                          {t("sprintPanel.title", { number: 1 })}
-                        </h3>
-                        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">
-                          {t("sprintPanel.statusUnplanned")}
-                        </span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                          {t("sprintPanel.taskCount", { count: 0 })}
-                        </span>
-                      </div>
-                      <MoreHorizontal
-                        size={18}
-                        className="text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                      />
-                    </div>
-                    {/* SPRINT EMPTY STATE EKRANI */}
-                    <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card/50 transition-colors">
-                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center mb-3 text-muted-foreground">
-                        <Layout size={20} />
-                      </div>
-                      <p className="text-xs text-foreground font-medium mb-1">
-                        {t("sprintPanel.empty.title")}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {t("sprintPanel.empty.description")}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* BACKLOG TABLOSU */}
                   <BacklogView
                     project={project}
                     issues={project.issues || []}
