@@ -11,7 +11,8 @@ import {
   Trash,
   Copy,
   ArrowRight,
-  ClipboardList, // İkon için eklendi
+  ClipboardList,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,12 +29,20 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { InlineIssueCreator } from "../issue/inline-issue-creator";
 import { TaskDetailSheet } from "./TaskDetailSheet";
 import { IssueAssigneeSelector } from "./issue-assignee-selector";
 import { useSession } from "next-auth/react";
-
 import {
   DragDropContext,
   Droppable,
@@ -52,55 +61,55 @@ interface BacklogViewProps {
   issues: Issue[];
 }
 
+// ==========================================
+// ANA BİLEŞEN
+// ==========================================
 export default function BacklogView({
   project,
   issues: initialIssues,
 }: BacklogViewProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
   const { data: session } = useSession();
+  const { mutate } = useSWRConfig();
+  const t = useTranslations("ProjectDetails");
+
+  const [isMounted, setIsMounted] = useState(false);
+  const [issues, setIssues] = useState<Issue[]>(initialIssues || []);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
 
-  // Kilit mekanizması (Sunucu ile senkronizasyon için)
+  // İşlem Kilitleri
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  const [issues, setIssues] = useState<Issue[]>(initialIssues || []);
-  const sprints = project.sprints || [];
-  const { mutate } = useSWRConfig();
-  const projectApiKey = `/api/project/${project.id}`;
   const [creatingSprint, setCreatingSprint] = useState(false);
+  const [sprintToStart, setSprintToStart] = useState<Sprint | null>(null);
 
-  const t = useTranslations("ProjectDetails");
+  const sprints = project.sprints || [];
+  const projectApiKey = `/api/project/${project.id}`;
+  const backlogIssues = issues.filter((i) => !i.sprintId);
 
   useEffect(() => {
     setIsMounted(true);
-    // İşlem devam ederken dışarıdan gelen eski verinin ekranı ezmesini engelliyoruz
-    if (!isUpdating) {
-      setIssues(initialIssues || []);
-    }
+    if (!isUpdating) setIssues(initialIssues || []);
   }, [initialIssues, isUpdating]);
 
+  // Sürükle Bırak Mantığı
   const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
-
-    if (!destination) return;
-
     if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
+      !destination ||
+      (destination.droppableId === source.droppableId &&
+        destination.index === source.index)
     )
       return;
 
     const targetSprintId =
       destination.droppableId === "backlog" ? null : destination.droppableId;
 
-    // 1. ANINDA GÖRÜNTÜ GÜNCELLEMESİ (Optimistic UI)
-    setIssues((currentIssues) => {
-      const newIssues = [...currentIssues];
+    // Optimistic UI Güncellemesi
+    setIssues((current) => {
+      const newIssues = [...current];
       const draggedIndex = newIssues.findIndex(
         (i) => String(i.id) === String(draggableId),
       );
-      if (draggedIndex === -1) return currentIssues;
+      if (draggedIndex === -1) return current;
 
       const [draggedItem] = newIssues.splice(draggedIndex, 1);
       const updatedIssue = { ...draggedItem, sprintId: targetSprintId as any };
@@ -110,7 +119,6 @@ export default function BacklogView({
           ? !i.sprintId
           : String(i.sprintId) === String(targetSprintId),
       );
-
       const otherIssues = newIssues.filter((i) =>
         targetSprintId === null
           ? !!i.sprintId
@@ -124,10 +132,8 @@ export default function BacklogView({
     if (destination.droppableId !== source.droppableId) {
       setIsUpdating(true);
       try {
-        const result = await moveIssueToSprint(draggableId, targetSprintId);
-        if (!result.success) {
-          await mutate(projectApiKey);
-        }
+        await moveIssueToSprint(draggableId, targetSprintId);
+        await mutate(projectApiKey);
       } catch (error) {
         console.error("Kart taşınırken hata oluştu:", error);
         await mutate(projectApiKey);
@@ -150,12 +156,9 @@ export default function BacklogView({
       ),
     );
     try {
-      const result = await moveIssueToSprint(issueId, targetSprintId);
-      if (!result.success) {
-        await mutate(projectApiKey);
-      }
-    } catch (error) {
-      console.error("Kart taşınırken hata:", error);
+      await moveIssueToSprint(issueId, targetSprintId);
+      await mutate(projectApiKey);
+    } catch {
       await mutate(projectApiKey);
     } finally {
       setTimeout(() => setIsUpdating(false), 300);
@@ -165,212 +168,344 @@ export default function BacklogView({
   const handleCreateSprint = async () => {
     setCreatingSprint(true);
     try {
-      const result = await createSprint(project.id);
-      if (result.success) {
-        await mutate(projectApiKey);
-      }
+      const res = await createSprint(project.id);
+      if (res.success) await mutate(projectApiKey);
     } finally {
       setCreatingSprint(false);
     }
   };
 
-  const backlogIssues = issues.filter((i) => !i.sprintId);
-
   if (!isMounted) return null;
 
   return (
-    <div className="flex flex-col gap-6 w-full h-full p-6 bg-transparent overflow-y-auto">
-      {sprints.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-border bg-card/40 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-bold text-foreground">
-              {t("backlogView.noSprints.title")}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-1 max-w-xl">
-              {t("backlogView.noSprints.description")}
-            </p>
-          </div>
-          <Button
-            type="button"
-            onClick={handleCreateSprint}
-            disabled={creatingSprint}
-            className="shrink-0"
-          >
-            {creatingSprint
-              ? t("backlogView.noSprints.creating")
-              : t("backlogView.noSprints.createButton")}
-          </Button>
-        </div>
-      )}
+    <div className="flex flex-col gap-8 w-full h-full p-6 bg-transparent overflow-y-auto">
       <DragDropContext onDragEnd={onDragEnd}>
-        {/* --- SPRINT ALANLARI --- */}
+        {/* SPRINT LİSTESİ */}
         {sprints.length > 0 && (
-          <div className="flex flex-col gap-4">
-            {sprints.map((sprint) => {
-              const sprintIssues = issues.filter(
-                (i) => String(i.sprintId) === String(sprint.id),
-              );
-              return (
-                <div key={sprint.id} className="flex flex-col">
-                  <div className="flex items-center gap-3 mb-2 px-1">
-                    <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
-                      <ChevronDown className="w-4 h-4" />
-                      {sprint.name}
-                    </h3>
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] uppercase font-bold"
-                    >
-                      Planlanmadı
-                    </Badge>
-                    <span className="text-xs text-muted-foreground ml-2">
-                      ({sprintIssues.length} görev)
-                    </span>
-                    <div className="ml-auto">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* DÜZELTİLEN DROPPABLE ALANI */}
-                  <Droppable droppableId={String(sprint.id)} type="task">
-                    {(provided, snapshot) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        className={cn(
-                          "min-h-[120px] w-full rounded-xl flex flex-col gap-2 transition-all border-2",
-                          snapshot.isDraggingOver
-                            ? "bg-blue-50/80 border-blue-400 border-dashed p-4"
-                            : sprintIssues.length === 0
-                              ? "border-slate-200 border-dashed bg-transparent p-4"
-                              : "border-transparent bg-transparent py-2",
-                        )}
-                      >
-                        {sprintIssues.length === 0 ? (
-                          // BOŞ STATE (DROPPABLE İÇİNDE OLMALI!)
-                          <div className="flex flex-col items-center justify-center h-full w-full py-4 pointer-events-none select-none text-center">
-                            <div className="h-10 w-10 bg-slate-100 rounded-md flex items-center justify-center mb-3">
-                              <ClipboardList className="w-5 h-5 text-slate-400" />
-                            </div>
-                            <p className="font-semibold text-slate-700 text-sm mb-1">
-                              Bu sprintte henüz görev yok
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              Backlog'dan görevleri buraya sürükleyin veya yeni
-                              bir görev oluşturun.
-                            </p>
-                          </div>
-                        ) : (
-                          sprintIssues.map((issue, index) => (
-                            <SprintIssueCard
-                              key={issue.id}
-                              issue={issue}
-                              index={index}
-                              projectKey={project.projectKey}
-                              onClick={() => setSelectedIssue(issue)}
-                            />
-                          ))
-                        )}
-                        {/* HAYATİ ÖNEM TAŞIYAN PLACEHOLDER */}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </div>
-              );
-            })}
+          <div className="flex flex-col gap-6">
+            {sprints.map((sprint) => (
+              <SprintGroup
+                key={sprint.id}
+                sprint={sprint}
+                issues={issues.filter(
+                  (i) => String(i.sprintId) === String(sprint.id),
+                )}
+                projectKey={project.projectKey}
+                onStartSprint={() => setSprintToStart(sprint)}
+                onSelectIssue={setSelectedIssue}
+              />
+            ))}
           </div>
         )}
 
-        {/* --- BACKLOG --- */}
-        <div className="flex flex-col mt-4">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-lg font-bold outline-none mb-4"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-5 w-5" />
-            ) : (
-              <ChevronRight className="h-5 w-5" />
-            )}
-            Backlog
-            <span className="text-sm font-normal text-muted-foreground ml-2">
-              {backlogIssues.length} görev
-            </span>
-          </button>
-
-          {isExpanded && (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="mb-4">
-                <InlineIssueCreator
-                  projectId={project.id}
-                  isSprint={false}
-                  className="border-none bg-transparent shadow-none"
-                />
-              </div>
-
-              {backlogIssues.length > 0 && (
-                <div className="grid grid-cols-[30px_30px_minmax(200px,1fr)_120px_150px_50px] gap-2 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                  <div></div>
-                  <div></div>
-                  <div>GÖREV ADI</div>
-                  <div>ÖNCELİK</div>
-                  <div>ATANAN</div>
-                  <div className="text-right pr-2">İŞLEMLER</div>
-                </div>
-              )}
-
-              <Droppable droppableId="backlog" type="task">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      "flex flex-col gap-1 min-h-[150px] rounded-xl pb-10 transition-colors",
-                      snapshot.isDraggingOver &&
-                        "bg-slate-50/80 ring-1 ring-slate-200",
-                    )}
-                  >
-                    {backlogIssues.length === 0 ? (
-                      <p className="text-sm text-slate-400 py-8 text-center border border-dashed border-slate-200 rounded-xl">
-                        {t("backlogView.backlog.emptyTitle")}
-                      </p>
-                    ) : (
-                      backlogIssues.map((issue, index) => (
-                        <BacklogItemCard
-                          key={issue.id}
-                          issue={issue}
-                          index={index}
-                          project={project}
-                          sprints={sprints}
-                          t={t}
-                          onEdit={() => setSelectedIssue(issue)}
-                          onMove={handleMoveToSprint}
-                        />
-                      ))
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          )}
-        </div>
+        {/* BACKLOG ALANI */}
+        <BacklogGroup
+          issues={backlogIssues}
+          project={project}
+          sprints={sprints}
+          t={t}
+          creatingSprint={creatingSprint}
+          onCreateSprint={handleCreateSprint}
+          onSelectIssue={setSelectedIssue}
+          onMoveIssue={handleMoveToSprint}
+        />
       </DragDropContext>
 
+      {/* MODALLAR VE ÇEKMECELER */}
       <TaskDetailSheet
         task={selectedIssue}
         isOpen={!!selectedIssue}
         onClose={() => setSelectedIssue(null)}
         currentUser={session?.user}
       />
+
+      <StartSprintModal
+        sprint={sprintToStart}
+        onClose={() => setSprintToStart(null)}
+        onSuccess={() => mutate(projectApiKey)}
+      />
     </div>
   );
 }
 
-// --- ALT BİLEŞENLER ---
+// ==========================================
+// ALT BİLEŞENLER (MODÜLLER)
+// ==========================================
+
+// 1. SPRINT ALANI BİLEŞENİ
+const SprintGroup = ({
+  sprint,
+  issues,
+  projectKey,
+  onStartSprint,
+  onSelectIssue,
+}: any) => {
+  const isActive = sprint.status === "ACTIVE";
+
+  return (
+    <div className="flex flex-col rounded-xl border bg-white shadow-sm overflow-hidden">
+      {/* SPRINT BAŞLIĞI (Daha temiz ve belirgin) */}
+      <div className="flex items-center justify-between bg-slate-50 px-4 py-3 border-b">
+        <div className="flex items-center gap-3">
+          <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+            <ChevronDown className="w-4 h-4 text-slate-500" />
+            {sprint.name}
+          </h3>
+          <Badge
+            variant={isActive ? "default" : "secondary"}
+            className="text-[10px] uppercase font-bold"
+          >
+            {isActive ? "Aktif" : "Planlanmadı"}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            ({issues.length} görev)
+          </span>
+        </div>
+
+        {/* SPRINT BAŞLAT BUTONU (Yukarıda ve düzenli) */}
+        <div className="flex items-center gap-2">
+          {!isActive && (
+            <Button
+              size="sm"
+              className="h-8 bg-primary hover:bg-primary/90 text-white font-semibold"
+              disabled={issues.length === 0}
+              onClick={onStartSprint}
+            >
+              <Play className="w-3 h-3 mr-1.5 fill-current" />
+              Sprint'i Başlat
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-slate-500"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* SPRINT İÇERİĞİ (Sürükle bırak alanı) */}
+      <Droppable droppableId={String(sprint.id)} type="task">
+        {(provided, snapshot) => (
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            className={cn(
+              "min-h-[100px] w-full flex flex-col gap-2 p-3 transition-colors",
+              snapshot.isDraggingOver ? "bg-blue-50/50" : "bg-transparent",
+            )}
+          >
+            {issues.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center select-none opacity-60">
+                <ClipboardList className="w-6 h-6 text-slate-400 mb-2" />
+                <p className="text-sm font-medium text-slate-600">
+                  Bu sprint boş
+                </p>
+                <p className="text-xs text-slate-400">
+                  Backlog'dan görev sürükleyin
+                </p>
+              </div>
+            ) : (
+              issues.map((issue: any, index: number) => (
+                <SprintIssueCard
+                  key={issue.id}
+                  issue={issue}
+                  index={index}
+                  projectKey={projectKey}
+                  onClick={() => onSelectIssue(issue)}
+                />
+              ))
+            )}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </div>
+  );
+};
+
+// 2. BACKLOG ALANI BİLEŞENİ
+const BacklogGroup = ({
+  issues,
+  project,
+  sprints,
+  t,
+  creatingSprint,
+  onCreateSprint,
+  onSelectIssue,
+  onMoveIssue,
+}: any) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  return (
+    <div className="flex flex-col mt-4">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-2 text-lg font-bold outline-none"
+        >
+          {isExpanded ? (
+            <ChevronDown className="h-5 w-5" />
+          ) : (
+            <ChevronRight className="h-5 w-5" />
+          )}
+          Backlog
+          <span className="text-sm font-normal text-muted-foreground ml-2">
+            {issues.length} görev
+          </span>
+        </button>
+        <Button
+          onClick={onCreateSprint}
+          disabled={creatingSprint}
+          variant="secondary"
+          size="sm"
+        >
+          {creatingSprint ? "Oluşturuluyor..." : "Sprint Oluştur"}
+        </Button>
+      </div>
+
+      {isExpanded && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="mb-4">
+            <InlineIssueCreator
+              projectId={project.id}
+              isSprint={false}
+              className="border-none bg-transparent shadow-none"
+            />
+          </div>
+
+          {issues.length > 0 && (
+            <div className="grid grid-cols-[30px_30px_minmax(200px,1fr)_120px_150px_50px] gap-2 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <div></div>
+              <div></div>
+              <div>GÖREV ADI</div>
+              <div>ÖNCELİK</div>
+              <div>ATANAN</div>
+              <div className="text-right pr-2">İŞLEMLER</div>
+            </div>
+          )}
+
+          <Droppable droppableId="backlog" type="task">
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={cn(
+                  "flex flex-col gap-1 min-h-[150px] rounded-xl pb-10 transition-colors",
+                  snapshot.isDraggingOver &&
+                    "bg-slate-50/80 ring-1 ring-slate-200",
+                )}
+              >
+                {issues.length === 0 ? (
+                  <p className="text-sm text-slate-400 py-8 text-center border border-dashed border-slate-200 rounded-xl">
+                    {t("backlogView.backlog.emptyTitle")}
+                  </p>
+                ) : (
+                  issues.map((issue: any, index: number) => (
+                    <BacklogItemCard
+                      key={issue.id}
+                      issue={issue}
+                      index={index}
+                      project={project}
+                      sprints={sprints}
+                      t={t}
+                      onEdit={() => onSelectIssue(issue)}
+                      onMove={onMoveIssue}
+                    />
+                  ))
+                )}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 3. SPRINT BAŞLATMA MODALI BİLEŞENİ
+const StartSprintModal = ({
+  sprint,
+  onClose,
+  onSuccess,
+}: {
+  sprint: Sprint | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!sprint) return;
+    setIsLoading(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const sprintData = Object.fromEntries(formData.entries());
+      console.log("Sprint Başlatılıyor:", sprintData, "ID:", sprint.id);
+      // await startSprintAction(sprint.id, sprintData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={!!sprint} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Sprint'i Başlat</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="sprintName">Sprint Adı</Label>
+            <Input
+              id="sprintName"
+              name="sprintName"
+              defaultValue={sprint?.name}
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="startDate">Başlangıç</Label>
+              <Input id="startDate" name="startDate" type="date" required />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="endDate">Bitiş</Label>
+              <Input id="endDate" name="endDate" type="date" required />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="sprintGoal">Sprint Hedefi</Label>
+            <Input
+              id="sprintGoal"
+              name="sprintGoal"
+              placeholder="Örn: Hataları çözmek"
+            />
+          </div>
+          <DialogFooter className="mt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              İptal
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Başlatılıyor..." : "Başlat"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ==========================================
+// KART BİLEŞENLERİ (Değişmedi, sadece alta taşındı)
+// ==========================================
 
 const SprintIssueCard = ({ issue, index, projectKey, onClick }: any) => {
   return (
@@ -381,15 +516,15 @@ const SprintIssueCard = ({ issue, index, projectKey, onClick }: any) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className={cn(
-            "flex items-center gap-3 py-3 px-4 bg-white border rounded-xl cursor-grab active:cursor-grabbing",
+            "flex items-center gap-3 py-2.5 px-3 bg-white border rounded-lg cursor-grab active:cursor-grabbing",
             snapshot.isDragging
-              ? "border-primary shadow-2xl z-50 ring-2 ring-primary opacity-90"
+              ? "border-primary shadow-xl z-50 ring-1 ring-primary opacity-90"
               : "border-slate-200 hover:border-slate-300 shadow-sm",
           )}
           onClick={onClick}
         >
-          <GripVertical size={16} className="text-slate-300" />
-          <span className="text-xs font-mono text-slate-400 shrink-0">
+          <GripVertical size={14} className="text-slate-300" />
+          <span className="text-[11px] font-mono text-slate-400 shrink-0">
             {projectKey}-{issue.number}
           </span>
           <span className="text-sm font-medium text-slate-700 truncate">
@@ -411,13 +546,13 @@ const BacklogItemCard = ({
   onMove,
 }: any) => {
   const priority = issue.priority || "MEDIUM";
-  const colorMap: any = {
-    LOW: "bg-blue-50 text-blue-600 border-blue-200",
-    MEDIUM: "bg-amber-50 text-amber-600 border-amber-200",
-    HIGH: "bg-orange-50 text-orange-600 border-orange-200",
-    HIGHEST: "bg-red-50 text-red-600 border-red-200",
-  };
-  const badgeStyle = colorMap[priority] || colorMap.MEDIUM;
+  const badgeStyle =
+    {
+      LOW: "bg-blue-50 text-blue-600",
+      MEDIUM: "bg-amber-50 text-amber-600",
+      HIGH: "bg-orange-50 text-orange-600",
+      HIGHEST: "bg-red-50 text-red-600",
+    }[priority as string] || "bg-amber-50 text-amber-600";
   const users = project.members?.map((m: any) => m.user || m) || [];
 
   return (
@@ -457,7 +592,7 @@ const BacklogItemCard = ({
             <Badge
               variant="secondary"
               className={cn(
-                "px-2 py-0.5 text-[10px] font-bold border",
+                "px-2 py-0.5 text-[10px] font-bold border-transparent",
                 badgeStyle,
               )}
             >
@@ -515,11 +650,6 @@ const BacklogItemCard = ({
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
                 )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <Trash className="mr-2 h-3.5 w-3.5" />{" "}
-                  {t("backlogView.table.delete_task")}
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
