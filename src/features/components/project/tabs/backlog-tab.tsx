@@ -66,11 +66,7 @@ export function BacklogTab({ project }: { project: any }) {
       </div>
 
       <div className="flex-1 ">
-        <BacklogView
-          project={project}
-          sprints={project.sprints || []}
-          issues={project.issues || []}
-        />
+        <BacklogView project={project} issues={project.issues || []} />
       </div>
     </div>
   );

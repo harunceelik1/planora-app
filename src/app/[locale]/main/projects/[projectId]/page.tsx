@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
 import { ProjectActions } from "@/features/components/project/proejct-actions/actions";
 import { AddMemberDialog } from "@/features/components/project/project-data/add-member-dialog";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Project } from "@/types/project";
+import { Issue, Project } from "@/types/project";
 
 // --- 1. Helper Bileşen: Circular Progress ---
 const CircularProgress = ({
@@ -150,9 +151,11 @@ export default function ProjectDetailsPage({
   const displayMembers = members.slice(0, 3);
   const remainingCount = members.length - 3;
 
-  const allIssues = project.issues || [];
-  const backlogCount = allIssues.filter((i) => !i.sprintId).length;
-  const completedCount = allIssues.filter((i) => i.status === "DONE").length;
+  const allIssues = (project.issues || []) as Issue[];
+  const backlogCount = allIssues.filter((issue) => !issue.sprintId).length;
+  const completedCount = allIssues.filter(
+    (issue) => issue.status === "DONE",
+  ).length;
 
   const getInitials = (name?: string | null) => {
     if (!name) return "??";
@@ -341,16 +344,125 @@ export default function ProjectDetailsPage({
 
 // Helper Board View
 const BoardView = ({ project }: { project: Project }) => {
-  const t = useTranslations("ProjectDetails");
+  const activeSprint = project.sprints?.find((s) => s.status === "ACTIVE");
+  const sprintIssues = activeSprint
+    ? project.issues.filter(
+        (issue) => String(issue.sprintId) === String(activeSprint.id),
+      )
+    : [];
+
+  const columns = [
+    { key: "TODO", title: "To Do" },
+    { key: "IN_PROGRESS", title: "In Progress" },
+    { key: "DONE", title: "Done" },
+  ];
+
+  if (!activeSprint) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+        <KanbanSquare className="h-10 w-10 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold text-foreground">
+          Aktif sprint bulunamadı
+        </h3>
+        <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+          Bir sprint başlattığınızda bu sayfada sprintin Kanban görünümü aktif
+          olur.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-      <KanbanSquare className="h-10 w-10 text-muted-foreground mb-4" />
-      <h3 className="text-lg font-semibold text-foreground">
-        {t("views.board.title")}
-      </h3>
-      <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-        {t("views.board.description")}
-      </p>
+    <div className="flex flex-col gap-6 h-full overflow-y-auto pb-6">
+      <div className="rounded-3xl border bg-white p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">
+              {activeSprint.name}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {activeSprint.startDate && activeSprint.endDate
+                ? `${new Intl.DateTimeFormat("tr-TR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }).format(
+                    new Date(activeSprint.startDate),
+                  )} - ${new Intl.DateTimeFormat("tr-TR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }).format(new Date(activeSprint.endDate))}`
+                : "Tarih bilgisi ayarlanmadı."}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="uppercase">Aktif Sprint</Badge>
+            {activeSprint.goal ? (
+              <span className="text-sm text-muted-foreground">
+                Hedef: {activeSprint.goal}
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                Hedef eklenmemiş.
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        {columns.map((column) => {
+          const columnIssues = sprintIssues.filter(
+            (issue) => issue.status === column.key,
+          );
+          return (
+            <div
+              key={column.key}
+              className="rounded-3xl border bg-slate-50 p-4 shadow-sm min-h-[220px]"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {column.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {columnIssues.length} görev
+                  </p>
+                </div>
+                <Badge className="text-[11px] uppercase">
+                  {columnIssues.length}
+                </Badge>
+              </div>
+
+              <div className="space-y-3">
+                {columnIssues.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-500 text-center">
+                    Görev yok
+                  </div>
+                ) : (
+                  columnIssues.map((issue) => (
+                    <div
+                      key={issue.id}
+                      className="rounded-2xl border bg-white p-3 shadow-sm"
+                    >
+                      <div className="text-sm font-semibold text-slate-800">
+                        {issue.title}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                        <span>
+                          {project.projectKey}-{issue.number}
+                        </span>
+                        <span>{issue.priority}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

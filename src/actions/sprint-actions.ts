@@ -79,7 +79,10 @@ export async function moveIssueToSprint(
         where: { id: targetSprintId, projectId: issue.projectId },
       });
       if (!sprint) {
-        return { success: false, error: "Sprint bulunamadı veya bu projeye ait değil." };
+        return {
+          success: false,
+          error: "Sprint bulunamadı veya bu projeye ait değil.",
+        };
       }
     }
 
@@ -93,5 +96,156 @@ export async function moveIssueToSprint(
   } catch (error) {
     console.error("Görev taşıma hatası:", error);
     return { success: false, error: "Görev taşınamadı." };
+  }
+}
+
+// 3. Sprint'i Başlatma ve Tarih Ayarlarını Kaydetme
+export async function startSprint(
+  sprintId: string,
+  sprintData: {
+    name: string;
+    goal?: string | null;
+    startDate: string;
+    endDate: string;
+  },
+) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { success: false, error: "Yetkisiz işlem." };
+  }
+
+  try {
+    const sprint = await db.sprint.findUnique({
+      where: { id: sprintId },
+      select: { projectId: true },
+    });
+    if (!sprint) {
+      return { success: false, error: "Sprint bulunamadı." };
+    }
+    if (!(await canAccessProject(userId, sprint.projectId))) {
+      return { success: false, error: "Bu proje için yetkiniz yok." };
+    }
+
+    const start = new Date(sprintData.startDate);
+    const end = new Date(sprintData.endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return { success: false, error: "Geçerli bir tarih girin." };
+    }
+    if (start > end) {
+      return {
+        success: false,
+        error: "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+      };
+    }
+
+    const updatedSprint = await db.sprint.update({
+      where: { id: sprintId },
+      data: {
+        name: sprintData.name,
+        goal: sprintData.goal || null,
+        startDate: start,
+        endDate: end,
+        status: "ACTIVE",
+      },
+    });
+
+    revalidatePath("/", "layout");
+    return { success: true, data: updatedSprint };
+  } catch (error) {
+    console.error("Sprint başlatma hatası:", error);
+    return { success: false, error: "Sprint başlatılamadı." };
+  }
+}
+
+export async function updateSprint(
+  sprintId: string,
+  sprintData: {
+    name: string;
+    goal?: string | null;
+    startDate: string;
+    endDate: string;
+  },
+) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { success: false, error: "Yetkisiz işlem." };
+  }
+
+  try {
+    const sprint = await db.sprint.findUnique({
+      where: { id: sprintId },
+      select: { projectId: true },
+    });
+    if (!sprint) {
+      return { success: false, error: "Sprint bulunamadı." };
+    }
+    if (!(await canAccessProject(userId, sprint.projectId))) {
+      return { success: false, error: "Bu proje için yetkiniz yok." };
+    }
+
+    const start = new Date(sprintData.startDate);
+    const end = new Date(sprintData.endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return { success: false, error: "Geçerli bir tarih girin." };
+    }
+    if (start > end) {
+      return {
+        success: false,
+        error: "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+      };
+    }
+
+    const updatedSprint = await db.sprint.update({
+      where: { id: sprintId },
+      data: {
+        name: sprintData.name,
+        goal: sprintData.goal || null,
+        startDate: start,
+        endDate: end,
+      },
+    });
+
+    revalidatePath("/", "layout");
+    return { success: true, data: updatedSprint };
+  } catch (error) {
+    console.error("Sprint güncelleme hatası:", error);
+    return { success: false, error: "Sprint güncellenemedi." };
+  }
+}
+
+export async function completeSprint(sprintId: string) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { success: false, error: "Yetkisiz işlem." };
+  }
+
+  try {
+    const sprint = await db.sprint.findUnique({
+      where: { id: sprintId },
+      select: { projectId: true, endDate: true },
+    });
+    if (!sprint) {
+      return { success: false, error: "Sprint bulunamadı." };
+    }
+    if (!(await canAccessProject(userId, sprint.projectId))) {
+      return { success: false, error: "Bu proje için yetkiniz yok." };
+    }
+
+    const updatedSprint = await db.sprint.update({
+      where: { id: sprintId },
+      data: {
+        status: "COMPLETED",
+        endDate: sprint.endDate || new Date(),
+      },
+    });
+
+    revalidatePath("/", "layout");
+    return { success: true, data: updatedSprint };
+  } catch (error) {
+    console.error("Sprint tamamlanırken hata oluştu:", error);
+    return { success: false, error: "Sprint tamamlanamadı." };
   }
 }

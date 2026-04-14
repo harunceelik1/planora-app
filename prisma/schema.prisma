@@ -130,16 +130,16 @@ model Issue {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   order       Float         @default(0) // Sıralama için
-  
+
   // 👇 YENİ EKLENENLER: Arayüzdeki yeni alanlar için
-  dueDate     DateTime?     // Bitiş tarihi (Opsiyonel)
-  storyPoints Int?          // Story Points / Puanlama (Opsiyonel)
+  dueDate     DateTime? // Bitiş tarihi (Opsiyonel)
+  storyPoints Int? // Story Points / Puanlama (Opsiyonel)
 
-  comments    Comment[]     // İlişki
+  comments Comment[] // İlişki
 
-  number    Int // Proje içindeki benzersiz görev numarası
+  number Int // Proje içindeki benzersiz görev numarası
   // --- İlişkiler ---
-  
+
   // Görevin ait olduğu proje
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -151,7 +151,7 @@ model Issue {
   // Görevin atandığı kişi (opsiyonel, atanmamış olabilir)
   assigneeId String?
   assignee   User?   @relation("AssignedIssues", fields: [assigneeId], references: [id])
-  
+
   sprint   Sprint? @relation(fields: [sprintId], references: [id])
   sprintId String?
 
@@ -161,6 +161,7 @@ model Issue {
 model Sprint {
   id        String       @id @default(cuid())
   name      String // Örn: "PLAN Sprint 1"
+  goal      String?
   startDate DateTime?
   endDate   DateTime?
   status    SprintStatus @default(PENDING) // PENDING, ACTIVE, COMPLETED

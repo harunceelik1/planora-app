@@ -33,6 +33,7 @@ export type Project = {
 export interface Sprint {
   id: string;
   name: string;
+  goal?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   status: "PENDING" | "ACTIVE" | "COMPLETED";

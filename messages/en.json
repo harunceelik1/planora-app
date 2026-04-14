@@ -219,6 +219,19 @@
       "sprint": {
         "noDate": "No date",
         "issuesCount": "{count, plural, =0 {no issues} one {# issue} other {# issues}}",
+        "status": {
+          "active": "Active",
+          "completed": "Completed",
+          "unplanned": "Unplanned"
+        },
+        "startBtn": "Start Sprint",
+        "completeBtn": "Complete Sprint",
+        "settingsBtn": "Sprint Settings",
+        "goalLabel": "Sprint Goal",
+        "empty": {
+          "title": "There are no issues in this sprint",
+          "description": "Drag issues here from the backlog or create a new issue."
+        },
         "editBtn": "Edit Sprint",
         "dragPlaceholder": "Drag issues here"
       },
@@ -238,6 +251,50 @@
         "issuesCount": "{count, plural, =0 {no issues} one {# issue} other {# issues}}",
         "emptyTitle": "Your backlog is empty.",
         "emptyDescription": "Start by creating new issues."
+      },
+      "confirmCompleteSprint": {
+        "title": "Complete Sprint",
+        "description": "Are you sure you want to complete <strong>{sprintName}</strong>? This action will archive the sprint tasks.",
+        "cancel": "Cancel",
+        "confirm": "Complete Sprint"
+      },
+      "toast": {
+        "sprintCompleted": "Sprint completed successfully.",
+        "sprintCompleteFailed": "Unable to complete the sprint."
+      },
+      "modal": {
+        "title": {
+          "start": "Start Sprint",
+          "settings": "Sprint Settings"
+        },
+        "description": {
+          "start": "Activate the sprint by entering its name, date range, and goal.",
+          "settings": "Update sprint information and adjust the date range."
+        },
+        "fields": {
+          "name": "Sprint Name",
+          "startDate": "Start Date",
+          "endDate": "End Date",
+          "goal": "Sprint Goal"
+        },
+        "fieldOptional": "Optional",
+        "goalPlaceholder": "Example: Resolve bugs and prepare the demo",
+        "errors": {
+          "nameRequired": "Sprint name is required.",
+          "dateRequired": "Start and end dates are required.",
+          "invalidDate": "Please enter a valid date.",
+          "dateOrder": "End date cannot be before start date.",
+          "genericStart": "An error occurred while starting the sprint.",
+          "genericUpdate": "An error occurred while updating the sprint.",
+          "completeFailed": "Could not complete the sprint."
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "submitStart": "Start Sprint",
+          "submitSave": "Save",
+          "starting": "Starting…",
+          "saving": "Saving…"
+        }
       }
     },
     "views": {

@@ -182,6 +182,19 @@
       "sprint": {
         "noDate": "Tarih yok",
         "issuesCount": "{count} görev",
+        "status": {
+          "active": "Aktif",
+          "completed": "Tamamlandı",
+          "unplanned": "Planlanmadı"
+        },
+        "startBtn": "Sprinti Başlat",
+        "completeBtn": "Sprinti Tamamla",
+        "settingsBtn": "Sprint Ayarları",
+        "goalLabel": "Sprint Hedefi",
+        "empty": {
+          "title": "Bu sprintte henüz görev yok",
+          "description": "Backlog'dan görevleri buraya sürükleyin veya yeni bir görev oluşturun."
+        },
         "editBtn": "Sprinti Düzenle",
         "dragPlaceholder": "Görevleri buraya sürükleyin"
       },
@@ -204,6 +217,50 @@
         "issuesCount": "{count} görev",
         "emptyTitle": "Backlog listeniz boş.",
         "emptyDescription": "Yeni görevler oluşturarak işe başlayın."
+      },
+      "confirmCompleteSprint": {
+        "title": "Sprinti Tamamla",
+        "description": "<strong>{sprintName}</strong> sprintini tamamlamak istediğinize emin misiniz? Bu işlem sprintteki görevleri arşiv durumuna taşıyabilir.",
+        "cancel": "İptal",
+        "confirm": "Sprinti Tamamla"
+      },
+      "toast": {
+        "sprintCompleted": "Sprint başarıyla tamamlandı.",
+        "sprintCompleteFailed": "Sprint tamamlanamadı."
+      },
+      "modal": {
+        "title": {
+          "start": "Sprinti Başlat",
+          "settings": "Sprint Ayarları"
+        },
+        "description": {
+          "start": "Sprint adını, tarih aralığını ve hedefini girerek sprint'i aktif hale getirin.",
+          "settings": "Sprint bilgilerini güncelleyebilir ve tarih aralığını düzenleyebilirsiniz."
+        },
+        "fields": {
+          "name": "Sprint Adı",
+          "startDate": "Başlangıç",
+          "endDate": "Bitiş",
+          "goal": "Sprint Hedefi"
+        },
+        "fieldOptional": "Opsiyonel",
+        "goalPlaceholder": "Örn: Hataları çözmek ve demo hazır etmek",
+        "errors": {
+          "nameRequired": "Sprint adı gereklidir.",
+          "dateRequired": "Başlangıç ve bitiş tarihleri gerekli.",
+          "invalidDate": "Geçerli bir tarih girin.",
+          "dateOrder": "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+          "genericStart": "Sprint başlatılırken bir hata oluştu.",
+          "genericUpdate": "Sprint güncellenirken bir hata oluştu.",
+          "completeFailed": "Sprint tamamlanamadı."
+        },
+        "buttons": {
+          "cancel": "İptal",
+          "submitStart": "Sprinti Başlat",
+          "submitSave": "Kaydet",
+          "starting": "Başlatılıyor…",
+          "saving": "Kaydediliyor…"
+        }
       }
     },
     "views": {
