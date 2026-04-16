@@ -277,7 +277,47 @@
       },
       "board": {
         "title": "Kanban Panosu",
-        "description": "Aktif sprintteki görevler burada kartlar halinde görünecek."
+        "description": "Aktif sprintteki görevler burada kartlar halinde görünecek.",
+        "activeSprintLabel": "Aktif Sprint",
+        "progressLabel": "Sprint ilerlemesi",
+        "completed": "Tamamlandı",
+        "options": "Seçenekler",
+        "noDueDate": "Tarih yok",
+        "dueToday": "Bugün",
+        "noAssignee": "Atanmamış",
+        "stats": {
+          "completed": "tamamlandı",
+          "inProgress": "devam ediyor",
+          "pending": "bekliyor"
+        },
+        "completeSprintDialog": {
+          "title": "Sprinti Tamamla",
+          "description": "<strong>{sprintName}</strong> sprintini tamamlamak üzeresiniz. Bu işlem sprinti kapatır ve ilişkili görevleri arşive taşır.",
+          "cancel": "Vazgeç",
+          "confirm": "Sprinti Tamamla"
+        },
+        "completeSprintFailed": "Sprint tamamlanamadı.",
+        "completeSprintError": "Sprint tamamlanırken bir hata oluştu.",
+        "completingSprint": "Tamamlanıyor...",
+        "completeSprintButton": "Sprinti Tamamla",
+        "columns": {
+          "todo": "Yapılacak",
+          "inProgress": "Devam Ediyor",
+          "done": "Tamamlandı"
+        },
+        "issueLabel": "görev",
+        "noIssues": "Henüz görev yok.",
+        "statusUpdateFailed": "Görev durumu güncellenemedi.",
+        "statusUpdateError": "Görev durumu güncellenirken bir hata oluştu.",
+        "moveTo": "{status} durumuna taşı",
+        "status": {
+          "TODO": "Yapılacak",
+          "IN_PROGRESS": "Devam Ediyor",
+          "DONE": "Tamamlandı"
+        },
+        "noActiveSprintTitle": "Aktif sprint bulunamadı",
+        "noActiveSprintDescription": "Görevleri panoda görmek için bir sprint başlatın.",
+        "noSprintDate": "Sprint için tarih bilgisi yok"
       },
       "calendar": {
         "title": "Takvim",
@@ -287,7 +327,19 @@
       "archive": {
         "title": "Arşivlenen Görevler",
         "description": "Daha önce tamamlanıp kaldırılan görevleri buradan inceleyebilirsiniz.",
-        "empty": "Arşivde görev bulunmuyor."
+        "headerLabel": "Arşivlenmiş Akışlar",
+        "completedSprints": "Tamamlanan sprintler",
+        "completedSprintsSubtitle": "Arşive kaydedilen sprint grupları",
+        "topTasksArchived": "Arşivlenen görevler",
+        "topTasksArchivedSubtitle": "Toplam arşivlenen görev sayısı",
+        "monthsLogged": "Aylar",
+        "monthsLoggedSubtitle": "Tamamlanan sprint zaman çizelgesi",
+        "sprintsInMonth": "sprint arşivlendi",
+        "completedTag": "Tamamlandı",
+        "tasksArchived": "Arşivlenen görevler",
+        "doneTasks": "Tamamlanan görevler",
+        "empty": "Arşivde görev bulunmuyor.",
+        "goalLabel": "Hedef"
       }
     },
     "error": {
@@ -335,6 +387,10 @@
     },
     "details": {
       "title": "Düzenlemeler",
+      "timezone": {
+        "label": "Zaman Dilimi",
+        "placeholder": "Bir zaman dilimi seçin"
+      },
       "location": {
         "label": "Konum",
         "placeholder": "Şehir, Ülke"
@@ -531,7 +587,7 @@
   "defaultUser": "Kullanıcı",
   "greeting": "Merhaba, {name}!",
   "activeSummary": "İşte bugünkü işlerinin özeti.",
-  "subGreeting": "Çalışma alanına hoş geldin. Başlamak için hemen bir proje oluştur.",
+  "subGreeting": "Çalışma alanına hoşgeldin. Başlamak için hemen bir proje oluştur.",
   "kpi": {
     "openTasks": "Açık Görevler",
     "criticalTasks": "kritik öncelikli",

@@ -60,8 +60,6 @@ export default function ProjectInitialization() {
   let dueThisWeekCount = 0;
 
   if (hasProjects) {
-    // API backend'den zaten status: "DONE" veya "CANCELLED" olmayanları getirdiği için,
-    // dönen tüm issue'lar aktif/açık görevlerdir.
     const allIssues = projects.flatMap((project: any) => project.issues || []);
 
     const today = new Date();
@@ -71,7 +69,11 @@ export default function ProjectInitialization() {
     nextWeek.setDate(today.getDate() + 7);
 
     allIssues.forEach((issue: any) => {
-      openTasksCount++; // Her gelen issue açık bir görev
+      const isOpen = issue.status !== "DONE" && issue.status !== "CANCELLED";
+
+      if (!isOpen) return;
+
+      openTasksCount++; // Sadece aktif açık görevleri say
 
       // Önceliği HIGH veya HIGHEST olanlar (Şemadaki IssuePriority enum'una göre)
       if (issue.priority === "HIGH" || issue.priority === "HIGHEST") {

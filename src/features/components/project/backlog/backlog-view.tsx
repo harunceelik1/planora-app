@@ -53,6 +53,7 @@ export default function BacklogView({
   const [confirmSprint, setConfirmSprint] = useState<Sprint | null>(null);
 
   const sprints = project.sprints || [];
+  const activeSprints = sprints.filter((sprint) => sprint.status !== "COMPLETED");
   const projectApiKey = `/api/project/${project.id}`;
   const backlogIssues = issues.filter((issue) => !issue.sprintId);
 
@@ -175,9 +176,9 @@ export default function BacklogView({
   return (
     <div className="flex flex-col gap-8 w-full h-full p-6 bg-transparent overflow-y-auto">
       <DragDropContext onDragEnd={onDragEnd}>
-        {sprints.length > 0 && (
+        {activeSprints.length > 0 && (
           <div className="flex flex-col gap-6">
-            {sprints.map((sprint) => (
+            {activeSprints.map((sprint) => (
               <SprintGroup
                 key={sprint.id}
                 sprint={sprint}

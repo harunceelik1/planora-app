@@ -1,29 +1,34 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import useSWR from "swr";
 import { useTranslations } from "next-intl";
 import * as Icons from "lucide-react";
+import ArchiveTab from "@/features/components/project/tabs/archive-tab";
 import {
   ListTodo,
   KanbanSquare,
   CalendarDays,
   LayoutDashboard,
   Archive,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
 } from "lucide-react";
-
-import { Spinner } from "@/components/ui/spinner";
-import { Badge } from "@/components/ui/badge";
-import { ProjectActions } from "@/features/components/project/proejct-actions/actions";
-import { AddMemberDialog } from "@/features/components/project/project-data/add-member-dialog";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
+import BoardView from "@/features/components/project/board-view";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
+import { AddMemberDialog } from "@/features/components/project/project-data/add-member-dialog";
+import { ProjectActions } from "@/features/components/project/proejct-actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Issue, Project } from "@/types/project";
+import { Issue, Project, Sprint } from "@/types/project";
 
 // --- 1. Helper Bileşen: Circular Progress ---
 const CircularProgress = ({
@@ -121,6 +126,8 @@ export default function ProjectDetailsPage({
     }
   }, [isLoading, error, project, router]);
 
+  const [expandedArchiveSprintIds, setExpandedArchiveSprintIds] = useState<string[]>([]);
+
   if (isLoading)
     return (
       <div className="flex flex-col h-screen items-center justify-center bg-background space-y-4">
@@ -156,7 +163,6 @@ export default function ProjectDetailsPage({
   const completedCount = allIssues.filter(
     (issue) => issue.status === "DONE",
   ).length;
-
   const getInitials = (name?: string | null) => {
     if (!name) return "??";
     return name.substring(0, 2).toUpperCase();
@@ -270,7 +276,7 @@ export default function ProjectDetailsPage({
                 <TabsTrigger value="backlog" className={tabTriggerStyle}>
                   <ListTodo className="h-4 w-4 mb-0.5" /> {t("tabs.backlog")}
                   {backlogCount > 0 && (
-                    <span className="ml-1.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-bold text-primary">
+                    <span className="ml-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-bold text-primary">
                       {backlogCount}
                     </span>
                   )}
@@ -325,14 +331,7 @@ export default function ProjectDetailsPage({
                 </div>
               </TabsContent>
               <TabsContent value="archive" className="h-full p-6">
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {t("views.archive.title")}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mt-2 max-w-md">
-                    {t("views.archive.description")}
-                  </p>
-                </div>
+                <ArchiveTab project={project} />
               </TabsContent>
             </div>
           </Tabs>
@@ -341,128 +340,3 @@ export default function ProjectDetailsPage({
     </main>
   );
 }
-
-// Helper Board View
-const BoardView = ({ project }: { project: Project }) => {
-  const activeSprint = project.sprints?.find((s) => s.status === "ACTIVE");
-  const sprintIssues = activeSprint
-    ? project.issues.filter(
-        (issue) => String(issue.sprintId) === String(activeSprint.id),
-      )
-    : [];
-
-  const columns = [
-    { key: "TODO", title: "To Do" },
-    { key: "IN_PROGRESS", title: "In Progress" },
-    { key: "DONE", title: "Done" },
-  ];
-
-  if (!activeSprint) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-        <KanbanSquare className="h-10 w-10 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold text-foreground">
-          Aktif sprint bulunamadı
-        </h3>
-        <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-          Bir sprint başlattığınızda bu sayfada sprintin Kanban görünümü aktif
-          olur.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-6 h-full overflow-y-auto pb-6">
-      <div className="rounded-3xl border bg-white p-5 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              {activeSprint.name}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {activeSprint.startDate && activeSprint.endDate
-                ? `${new Intl.DateTimeFormat("tr-TR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  }).format(
-                    new Date(activeSprint.startDate),
-                  )} - ${new Intl.DateTimeFormat("tr-TR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  }).format(new Date(activeSprint.endDate))}`
-                : "Tarih bilgisi ayarlanmadı."}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="uppercase">Aktif Sprint</Badge>
-            {activeSprint.goal ? (
-              <span className="text-sm text-muted-foreground">
-                Hedef: {activeSprint.goal}
-              </span>
-            ) : (
-              <span className="text-sm text-muted-foreground">
-                Hedef eklenmemiş.
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-3">
-        {columns.map((column) => {
-          const columnIssues = sprintIssues.filter(
-            (issue) => issue.status === column.key,
-          );
-          return (
-            <div
-              key={column.key}
-              className="rounded-3xl border bg-slate-50 p-4 shadow-sm min-h-[220px]"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-sm font-semibold text-foreground">
-                    {column.title}
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    {columnIssues.length} görev
-                  </p>
-                </div>
-                <Badge className="text-[11px] uppercase">
-                  {columnIssues.length}
-                </Badge>
-              </div>
-
-              <div className="space-y-3">
-                {columnIssues.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-500 text-center">
-                    Görev yok
-                  </div>
-                ) : (
-                  columnIssues.map((issue) => (
-                    <div
-                      key={issue.id}
-                      className="rounded-2xl border bg-white p-3 shadow-sm"
-                    >
-                      <div className="text-sm font-semibold text-slate-800">
-                        {issue.title}
-                      </div>
-                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                        <span>
-                          {project.projectKey}-{issue.number}
-                        </span>
-                        <span>{issue.priority}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};

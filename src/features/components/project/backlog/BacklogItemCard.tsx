@@ -37,10 +37,10 @@ interface BacklogItemCardProps {
 }
 
 const priorityStyles: Record<string, string> = {
-  LOW: "bg-blue-50 text-blue-600",
-  MEDIUM: "bg-amber-50 text-amber-600",
-  HIGH: "bg-orange-50 text-orange-600",
-  HIGHEST: "bg-red-50 text-red-600",
+  LOW: "bg-blue-50 text-blue-600 dark:bg-blue-900/80 dark:text-blue-200",
+  MEDIUM: "bg-amber-50 text-amber-600 dark:bg-amber-900/80 dark:text-amber-200",
+  HIGH: "bg-orange-50 text-orange-600 dark:bg-orange-900/80 dark:text-orange-200",
+  HIGHEST: "bg-red-50 text-red-600 dark:bg-red-900/80 dark:text-red-200",
 };
 
 export default function BacklogItemCard({
@@ -64,10 +64,8 @@ export default function BacklogItemCard({
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={cn(
-            "grid grid-cols-[30px_30px_minmax(200px,1fr)_120px_150px_50px] gap-2 items-center px-4 py-3 bg-white rounded-xl border group",
-            snapshot.isDragging
-              ? "shadow-2xl border-primary z-50 ring-2 ring-primary opacity-90"
-              : "border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all",
+            "grid grid-cols-[30px_30px_minmax(200px,1fr)_120px_150px_50px] gap-2 items-center px-4 py-3 bg-card dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:border-slate-300 dark:hover:border-slate-700 transition-all",
+            snapshot.isDragging && "shadow-2xl border-primary/30 z-50 ring-2 ring-primary/20 opacity-95",
           )}
         >
           <div
@@ -85,10 +83,10 @@ export default function BacklogItemCard({
             className="flex flex-col items-start gap-0.5 overflow-hidden cursor-pointer"
             onClick={onEdit}
           >
-            <span className="text-sm font-semibold text-slate-700 leading-none truncate w-full">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-none truncate w-full">
               {issue.title}
             </span>
-            <div className="text-[11px] font-medium text-slate-400 mt-1">
+            <div className="text-[11px] font-medium text-slate-400 dark:text-slate-400 mt-1">
               {project.projectKey}-{issue.number}
             </div>
           </div>
@@ -114,7 +112,7 @@ export default function BacklogItemCard({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0 outline-none">
-                  <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                  <MoreHorizontal className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -142,14 +140,26 @@ export default function BacklogItemCard({
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                       <DropdownMenuSubContent>
-                        {sprints.map((s) => (
-                          <DropdownMenuItem
-                            key={s.id}
-                            onClick={() => onMove(issue.id, s.id)}
-                          >
-                            {s.name}
-                          </DropdownMenuItem>
-                        ))}
+                       {sprints.map((s) => {
+                const isCompleted = s.status === "COMPLETED"; // Durumu kontrol et
+
+                return (
+                  <DropdownMenuItem
+                    key={s.id}
+                    // 1. Tıklamayı sadece "COMPLETED" değilse çalıştır
+                    onClick={() => !isCompleted && onMove(issue.id, s.id)}
+                    // 2. Menü öğesini disabled yap (bu otomatik olarak sönükleştirir ve tıklamayı keser)
+                    disabled={isCompleted}
+                    className={cn(
+                      isCompleted && "opacity-50 cursor-not-allowed" 
+                    )}
+                  >
+                    <span className="truncate">
+                      {s.name}
+                    </span>
+                  </DropdownMenuItem>
+                );
+              })}
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>

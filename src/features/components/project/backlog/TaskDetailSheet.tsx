@@ -127,15 +127,15 @@ export function TaskDetailSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-[500px] w-full p-0 flex flex-col h-full bg-white border-l shadow-2xl">
-        <SheetHeader className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0 h-16 shrink-0">
+      <SheetContent className="sm:max-w-125 w-full p-0 flex flex-col h-full bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
+        <SheetHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0 h-16 shrink-0 bg-white dark:bg-slate-950">
           <SheetTitle className="sr-only">
             {t("taskDetails")}: {task.title}
           </SheetTitle>
           <div className="flex items-center gap-2">
             <Badge
               variant="secondary"
-              className="bg-slate-100 text-slate-600 border-none font-mono text-xs rounded-sm px-2 py-0.5"
+              className="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-none font-mono text-xs rounded-sm px-2 py-0.5"
             >
               {task.id.slice(0, 8)}...
             </Badge>
@@ -143,7 +143,7 @@ export function TaskDetailSheet({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 hover:bg-slate-100 rounded-full"
+            className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
             onClick={onClose}
           >
             <Maximize2 className="h-4 w-4" />
@@ -152,7 +152,7 @@ export function TaskDetailSheet({
 
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
               {task.title || t("noTitle")}
             </h2>
 
@@ -168,7 +168,7 @@ export function TaskDetailSheet({
                   if (res.success) refreshData();
                 }}
               >
-                <SelectTrigger className="w-full sm:w-[200px] h-9 bg-white border-slate-200">
+                <SelectTrigger className="w-full sm:w-50 h-9 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 dark:text-slate-100">
                   <SelectValue placeholder={t("placeholders.selectStatus")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,7 +215,7 @@ export function TaskDetailSheet({
                     if (res.success) refreshData();
                   }}
                 >
-                  <SelectTrigger className="h-8 border-dashed bg-transparent hover:bg-slate-50 transition-colors w-full justify-start gap-2 shadow-none">
+                  <SelectTrigger className="h-8 border-dashed bg-transparent hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors w-full justify-start gap-2 shadow-none dark:text-slate-100">
                     <Flag
                       className={cn(
                         "h-3.5 w-3.5 shrink-0",
@@ -295,7 +295,7 @@ export function TaskDetailSheet({
                     if (res.success) refreshData();
                   }}
                 >
-                  <SelectTrigger className="h-8 border-dashed bg-transparent hover:bg-slate-50 transition-colors w-full justify-start gap-2 shadow-none">
+                  <SelectTrigger className="h-8 border-dashed bg-transparent hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors w-full justify-start gap-2 shadow-none dark:text-slate-100">
                     <Zap className="h-3.5 w-3.5 shrink-0 text-orange-500" />
                     <SelectValue placeholder={t("placeholders.estimate")} />
                   </SelectTrigger>
@@ -320,7 +320,7 @@ export function TaskDetailSheet({
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="min-h-[120px] text-sm"
+                    className="min-h-30 text-sm"
                     autoFocus
                   />
                   <div className="flex gap-2 justify-end">
@@ -342,7 +342,7 @@ export function TaskDetailSheet({
               ) : (
                 <div
                   onClick={() => setIsEditingDesc(true)}
-                  className="min-h-[120px] p-4 rounded-xl bg-slate-50/80 border border-slate-100 text-sm text-slate-600 cursor-text hover:bg-slate-50 transition-colors"
+                  className="min-h-30 p-4 rounded-xl bg-slate-50/80 dark:bg-slate-900/70 border border-slate-100 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-200 cursor-text hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
                 >
                   {description ? (
                     <p className="whitespace-pre-wrap">{description}</p>
@@ -356,8 +356,8 @@ export function TaskDetailSheet({
             </div>
 
             {/* COMMENTS */}
-            <div className="space-y-4 pt-6 mt-6 border-t border-slate-100">
-              <h3 className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="space-y-4 pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
+              <h3 className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {t("activityAndComments")}
               </h3>
               <div className="space-y-5">
@@ -371,17 +371,17 @@ export function TaskDetailSheet({
                     </Avatar>
                     <div className="flex flex-col flex-1">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-semibold text-slate-800">
+                        <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {comment.user?.name || t("unknownUser")}
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-slate-400 dark:text-slate-400">
                           {formatI18n.dateTime(new Date(comment.createdAt), {
                             dateStyle: "medium",
                             timeStyle: "short",
                           })}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-600 mt-0.5">
+                      <p className="text-sm text-slate-600 dark:text-slate-300 mt-0.5">
                         {comment.content}
                       </p>
                     </div>
@@ -393,7 +393,7 @@ export function TaskDetailSheet({
         </div>
 
         {/* COMMENT INPUT */}
-        <div className="shrink-0 p-4 border-t bg-white">
+        <div className="shrink-0 p-4 border-t border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800">
           <div className="flex gap-3 items-center">
             <Avatar className="h-8 w-8">
               <AvatarImage src={currentUser?.image || undefined} />
@@ -412,7 +412,7 @@ export function TaskDetailSheet({
                   if (e.key === "Enter") handleSendComment();
                 }}
                 placeholder={t("placeholders.addComment")}
-                className="w-full text-sm rounded-full border border-slate-200 pl-4 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full text-sm rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 pl-4 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <Button

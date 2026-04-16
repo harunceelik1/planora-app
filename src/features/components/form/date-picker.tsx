@@ -1,8 +1,9 @@
 "use client";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS, tr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { Control, Controller } from "react-hook-form";
+import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -22,8 +23,13 @@ export function FormDatePicker({
   control,
   name,
   label,
-  placeholder = "Tarih seçin",
+  placeholder,
 }: FormDatePickerProps) {
+  const locale = useLocale();
+  const dateLocale = locale === "tr" ? tr : enUS;
+  const placeholderText =
+    placeholder ?? (locale === "tr" ? "Tarih seçiniz" : "Select date");
+
   return (
     <div className="space-y-1.5 w-full">
       {label && <Label>{label}</Label>}
@@ -41,9 +47,9 @@ export function FormDatePicker({
                 )}
               >
                 {field.value ? (
-                  format(field.value, "PPP", { locale: tr })
+                  format(field.value, "PPP", { locale: dateLocale })
                 ) : (
-                  <span>{placeholder}</span>
+                  <span>{placeholderText}</span>
                 )}
                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
               </Button>
@@ -57,7 +63,7 @@ export function FormDatePicker({
                 disabled={(date) =>
                   date > new Date("2100-01-01") || date < new Date("1940-01-01")
                 }
-                locale={tr}
+                locale={dateLocale}
               />
             </PopoverContent>
           </Popover>

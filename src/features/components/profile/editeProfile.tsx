@@ -40,7 +40,7 @@ export default function EditProfileDialog({
   initials,
   onSuccess,
 }: Props) {
-  const t = useTranslations("ProfilePage.editProfile");
+  const t = useTranslations("ProfilePage");
   const { update } = useSession();
   const { startUpload } = useUploadThing("projectImage");
 
@@ -96,7 +96,6 @@ export default function EditProfileDialog({
     setLoading(true);
 
     try {
-      // 🔥 DÜZELTİLEN KISIM: Resim URL Mantığı
       let finalImage = user.image; // Varsayılan: Eskisini koru
 
       if (selectedFile) {
@@ -154,12 +153,12 @@ export default function EditProfileDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">{t("trigger")}</Button>
+        <Button variant="outline">{t("editProfile.trigger")}</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogTitle>{t("editProfile.title")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
@@ -184,7 +183,7 @@ export default function EditProfileDialog({
                     onChange={onFileChange}
                   />
                   <span className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4">
-                    {t("buttons.upload")}
+                    {t("editProfile.buttons.upload")}
                   </span>
                 </label>
 
@@ -196,9 +195,12 @@ export default function EditProfileDialog({
                   className="text-destructive hover:bg-destructive/10"
                   onClick={handleRemoveImage}
                 >
-                  {t("buttons.remove")}
+                  {t("editProfile.buttons.remove")}
                 </Button>
               </div>
+              <p className="text-sm text-muted-foreground">
+                {t("editProfile.helpText")}
+              </p>
               <p className="text-[11px] text-muted-foreground">
                 400×400 • Max: 4MB
               </p>
@@ -208,56 +210,63 @@ export default function EditProfileDialog({
           {/* Form Alanları */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <Label>{t("labels.name")}</Label>
+              <Label>{t("editProfile.labels.name")}</Label>
               <Input
                 {...register("name")}
-                placeholder={t("placeholders.name")}
+                placeholder={t("editProfile.placeholders.name")}
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label>İş Unvanı</Label>
+              <Label>{t("jobTitle")}</Label>
               <Input
                 {...register("jobTitle")}
-                placeholder="Frontend Developer"
+                placeholder={t("details.job.placeholder")}
               />
             </div>
 
             <TimezoneSelect
               control={control}
               name="timezone"
-              label="Zaman Dilimi"
+              label={t("details.timezone.label")}
             />
 
             <div className="space-y-1.5">
-              <Label>Konum</Label>
-              <Input {...register("location")} placeholder="İstanbul, TR" />
+              <Label>{t("location")}</Label>
+              <Input
+                {...register("location")}
+                placeholder={t("details.location.placeholder")}
+              />
             </div>
 
             <div className="space-y-1.5">
-              <Label>Telefon</Label>
-              <Input {...register("phone")} type="tel" placeholder="+90..." />
+              <Label>{t("phone")}</Label>
+              <Input
+                {...register("phone")}
+                type="tel"
+                placeholder={t("details.phone.placeholder")}
+              />
             </div>
 
             <FormDatePicker
               control={control}
               name="birthdate"
-              label="Doğum Tarihi"
-              placeholder="Seçiniz"
+              label={t("birthdate")}
+              placeholder={t("details.birthdate.label")}
             />
           </div>
 
           <DialogFooter className="sticky bottom-0 bg-background pt-2 border-t mt-4 z-10">
             <DialogClose asChild>
               <Button type="button" variant="ghost" disabled={loading}>
-                {t("buttons.cancel")}
+                {t("editProfile.buttons.cancel")}
               </Button>
             </DialogClose>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                t("buttons.save")
+                t("editProfile.buttons.save")
               )}
             </Button>
           </DialogFooter>

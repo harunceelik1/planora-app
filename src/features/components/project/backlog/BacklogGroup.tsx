@@ -38,12 +38,14 @@ export default function BacklogGroup({
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2 text-lg font-bold outline-none"
+          aria-expanded={isExpanded}
         >
-          {isExpanded ? (
-            <ChevronDown className="h-5 w-5" />
-          ) : (
-            <ChevronRight className="h-5 w-5" />
-          )}
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 transition-transform duration-300",
+              isExpanded ? "rotate-0" : "-rotate-90",
+            )}
+          />
           {t("backlogView.backlog.title")}
           <span className="text-sm font-normal text-muted-foreground ml-2">
             {t("backlogView.backlog.issuesCount", { count: issues.length })}
@@ -61,8 +63,18 @@ export default function BacklogGroup({
         </Button>
       </div>
 
-      {isExpanded && (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+      <div
+        className={cn(
+          "overflow-hidden transition-all duration-300",
+          isExpanded ? "max-h-screen" : "max-h-0",
+        )}
+      >
+        <div
+          className={cn(
+            "origin-top transition-all duration-300",
+            isExpanded ? "opacity-100" : "opacity-0",
+          )}
+        >
           <div className="mb-4">
             <InlineIssueCreator
               projectId={project.id}
@@ -92,11 +104,11 @@ export default function BacklogGroup({
                 className={cn(
                   "flex flex-col gap-1 min-h-37.5 rounded-xl pb-10 transition-colors",
                   snapshot.isDraggingOver &&
-                    "bg-slate-50/80 ring-1 ring-slate-200",
+                    "bg-slate-50/80 ring-1 ring-slate-200 dark:bg-slate-800/60 dark:ring-slate-700",
                 )}
               >
                 {issues.length === 0 ? (
-                  <p className="text-sm text-slate-400 py-8 text-center border border-dashed border-slate-200 rounded-xl">
+                  <p className="text-sm text-slate-400 dark:text-slate-300 py-8 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl bg-white/60 dark:bg-slate-950/50">
                     {t("backlogView.backlog.emptyTitle")}
                     <br />
                     {t("backlogView.backlog.emptyDescription")}
@@ -119,7 +131,7 @@ export default function BacklogGroup({
             )}
           </Droppable>
         </div>
-      )}
+      </div>
     </div>
   );
 }

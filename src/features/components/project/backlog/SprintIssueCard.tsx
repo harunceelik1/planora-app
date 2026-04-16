@@ -32,10 +32,10 @@ export default function SprintIssueCard({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           className={cn(
-            "flex items-center gap-3 py-2.5 px-3 bg-white border rounded-lg",
+            "flex items-center gap-3 py-2.5 px-3 bg-white dark:bg-slate-900 border rounded-lg",
             disabled
-              ? "border-slate-200 bg-slate-100 text-slate-500 opacity-80"
-              : "cursor-grab active:cursor-grabbing",
+              ? "border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 opacity-80"
+              : "cursor-grab active:cursor-grabbing border-slate-200 dark:border-slate-800",
           )}
           onClick={() => !disabled && onClick()}
         >

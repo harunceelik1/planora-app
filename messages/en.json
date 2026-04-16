@@ -121,6 +121,10 @@
     },
     "details": {
       "title": "Details",
+      "timezone": {
+        "label": "Timezone",
+        "placeholder": "Select a timezone"
+      },
       "location": {
         "label": "Location",
         "placeholder": "City, Country"
@@ -311,7 +315,47 @@
       },
       "board": {
         "title": "Kanban Board",
-        "description": "Tasks in the active sprint will appear here as cards."
+        "description": "Tasks in the active sprint will appear here as cards.",
+        "activeSprintLabel": "Active Sprint",
+        "progressLabel": "Sprint progress",
+        "completed": "Completed",
+        "options": "Options",
+        "noDueDate": "No due date",
+        "dueToday": "Due today",
+        "noAssignee": "Unassigned",
+        "stats": {
+          "completed": "completed",
+          "inProgress": "in progress",
+          "pending": "pending"
+        },
+        "completeSprintDialog": {
+          "title": "Complete Sprint",
+          "description": "You are about to complete <strong>{sprintName}</strong>. This will close the sprint and archive its related tasks.",
+          "cancel": "Cancel",
+          "confirm": "Complete Sprint"
+        },
+        "completeSprintFailed": "Unable to complete the sprint.",
+        "completeSprintError": "An error occurred while completing the sprint.",
+        "completingSprint": "Completing...",
+        "completeSprintButton": "Complete Sprint",
+        "columns": {
+          "todo": "To Do",
+          "inProgress": "In Progress",
+          "done": "Done"
+        },
+        "issueLabel": "task",
+        "noIssues": "No issues yet.",
+        "statusUpdateFailed": "Unable to update the task status.",
+        "statusUpdateError": "An error occurred while updating the task status.",
+        "moveTo": "Move to {status}",
+        "status": {
+          "TODO": "To Do",
+          "IN_PROGRESS": "In Progress",
+          "DONE": "Done"
+        },
+        "noActiveSprintTitle": "No active sprint found",
+        "noActiveSprintDescription": "Start a sprint to see your tasks in the board view.",
+        "noSprintDate": "No sprint dates set"
       },
       "calendar": {
         "title": "Calendar",
@@ -321,7 +365,19 @@
       "archive": {
         "title": "Archived Tasks",
         "description": "You can review previously completed and removed tasks here.",
-        "empty": "No archived tasks found."
+        "headerLabel": "Archived Workflows",
+        "completedSprints": "Completed sprints",
+        "completedSprintsSubtitle": "Sprint groups stored in archive",
+        "topTasksArchived": "Tasks archived",
+        "topTasksArchivedSubtitle": "Total archive task count",
+        "monthsLogged": "Months",
+        "monthsLoggedSubtitle": "Completed sprint timeline",
+        "sprintsInMonth": "sprints archived",
+        "completedTag": "Completed",
+        "tasksArchived": "Tasks archived",
+        "doneTasks": "Done tasks",
+        "empty": "No archived tasks found.",
+        "goalLabel": "Goal"
       }
     },
     "error": {

@@ -109,16 +109,12 @@ export async function GET(req: Request) {
         // 👇 BURASI GÜNCELLENDİ (Eskiden user: true diyip her şeyi çekiyordu)
         members: membersSelectConfig,
         issues: {
-          where: {
-            status: {
-              notIn: ["DONE", "CANCELLED"], // Sadece aktif (TODO ve IN_PROGRESS) olanları getir
-            },
-          },
           select: {
             id: true,
             status: true,
             priority: true,
             dueDate: true,
+            storyPoints: true,
           },
         },
         _count: {
