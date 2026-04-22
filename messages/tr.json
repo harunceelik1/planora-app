@@ -1,4 +1,4 @@
-{
+﻿{
   "HomePage": {
     "heroTitle": "Planla Ve Yönet",
     "heroDescription": "Planora, projelerini hızla planlamanı, verimli bir şekilde yönetmeni ve ekibinle kesintisiz iş birliği yapmanı sağlayan hepsi bir arada bir platformdur.",
@@ -36,6 +36,12 @@
       "home": "Ana Sayfa",
       "about": "Hakkında"
     },
+    "notifications": {
+      "title": "Bildirimler",
+      "empty": "Henüz bildiriminiz yok.",
+      "markAll": "Tümünü okundu işaretle",
+      "unreadCount": "{count} okunmamış"
+    },
     "auth": {
       "loading": "Yükleniyor...",
       "signIn": "Giriş Yap",
@@ -44,6 +50,7 @@
     },
     "aria": {
       "userMenu": "Kullanıcı menüsü",
+      "notifications": "Bildirimler",
       "openMenu": "Menüyü aç"
     }
   },
@@ -679,6 +686,7 @@
     "taskDetails": "Görev Detayları",
     "noTitle": "Başlıksız Görev",
     "unassigned": "Atanmamış",
+    "unknownUser": "Bilinmeyen Kullanıcı",
     "activityAndComments": "Aktivite & Yorumlar",
     "labels": {
       "status": "DURUM",
@@ -710,6 +718,15 @@
     "buttons": {
       "save": "Kaydet",
       "cancel": "İptal"
+    },
+    "deleteDialog": {
+      "title": "Görevi sil",
+      "description": "Bu görev kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+      "cancel": "Vazgeç",
+      "confirm": "Görevi Sil",
+      "deleting": "Siliniyor...",
+      "success": "Görev silindi.",
+      "error": "Görev silinemedi."
     }
   }
 }

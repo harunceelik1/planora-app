@@ -1,4 +1,4 @@
-{
+﻿{
   "HomePage": {
     "heroTitle": "Plan and Manage",
     "heroDescription": "Planora is an all-in-one platform that enables you to plan projects quickly, manage them efficiently, and collaborate seamlessly with your team.",
@@ -36,6 +36,12 @@
       "home": "Home",
       "about": "About"
     },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications yet.",
+      "markAll": "Mark all as read",
+      "unreadCount": "{count} unread"
+    },
     "auth": {
       "loading": "Loading...",
       "signIn": "Sign In",
@@ -44,6 +50,7 @@
     },
     "aria": {
       "userMenu": "User menu",
+      "notifications": "Notifications",
       "openMenu": "Open menu"
     }
   },
@@ -709,6 +716,15 @@
     "buttons": {
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "deleteDialog": {
+      "title": "Delete task",
+      "description": "This task will be permanently deleted. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete Task",
+      "deleting": "Deleting...",
+      "success": "Task deleted.",
+      "error": "Task could not be deleted."
     }
   }
 }

@@ -1,15 +1,8 @@
-import { Resend } from "resend";
+﻿import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Domainin henüz yoksa 'onboarding@resend.dev' kullanmak zorundasın.
-// Kendi domainini bağlayınca burayı 'noreply@planora.com' gibi güncelleyeceğiz.
-const domain = process.env.NEXT_PUBLIC_APP_URL;
-
 export const sendVerificationEmail = async (email: string, token: string) => {
-  // Onay linki (Kullanıcı buna tıklayarak da onaylayabilir)
-  const confirmLink = `${domain}/new-verification?token=${token}`;
-
   try {
     const data = await resend.emails.send({
       from: "Planora <onboarding@resend.dev>",
@@ -32,6 +25,51 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     return { success: true, data };
   } catch (error) {
     console.error("Mail gönderme hatası:", error);
+    return { success: false, error };
+  }
+};
+
+interface TaskReminderEmailPayload {
+  recipientName?: string | null;
+  issueTitle: string;
+  projectName: string;
+  dueLabel: string;
+  statusLabel: string;
+  projectUrl?: string;
+}
+
+export const sendTaskReminderEmail = async (
+  email: string,
+  payload: TaskReminderEmailPayload,
+) => {
+  try {
+    const data = await resend.emails.send({
+      from: "Planora <onboarding@resend.dev>",
+      to: email,
+      subject: `Yaklaşan görev: ${payload.issueTitle}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #0f172a;">
+          <h2 style="margin-bottom: 12px;">Görev hatırlatması</h2>
+          <p>Merhaba ${payload.recipientName || "Planora kullanıcısı"},</p>
+          <p><strong>${payload.issueTitle}</strong> görevi için bir hatırlatma oluşturuldu.</p>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; margin: 20px 0;">
+            <p style="margin: 0 0 8px;"><strong>Proje:</strong> ${payload.projectName}</p>
+            <p style="margin: 0 0 8px;"><strong>Durum:</strong> ${payload.statusLabel}</p>
+            <p style="margin: 0;"><strong>Teslim:</strong> ${payload.dueLabel}</p>
+          </div>
+          ${
+            payload.projectUrl
+              ? `<p><a href="${payload.projectUrl}" style="display: inline-block; background: #0f172a; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 999px;">Görevi görüntüle</a></p>`
+              : ""
+          }
+          <p style="margin-top: 24px; font-size: 12px; color: #64748b;">Bu bildirim teslim tarihi yaklaşan görevler için otomatik olarak gönderildi.</p>
+        </div>
+      `,
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Task reminder mail error:", error);
     return { success: false, error };
   }
 };

@@ -1,11 +1,12 @@
 import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
 import { revalidatePath } from "next/cache";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -36,12 +37,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Projeye erişim kontrolü
-    const member = await db.projectMember.findUnique({
+    const member = await db.projectMember.findFirst({
       where: {
-        projectId_userId: {
-          projectId: issue.projectId,
-          userId: session.user.id,
-        },
+        projectId: issue.projectId,
+        userId: session.user.id,
       },
     });
 
@@ -70,10 +69,12 @@ export async function POST(request: NextRequest) {
       success: true,
       data: updatedIssue,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update status";
     console.error("Status update error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to update status" },
+      { error: message },
       { status: 500 }
     );
   }

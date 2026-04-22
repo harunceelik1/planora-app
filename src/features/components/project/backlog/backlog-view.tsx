@@ -211,6 +211,13 @@ export default function BacklogView({
         task={selectedIssue}
         isOpen={!!selectedIssue}
         onClose={() => setSelectedIssue(null)}
+        onDeleted={(deletedIssueId) => {
+          setSelectedIssue(null);
+          setIssues((current) =>
+            current.filter((issue) => issue.id !== deletedIssueId),
+          );
+          mutate(projectApiKey);
+        }}
         currentUser={session?.user}
       />
 

@@ -96,3 +96,33 @@ export async function createComment(
     return { success: false, error: "Yorum eklenemedi." };
   }
 }
+
+export async function deleteIssue(issueId: string) {
+  try {
+    const issue = await db.issue.findUnique({
+      where: { id: issueId },
+      select: { projectId: true },
+    });
+
+    if (!issue) {
+      return { success: false, error: "Gorev bulunamadi." };
+    }
+
+    await db.issue.delete({
+      where: { id: issueId },
+    });
+
+    await db.project.update({
+      where: { id: issue.projectId },
+      data: { updatedAt: new Date() },
+    });
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Gorev silinemedi.";
+    console.error("GOREV SILME HATASI DETAYI:", message);
+    return { success: false, error: message };
+  }
+}

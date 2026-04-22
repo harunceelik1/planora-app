@@ -30,6 +30,7 @@ model User {
   projectsAsMember ProjectMember[]   @relation("ProjectsAsMember") // Üyesi olduğu projeler (ProjectMember tablosu üzerinden)
   comments         Comment[]
   favoriteProjects FavoriteProject[]
+  notifications    Notification[]
 }
 
 model Account {
@@ -136,6 +137,7 @@ model Issue {
   storyPoints Int? // Story Points / Puanlama (Opsiyonel)
 
   comments Comment[] // İlişki
+  notifications Notification[]
 
   number Int // Proje içindeki benzersiz görev numarası
   // --- İlişkiler ---
@@ -202,6 +204,24 @@ model Comment {
   user   User   @relation(fields: [userId], references: [id])
 }
 
+model Notification {
+  id          String           @id @default(cuid())
+  title       String
+  message     String           @db.Text
+  type        NotificationType
+  isRead      Boolean          @default(false)
+  emailSentAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  issueId String?
+  issue   Issue?  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, issueId, type])
+}
+
 // Bir görevin durumu (Kanban board için)
 enum IssueStatus {
   TODO
@@ -216,4 +236,11 @@ enum IssuePriority {
   MEDIUM
   HIGH
   HIGHEST
+}
+
+enum NotificationType {
+  DUE_IN_3_DAYS
+  DUE_TOMORROW
+  DUE_TODAY
+  OVERDUE
 }

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useRouter, useParams } from "next/navigation";
 import { useSWRConfig } from "swr";
 import { useTranslations, useFormatter } from "next-intl";
+import { toast } from "react-toastify";
 
 import {
   Sheet,
@@ -36,14 +37,30 @@ import {
   Calendar as CalendarIcon,
   Zap,
   Send,
+  Trash2,
 } from "lucide-react";
 import { Comment, Issue } from "@/types/project";
-import { createComment, updateIssueData } from "@/actions/issue-actions";
+import {
+  createComment,
+  deleteIssue,
+  updateIssueData,
+} from "@/actions/issue-actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TaskDetailSheetProps {
   task: Issue | null;
   isOpen: boolean;
   onClose: () => void;
+  onDeleted?: (taskId: string) => void;
   currentUser?: {
     id?: string;
     name?: string | null;
@@ -56,6 +73,7 @@ export function TaskDetailSheet({
   task,
   isOpen,
   onClose,
+  onDeleted,
   currentUser,
 }: TaskDetailSheetProps) {
   const t = useTranslations("TaskDetail");
@@ -72,6 +90,8 @@ export function TaskDetailSheet({
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState<Comment[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Burada state'lerimiz duruyor, süper.
   const [priority, setPriority] = useState("LOW");
@@ -125,36 +145,62 @@ export function TaskDetailSheet({
     }
   };
 
-  return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-125 w-full p-0 flex flex-col h-full bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
-        <SheetHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0 h-16 shrink-0 bg-white dark:bg-slate-950">
-          <SheetTitle className="sr-only">
-            {t("taskDetails")}: {task.title}
-          </SheetTitle>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="secondary"
-              className="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-none font-mono text-xs rounded-sm px-2 py-0.5"
-            >
-              {task.id.slice(0, 8)}...
-            </Badge>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
-            onClick={onClose}
-          >
-            <Maximize2 className="h-4 w-4" />
-          </Button>
-        </SheetHeader>
+  const handleDeleteTask = async () => {
+    setIsDeleting(true);
+    const result = await deleteIssue(task.id);
+    setIsDeleting(false);
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-              {task.title || t("noTitle")}
-            </h2>
+    if (!result.success) {
+      toast.error(result.error || t("deleteDialog.error"));
+      return;
+    }
+
+    toast.success(t("deleteDialog.success"));
+    setIsDeleteDialogOpen(false);
+    onDeleted?.(task.id);
+    onClose();
+  };
+
+  return (
+    <>
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent className="sm:max-w-125 w-full p-0 flex flex-col h-full bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
+          <SheetHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0 h-16 shrink-0 bg-white dark:bg-slate-950">
+            <SheetTitle className="sr-only">
+              {t("taskDetails")}: {task.title}
+            </SheetTitle>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-none font-mono text-xs rounded-sm px-2 py-0.5"
+              >
+                {task.id.slice(0, 8)}...
+              </Badge>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
+              onClick={onClose}
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                {task.title || t("noTitle")}
+              </h2>
 
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -425,7 +471,38 @@ export function TaskDetailSheet({
             </Button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+        </SheetContent>
+      </Sheet>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("deleteDialog.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("deleteDialog.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              onClick={(event) => {
+                event.preventDefault();
+                if (!isDeleting) {
+                  handleDeleteTask();
+                }
+              }}
+            >
+              {isDeleting
+                ? t("deleteDialog.deleting")
+                : t("deleteDialog.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

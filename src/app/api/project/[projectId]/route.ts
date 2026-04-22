@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/prisma"; // Prisma client yolun
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Auth options yolun
+import { authOptions } from "@/lib/auth-options"; // Auth options yolun
 
 interface RouteParams {
   params: Promise<{ projectId: string }>;

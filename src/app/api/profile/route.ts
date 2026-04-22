@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth-options";
 import { db } from "@/lib/prisma";
 
 export async function GET() {
@@ -9,7 +9,7 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
-    console.log("🔍 İstek atan User ID:", userId);
+    // console.log("🔍 İstek atan User ID:", userId);
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -3,7 +3,7 @@
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth"; // 👈 NextAuth'dan bunu çekiyoruz
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth-options";
 
 export const toggleFavoriteProject = async (projectId: string) => {
   // 1. Session'ı direkt burada, manuel olarak alıyoruz
