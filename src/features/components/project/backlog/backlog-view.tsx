@@ -21,6 +21,7 @@ import {
   moveIssueToSprint,
   completeSprint,
 } from "@/actions/sprint-actions";
+import { deleteSprint } from "@/actions/sprint-actions";
 import BacklogGroup from "./BacklogGroup";
 import SprintGroup from "./SprintGroup";
 import StartSprintModal from "./StartSprintModal";
@@ -152,6 +153,24 @@ export default function BacklogView({
     setConfirmSprint(sprint);
   const closeCompleteSprintConfirm = () => setConfirmSprint(null);
 
+  const handleDeleteSprint = async (sprintId: string) => {
+    setIsUpdating(true);
+    try {
+      const res = await deleteSprint(sprintId);
+      if (!res.success) {
+        toast.error(res.error || t("backlogView.sprintDelete.failed"));
+      } else {
+        toast.success(t("backlogView.sprintDelete.success"));
+      }
+      await mutate(projectApiKey);
+    } catch (error) {
+      console.error("Sprint delete error:", error);
+      toast.error(t("backlogView.sprintDelete.failed"));
+    } finally {
+      setTimeout(() => setIsUpdating(false), 300);
+    }
+  };
+
   const handleCompleteSprint = async (sprintId: string) => {
     setIsUpdating(true);
     try {
@@ -190,6 +209,7 @@ export default function BacklogView({
                   openSprintModal(sprint, mode)
                 }
                 onCompleteSprint={() => openCompleteSprintConfirm(sprint)}
+                onDeleteSprint={() => handleDeleteSprint(sprint.id)}
                 onSelectIssue={setSelectedIssue}
               />
             ))}

@@ -249,3 +249,34 @@ export async function completeSprint(sprintId: string) {
     return { success: false, error: "Sprint tamamlanamadı." };
   }
 }
+
+// 4. Sprint silme: sprintteki görevleri backloga taşı ve sprinti sil
+export async function deleteSprint(sprintId: string) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { success: false, error: "Yetkisiz işlem." };
+  }
+
+  try {
+    const sprint = await db.sprint.findUnique({ where: { id: sprintId }, select: { projectId: true } });
+    if (!sprint) {
+      return { success: false, error: "Sprint bulunamadı." };
+    }
+    if (!(await canAccessProject(userId, sprint.projectId))) {
+      return { success: false, error: "Bu proje için yetkiniz yok." };
+    }
+
+    // Taşı: sprint'e bağlı görevleri backloga gönder
+    await db.issue.updateMany({ where: { sprintId }, data: { sprintId: null } });
+
+    // Sprinti sil
+    await db.sprint.delete({ where: { id: sprintId } });
+
+    revalidatePath("/", "layout");
+    return { success: true };
+  } catch (error) {
+    console.error("Sprint silme hatası:", error);
+    return { success: false, error: "Sprint silinemedi." };
+  }
+}

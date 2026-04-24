@@ -57,16 +57,16 @@ export default function ArchiveTab({ project }: { project: Project }) {
     });
   }, [completedSprints]);
 
-  const totalArchivedTasks = completedSprints.reduce((sum: number, sprint: Sprint) => {
-    const sprintDoneCount = sprint.issues?.filter((issue: Issue) => issue.status === "DONE").length;
-    if (typeof sprintDoneCount === "number") return sum + sprintDoneCount;
-    return (
-      sum +
-      allIssues.filter(
-        (issue: Issue) => issue.sprintId === sprint.id && issue.status === "DONE",
-      ).length
-    );
-  }, 0);
+  // const totalArchivedTasks = completedSprints.reduce((sum: number, sprint: Sprint) => {
+  //   const sprintDoneCount = sprint.issues?.filter((issue: Issue) => issue.status === "DONE").length;
+  //   if (typeof sprintDoneCount === "number") return sum + sprintDoneCount;
+  //   return (
+  //     sum +
+  //     allIssues.filter(
+  //       (issue: Issue) => issue.sprintId === sprint.id && issue.status === "DONE",
+  //     ).length
+  //   );
+  // }, 0);
 
   return (
     <div className="flex flex-col gap-8 h-full overflow-y-auto custom-scrollbar p-6">

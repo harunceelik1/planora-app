@@ -17,28 +17,34 @@ export async function GET(request: Request, { params }: RouteParams) {
   const project = await db.project.findUnique({
     where: { id: projectId },
     include: {
+      // Sprints: sadece temel alanlar
       sprints: {
         orderBy: { createdAt: "asc" },
+        select: { id: true, name: true, status: true, startDate: true, endDate: true },
       },
-      // Tüm görevler (backlog + sprint); backlog-view sprintId ile ayırır
+      // Issues: yalnızca UI için gerekli alanları seçiyoruz
       issues: {
         orderBy: { order: "asc" },
-        include: {
-          assignee: true,
-          // 👇 EKSİK OLAN KISIM BURASIYDI: Yorumları ve yapan kullanıcıyı çekiyoruz
-          comments: {
-            include: {
-              user: true,
-            },
-            orderBy: {
-              createdAt: "asc", // Yorumları eskiden yeniye sıralar
-            },
-          },
+        select: {
+          id: true,
+          number: true,
+          title: true,
+          description: true,
+          status: true,
+          priority: true,
+          order: true,
+          sprintId: true,
+          createdAt: true,
+          dueDate: true,
+          storyPoints: true,
+          reporterId: true,
+          assignee: { select: { id: true, name: true, image: true } },
+          _count: { select: { comments: true } },
         },
       },
-      owner: true,
+      owner: { select: { id: true, name: true, image: true } },
       members: {
-        include: { user: true },
+        select: { id: true, role: true, user: { select: { id: true, name: true, image: true } } },
       },
     },
   });

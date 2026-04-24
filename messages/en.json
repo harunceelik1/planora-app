@@ -22,6 +22,7 @@
         "shortDesc": "One-click login with Google for a quick start, or register with traditional email.",
         "longDesc": "The Account Management module offers two flexible login options: sign in instantly with your Google account or register with email."
       }
+  
     },
     "buttons": {
       "moreInfo": "Learn More",
@@ -306,6 +307,20 @@
           "starting": "Starting…",
           "saving": "Saving…"
         }
+      },
+      "bulkDelete": {
+        "confirm": "Are you sure you want to delete the selected issues?",
+        "delete": "Delete selected",
+        "success": "{count} issues deleted.",
+        "failed": "Bulk delete failed."
+      }
+      ,
+      "sprintDelete": {
+        "title": "Delete sprint",
+        "description": "Are you sure you want to delete <strong>{sprintName}</strong>? All sprint tasks will be moved back to the backlog.",
+        "delete": "Delete sprint",
+        "success": "Sprint deleted.",
+        "failed": "Could not delete sprint."
       }
     },
     "views": {
@@ -318,7 +333,18 @@
       },
       "timeline": {
         "title": "Timeline",
-        "description": "Project planning will be here soon."
+        "description": "Track sprint windows and task dates in a single flow.",
+        "emptyTitle": "There are no scheduled items for the timeline yet",
+        "emptyDescription": "The project flow will appear here once issues have due dates or sprints have start and end dates.",
+        "sprintLane": "Sprint Schedule",
+        "sprintSchedule": "Sprint schedule",
+        "assigneeLabel": "Assignee",
+        "dueLabel": "Due: {date}",
+        "summary": {
+          "range": "Time Range",
+          "datedIssues": "Scheduled Issues",
+          "sprints": "Planned Sprints"
+        }
       },
       "board": {
         "title": "Kanban Board",
@@ -727,4 +753,28 @@
       "error": "Task could not be deleted."
     }
   }
+  ,
+  "ProjectSummary": {
+    "stats": {
+      "totalTasks": "Total Tasks",
+      "backlog": "Backlog",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "overdue": "Overdue",
+      "members": "Members"
+    },
+    "recent": {
+      "title": "Recently Updated Issues",
+      "empty": "No issues",
+      "updated": "Updated"
+    },
+    "dates": {
+      "title": "Dates",
+      "overdueTitle": "Overdue",
+      "overdueEmpty": "No overdue items",
+      "upcomingTitle": "Upcoming",
+      "upcomingEmpty": "No upcoming dates"
+    }
+  }
 }
+

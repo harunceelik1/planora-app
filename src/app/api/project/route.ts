@@ -44,11 +44,9 @@ export async function GET(req: Request) {
       const project = await db.project.findUnique({
         where: { id: projectId },
         include: {
-          owner: true,
+          owner: { select: { id: true, name: true, image: true, email: true } },
           members: {
-            include: {
-              user: true, // Detay sayfasında herkesi tam görebilmek için burada limit koymadık
-            },
+            select: { id: true, role: true, user: { select: { id: true, name: true, image: true } } },
           },
         },
       });

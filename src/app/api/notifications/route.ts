@@ -14,14 +14,12 @@ export async function GET() {
     where: { userId: session.user.id },
     include: {
       issue: {
-        include: {
-          project: {
-            select: {
-              id: true,
-              projectName: true,
-              projectKey: true,
-            },
-          },
+        select: {
+          id: true,
+          number: true,
+          title: true,
+          projectId: true,
+          project: { select: { id: true, projectKey: true } },
         },
       },
     },

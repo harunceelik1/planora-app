@@ -102,6 +102,57 @@ export function InlineIssueCreator({
     setIsLoading(false);
   };
 
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isAiDisabledUntil, setIsAiDisabledUntil] = useState<number | null>(null);
+
+  const handleAiSplit = async () => {
+    const title = inputRef.current?.value || "";
+    if (!title || title.trim() === "") {
+      toast.warn("Please enter a task title first.");
+      return;
+    }
+
+    // Prevent if temporarily disabled due to rate limit
+    if (isAiDisabledUntil && isAiDisabledUntil > Date.now()) {
+      const wait = Math.ceil((isAiDisabledUntil - Date.now()) / 1000);
+      toast.warn(`AI is rate-limited. Try again in ${wait}s`);
+      return;
+    }
+
+    setIsAiLoading(true);
+
+    try {
+      const locale = (typeof navigator !== "undefined" && navigator.language && navigator.language.startsWith("tr")) ? "tr" : "en";
+      const res = await fetch(`/api/ai/decompose`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, projectId, sprintId: sprintId || null, locale }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        if (res.status === 429) {
+          const retry = data?.retryAfter || Number(res.headers.get("Retry-After")) || 60;
+          setIsAiDisabledUntil(Date.now() + retry * 1000);
+          toast.error(`AI rate limit. Try again in ${retry}s`);
+        } else {
+          toast.error(data.error || "AI split failed");
+        }
+      } else {
+        toast.success(`${data.createdCount || 0} subtasks created by AI`);
+        // clear input if created
+        formRef.current?.reset();
+        await mutate(`/api/project/${projectId}`);
+        if (isSprint) disableEditing();
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("AI request failed");
+    }
+
+    setIsAiLoading(false);
+  };
+
   // --- RENDER ---
 
   // BACKLOG MODU: Kart Görünümü (Hedef Tasarım)
@@ -145,6 +196,17 @@ export function InlineIssueCreator({
             >
               <span className="text-xs font-semibold mr-1">Enter</span>
               <CornerDownLeft className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAiSplit}
+              size="sm"
+              variant="ghost"
+              className="h-8 px-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50"
+              disabled={isAiLoading}
+            >
+              <span className="text-xs font-semibold mr-1">AI ile Alt Görevlere Böl</span>
+              {isAiLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
             </Button>
             <Button
               type="button"

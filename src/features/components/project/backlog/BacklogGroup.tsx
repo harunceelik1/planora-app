@@ -1,9 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { useSWRConfig } from "swr";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Droppable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { InlineIssueCreator } from "../issue/inline-issue-creator";
@@ -30,7 +43,10 @@ export default function BacklogGroup({
   onMoveIssue,
 }: BacklogGroupProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
   const t = useTranslations("ProjectDetails");
+  const { mutate } = useSWRConfig();
+  const projectApiKey = `/api/project/${project.id}`;
 
   return (
     <div className="flex flex-col mt-4">
@@ -82,6 +98,60 @@ export default function BacklogGroup({
               className="border-none bg-transparent shadow-none"
             />
           </div>
+          {Object.keys(selectedIds).length > 0 && (
+            <div className="flex items-center justify-between gap-2 mb-2 px-4">
+              <div className="text-sm text-slate-600">
+                {Object.keys(selectedIds).length} selected
+              </div>
+              <div className="flex items-center gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      {t("backlogView.bulkDelete.delete")}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("backlogView.bulkDelete.confirm")}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("backlogView.bulkDelete.confirm")}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("backlogView.modal.buttons.cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={async () => {
+                          const ids = Object.keys(selectedIds);
+                          try {
+                            const res = await fetch(`/api/issue/bulk-delete`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ ids }),
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.success) {
+                              setSelectedIds({});
+                              mutate(projectApiKey);
+                              toast.success(t("backlogView.bulkDelete.success", { count: ids.length }));
+                            } else {
+                              toast.error(data.error || t("backlogView.bulkDelete.failed"));
+                            }
+                          } catch (e) {
+                            console.error(e);
+                            toast.error(t("backlogView.bulkDelete.failed"));
+                          }
+                        }}
+                      >
+                        {t("backlogView.bulkDelete.delete")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          )}
 
           {issues.length > 0 && (
             <div className="grid grid-cols-[30px_30px_minmax(200px,1fr)_120px_150px_50px] gap-2 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
@@ -123,6 +193,15 @@ export default function BacklogGroup({
                       sprints={sprints}
                       onEdit={() => onSelectIssue(issue)}
                       onMove={onMoveIssue}
+                      selected={!!selectedIds[issue.id]}
+                      onToggleSelect={(id: string) => {
+                        setSelectedIds((prev) => {
+                          const copy = { ...prev };
+                          if (copy[id]) delete copy[id];
+                          else copy[id] = true;
+                          return copy;
+                        });
+                      }}
                     />
                   ))
                 )}

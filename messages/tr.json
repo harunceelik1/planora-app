@@ -22,6 +22,7 @@
         "shortDesc": "Hızlı başlangıç için Google ile tek tıkla giriş veya geleneksel e-posta ile kayıt.",
         "longDesc": "Hesap Yönetimi modülü, size iki esnek giriş seçeneği sunar: Google hesabınızla anında giriş yapabilir ya da e-posta ile kayıt olabilirsiniz."
       }
+ 
     },
     "buttons": {
       "moreInfo": "Daha Fazla Bilgi",
@@ -268,6 +269,20 @@
           "starting": "Başlatılıyor…",
           "saving": "Kaydediliyor…"
         }
+      },
+      "bulkDelete": {
+        "confirm": "Seçili görevleri gerçekten silmek istiyor musunuz?",
+        "delete": "Seçilenleri Sil",
+        "success": "{count} görev silindi.",
+        "failed": "Toplu silme başarısız oldu."
+      }
+      ,
+      "sprintDelete": {
+        "title": "Sprinti Sil",
+        "description": "<strong>{sprintName}</strong> sprintini silmek istediğinize emin misiniz? Sprintteki tüm görevler backloga taşınacaktır.",
+        "delete": "Sprinti Sil",
+        "success": "Sprint silindi.",
+        "failed": "Sprint silinemedi."
       }
     },
     "views": {
@@ -280,7 +295,18 @@
       },
       "timeline": {
         "title": "Zaman Çizelgesi",
-        "description": "Proje planlaması yakında burada olacak."
+        "description": "Sprint ve görev tarihlerini tek akışta izleyin.",
+        "emptyTitle": "Henüz zaman çizelgesine eklenecek tarihli öğe yok",
+        "emptyDescription": "Görevlere teslim tarihi eklediğinizde veya sprintlere başlangıç ve bitiş tarihi verdiğinizde proje akışı burada görünecek.",
+        "sprintLane": "Sprint Takvimi",
+        "sprintSchedule": "Sprint takvimi",
+        "assigneeLabel": "Atanan",
+        "dueLabel": "Teslim: {date}",
+        "summary": {
+          "range": "Zaman Aralığı",
+          "datedIssues": "Tarihli Görevler",
+          "sprints": "Planlı Sprintler"
+        }
       },
       "board": {
         "title": "Kanban Panosu",
@@ -727,6 +753,29 @@
       "deleting": "Siliniyor...",
       "success": "Görev silindi.",
       "error": "Görev silinemedi."
+    }
+  }
+  ,
+  "ProjectSummary": {
+    "stats": {
+      "totalTasks": "Toplam Görev",
+      "backlog": "Beklemede (Backlog)",
+      "inProgress": "Yapılıyor",
+      "completed": "Tamamlandı",
+      "overdue": "Süre Aşımı",
+      "members": "Üye"
+    },
+    "recent": {
+      "title": "Son Güncellenen Görevler",
+      "empty": "Görev yok",
+      "updated": "Güncellendi"
+    },
+    "dates": {
+      "title": "Tarihler",
+      "overdueTitle": "Süre Aşımı",
+      "overdueEmpty": "Süre aşımı yok",
+      "upcomingTitle": "Yaklaşan",
+      "upcomingEmpty": "Yaklaşan tarih yok"
     }
   }
 }

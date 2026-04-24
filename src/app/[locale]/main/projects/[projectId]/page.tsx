@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect } from "react";
 import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import useSWR from "swr";
@@ -13,22 +13,19 @@ import {
   CalendarDays,
   LayoutDashboard,
   Archive,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
-import BoardView from "@/features/components/project/board-view";
+import TimelineView from "@/features/components/project/tabs/timeline-view";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
 import { AddMemberDialog } from "@/features/components/project/project-data/add-member-dialog";
 import { ProjectActions } from "@/features/components/project/proejct-actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Issue, Project, Sprint } from "@/types/project";
+import { Issue, Project } from "@/types/project";
+import BoardView from "@/features/components/project/tabs/board-view";
+import ProjectSummary from "@/features/components/project/project-summary";
 
 // --- 1. Helper Bileşen: Circular Progress ---
 const CircularProgress = ({
@@ -115,7 +112,7 @@ export default function ProjectDetailsPage({
     iconName: string;
     className?: string;
   }) => {
-    // @ts-ignore
+    // @ts-expect-error lucide-react exports icons on a string-keyed object
     const IconComponent = Icons[iconName] || Icons.Layout;
     return <IconComponent className={className} />;
   };
@@ -125,8 +122,6 @@ export default function ProjectDetailsPage({
       router.replace("/main/projects");
     }
   }, [isLoading, error, project, router]);
-
-  const [expandedArchiveSprintIds, setExpandedArchiveSprintIds] = useState<string[]>([]);
 
   if (isLoading)
     return (
@@ -311,24 +306,15 @@ export default function ProjectDetailsPage({
                 <BoardView project={project} />
               </TabsContent>
               <TabsContent value="overview" className="h-full p-6">
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="h-full overflow-y-auto">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
                     {t("views.overview.title")}
                   </h3>
-                  <p className="text-muted-foreground text-sm mt-2 max-w-md">
-                    {t("views.overview.description")}
-                  </p>
+                  <ProjectSummary project={project} />
                 </div>
               </TabsContent>
-              <TabsContent value="timeline" className="h-full p-6">
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {t("views.timeline.title")}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mt-2 max-w-md">
-                    {t("views.timeline.description")}
-                  </p>
-                </div>
+              <TabsContent value="timeline" className="h-full m-0 p-6">
+                <TimelineView project={project} />
               </TabsContent>
               <TabsContent value="archive" className="h-full p-6">
                 <ArchiveTab project={project} />

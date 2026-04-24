@@ -122,7 +122,7 @@ export async function PATCH(req: Request) {
         role: role, // "ADMIN" gönderirsen Yönetici olur
       },
       include: {
-        user: true, // Güncellenen kullanıcı bilgisini dön (Frontend için)
+        user: { select: { id: true, name: true, image: true } },
       },
     });
 

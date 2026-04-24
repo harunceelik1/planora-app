@@ -4,7 +4,6 @@ import { getInitials } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar"; // Radix-ui yerine shadcn component
 import { ColumnDef } from "@tanstack/react-table";
 import { Star, ArrowUp, ArrowDown, ChevronsUpDown, Mail } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Project } from "@/types/project";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routest";
@@ -13,7 +12,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import Link from "next/link"; // Not: Burada Link next/link kalabilir çünkü dinamik rota yapmıyoruz, ID veriyoruz. Ama i18n/navigation kullanmak daha iyidir.
 import { Link as I18nLink, useRouter } from "@/i18n/routing";
 import { FavoriteButton } from "../favorite-button";
 
@@ -66,7 +64,7 @@ export const getColumns = (
           href={ROUTES.PROJECTS.DETAILS(project.id)}
           className="font-medium text-foreground hover:underline transition-colors"
         >
-          <p className="text-blue-600">{project.projectName}</p>
+          <p className="font-bold">{project.projectName}</p>
         </I18nLink>
       );
     },

@@ -19,6 +19,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import SprintIssueCard from "./SprintIssueCard";
 import { formatSprintDate } from "./backlog-utils";
@@ -30,6 +41,7 @@ interface SprintGroupProps {
   projectKey: string;
   onOpenSprintModal: (mode: "start" | "settings") => void;
   onCompleteSprint: () => void;
+  onDeleteSprint?: () => void;
   onSelectIssue: (issue: Issue) => void;
 }
 
@@ -39,10 +51,12 @@ export default function SprintGroup({
   projectKey,
   onOpenSprintModal,
   onCompleteSprint,
+  onDeleteSprint,
   onSelectIssue,
 }: SprintGroupProps) {
   const t = useTranslations("ProjectDetails");
   const [collapsed, setCollapsed] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const isActive = sprint.status === "ACTIVE";
   const isCompleted = sprint.status === "COMPLETED";
 
@@ -132,6 +146,10 @@ export default function SprintGroup({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
+                {t("backlogView.sprintDelete.delete")}
+              </DropdownMenuItem>
+
               {sprint.status === "PENDING" && (
                 <DropdownMenuItem
                   disabled={issues.length === 0}
@@ -150,6 +168,31 @@ export default function SprintGroup({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("backlogView.sprintDelete.title")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t.rich("backlogView.sprintDelete.description", {
+                    sprintName: sprint.name,
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("backlogView.modal.buttons.cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    if (typeof onDeleteSprint === "function") onDeleteSprint();
+                  }}
+                >
+                  {t("backlogView.sprintDelete.delete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

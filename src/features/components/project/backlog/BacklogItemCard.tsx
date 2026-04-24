@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 import { Draggable } from "@hello-pangea/dnd";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,8 @@ interface BacklogItemCardProps {
   sprints?: Sprint[];
   onEdit: () => void;
   onMove: (issueId: string, targetSprintId: string | null) => void;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 const priorityStyles: Record<string, string> = {
@@ -50,6 +53,8 @@ export default function BacklogItemCard({
   sprints,
   onEdit,
   onMove,
+  selected,
+  onToggleSelect,
 }: BacklogItemCardProps) {
   const t = useTranslations("ProjectDetails");
   const priority = issue.priority || "MEDIUM";
@@ -75,9 +80,12 @@ export default function BacklogItemCard({
             <GripVertical size={16} />
           </div>
           <div className="flex justify-center">
-            <span className="sr-only">
-              {t("backlogView.table.move_to_sprint")}
-            </span>
+            <Checkbox
+              aria-label={`select-issue-${issue.id}`}
+              checked={!!selected}
+              onCheckedChange={() => onToggleSelect && onToggleSelect(issue.id)}
+              className="h-4 w-4 mt-1 cursor-pointer"
+            />
           </div>
           <div
             className="flex flex-col items-start gap-0.5 overflow-hidden cursor-pointer"
