@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth-options";
 
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
+import { parseSafe, registerSchema } from "@/lib/validation";
 
 export async function GET(request: Request) {
   try {
@@ -64,13 +65,10 @@ export async function POST(req: Request) {
   console.log("🚀 1. REGISTER API BAŞLADI"); // LOG 1
 
   try {
-    const body = await req.json();
-    const { name, email, password } = body;
-
-    if (!name || !email || !password) {
-      console.log("❌ Eksik bilgi");
-      return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
-    }
+    const raw = await req.json();
+    const parsed = parseSafe(registerSchema, raw);
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+    const { name, email, password } = parsed.data;
 
     const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {

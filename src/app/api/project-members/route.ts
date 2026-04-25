@@ -36,12 +36,10 @@ export async function POST(req: Request) {
     }
 
     // 2. Veriyi Al (Hangi proje? Kimler eklenecek?)
-    const body = await req.json();
-    const { projectId, userIds } = body;
-
-    if (!projectId || !userIds || !Array.isArray(userIds)) {
-      return NextResponse.json({ error: "Eksik veri" }, { status: 400 });
-    }
+    const raw = await req.json();
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.projectMembersAddSchema, raw));
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+    const { projectId, userIds } = parsed.data;
 
     const result = await db.projectMember.createMany({
       data: userIds.map((userId: string) => ({
@@ -75,7 +73,9 @@ export async function PATCH(req: Request) {
 
     // 2. Veriyi Al
     const body = await req.json();
-    const { projectId, userId, role } = body;
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.projectMemberPatchSchema, body));
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+    const { projectId, userId, role } = parsed.data;
     // userId: Rolü değişecek üyenin ID'si
     // role: "ADMIN" veya "MEMBER"
 
@@ -143,11 +143,9 @@ export async function DELETE(req: Request) {
     }
 
     const body = await req.json();
-    const { projectId, userId } = body; // userId: Atılacak kişinin ID'si
-
-    if (!projectId || !userId) {
-      return NextResponse.json({ error: "Eksik bilgi." }, { status: 400 });
-    }
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.projectMemberDeleteSchema, body));
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+    const { projectId, userId } = parsed.data; // userId: Atılacak kişinin ID'si
 
     // 1. İsteği yapan kişi bu projenin Sahibi (OWNER) mı?
     const project = await db.project.findUnique({

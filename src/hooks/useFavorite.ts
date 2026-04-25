@@ -5,9 +5,12 @@ import { toast } from "react-toastify";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+type Favorite = { id?: string; project: { id: string; name?: string } };
+type CurrentUser = { favoriteProjects?: Favorite[] } | null;
+
 export const useFavorite = (
   projectId: string,
-  initialStats: boolean = false
+  initialStats: boolean = false,
 ) => {
   const { mutate } = useSWRConfig();
 
@@ -19,11 +22,10 @@ export const useFavorite = (
   });
 
   // Favori durumunu kontrol et
-  const isFavorited = user
-    ? user.favoriteProjects?.some(
-        (fav: any) => String(fav.project.id) === String(projectId)
-      )
-    : initialStats;
+  const isFavorited =
+    ((user as CurrentUser | null)?.favoriteProjects?.some(
+      (fav: Favorite) => String(fav.project.id) === String(projectId)
+    ) as boolean | undefined) ?? initialStats;
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,7 +45,7 @@ export const useFavorite = (
           });
         } else {
           updatedFavorites = updatedFavorites.filter(
-            (fav: any) => String(fav.project.id) !== String(projectId)
+            (fav: Favorite) => String(fav.project.id) !== String(projectId)
           );
         }
         return { ...currentUser, favoriteProjects: updatedFavorites };

@@ -125,8 +125,9 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json(projects);
-  } catch (error) {
-    console.error("Projeler getirilirken hata:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || "Projeler getirilemedi.");
+    console.error("Projeler getirilirken hata:", message);
     return NextResponse.json(
       { error: "Projeler getirilemedi." },
       { status: 500 },
@@ -147,15 +148,12 @@ export async function POST(request: Request) {
   const sessionUserId = session.user.id;
 
   try {
-    const body = await request.json();
-    const { name, projectKey } = body;
-
-    if (!name || !projectKey) {
-      return NextResponse.json(
-        { error: "Proje adı ve anahtarı gereklidir." },
-        { status: 400 },
-      );
+    const raw = await request.json();
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.createProjectSchema, raw));
+    if (!parsed.ok) {
+      return NextResponse.json({ error: "Invalid request body", details: parsed.error }, { status: 400 });
     }
+    const { name, projectKey } = parsed.data;
 
     const newProject = await db.project.create({
       data: {
@@ -175,10 +173,13 @@ export async function POST(request: Request) {
       { message: "Proje başarıyla oluşturuldu.", project: newProject },
       { status: 201 },
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Prisma hata objesi olabilir — tip güvenli şekilde kontrol ediyoruz
+    const maybePrisma = error as { code?: string; meta?: { target?: string[] } };
     if (
-      error?.code === "P2002" &&
-      error?.meta?.target?.includes("projectKey")
+      maybePrisma?.code === "P2002" &&
+      Array.isArray(maybePrisma.meta?.target) &&
+      maybePrisma.meta.target.includes("projectKey")
     ) {
       return NextResponse.json(
         { error: "Bu proje anahtarı zaten kullanılıyor." },
@@ -186,7 +187,8 @@ export async function POST(request: Request) {
       );
     }
 
-    console.error("Proje oluşturma hatası:", error);
+    const message = error instanceof Error ? error.message : String(error || "Proje oluşturulurken bir hata oluştu.");
+    console.error("Proje oluşturma hatası:", message);
     return NextResponse.json(
       { error: "Proje oluşturulurken bir hata oluştu." },
       { status: 500 },

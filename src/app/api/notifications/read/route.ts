@@ -10,16 +10,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const notificationId =
-    typeof body.notificationId === "string" ? body.notificationId : null;
-  const markAll = body.markAll === true;
+  const raw = await request.json().catch(() => ({}));
+  const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.notificationsReadSchema, raw));
+  if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+  const notificationId = typeof parsed.data.notificationId === "string" ? parsed.data.notificationId : null;
+  const markAll = parsed.data.markAll === true;
 
   if (!notificationId && !markAll) {
-    return NextResponse.json(
-      { error: "notificationId or markAll is required." },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "notificationId or markAll is required." }, { status: 400 });
   }
 
   if (markAll) {

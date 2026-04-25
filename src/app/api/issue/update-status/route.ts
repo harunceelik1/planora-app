@@ -14,7 +14,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { issueId, status } = await request.json();
+    const raw = await request.json();
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.updateIssueStatusSchema, raw));
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid request body", details: parsed.error }, { status: 400 });
+    const { issueId, status } = parsed.data;
 
     if (!issueId || !status) {
       return NextResponse.json(

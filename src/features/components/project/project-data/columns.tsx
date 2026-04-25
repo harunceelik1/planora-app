@@ -4,7 +4,7 @@ import { getInitials } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar"; // Radix-ui yerine shadcn component
 import { ColumnDef } from "@tanstack/react-table";
 import { Star, ArrowUp, ArrowDown, ChevronsUpDown, Mail } from "lucide-react";
-import { Project } from "@/types/project";
+import { Project, ProjectMember } from "@/types/project";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routest";
 import {
@@ -155,7 +155,7 @@ export const getColumns = (
         <div className="flex items-center -space-x-3">
           {" "}
           {/* -space-x-2 üst üste bindirir */}
-          {displayMembers.map((member: any) => (
+          {displayMembers.map((member: ProjectMember) => (
             // Not: member.user?.id yoksa member.id kullan. Veri yapına göre ayarla.
             <div key={member.id} className="relative group">
               {/* Tooltip istersen buraya title ekleyebilirsin */}

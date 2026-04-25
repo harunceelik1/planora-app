@@ -13,14 +13,7 @@ export type Project = {
     email?: string;
     image?: string;
   };
-  members: {
-    id: string;
-    user: {
-      id: string;
-      name: string;
-      image?: string;
-    };
-  }[];
+  members: ProjectMember[];
   _count: {
     issues: number;
     members: number;
@@ -42,7 +35,7 @@ export interface Sprint {
 export interface Issue {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null;
   status: IssueStatus;
   priority: IssuePriority;
   order: number;
@@ -68,8 +61,9 @@ export interface Issue {
   // attachments?: Attachment[]; // Dosya ekleri için
 }
 export interface ProjectMember {
+  id?: string;
+  role?: string;
   user: User;
-  role: string;
 }
 export interface Comment {
   id: string;
@@ -86,7 +80,7 @@ export interface ProjectData {
 }
 
 export interface UserWithRole extends User {
-  role: string;
+  role?: string;
 }
 export type IssueStatus = "TODO" | "IN_PROGRESS" | "DONE" | "CANCELLED";
 export type IssuePriority = "LOW" | "MEDIUM" | "HIGH" | "HIGHEST";

@@ -25,7 +25,7 @@ import {
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Issue, Project, Sprint } from "@/types/project";
+import { Issue, Project, Sprint, ProjectMember } from "@/types/project";
 import { IssueAssigneeSelector } from "./issue-assignee-selector";
 
 interface BacklogItemCardProps {
@@ -59,8 +59,7 @@ export default function BacklogItemCard({
   const t = useTranslations("ProjectDetails");
   const priority = issue.priority || "MEDIUM";
   const badgeStyle = priorityStyles[priority] || priorityStyles.MEDIUM;
-  const users =
-    project.members?.map((member: any) => member.user || member) || [];
+  const users = project.members?.map((member: ProjectMember) => member.user) || [];
 
   return (
     <Draggable draggableId={String(issue.id)} index={index}>

@@ -274,7 +274,8 @@
         "confirm": "Seçili görevleri gerçekten silmek istiyor musunuz?",
         "delete": "Seçilenleri Sil",
         "success": "{count} görev silindi.",
-        "failed": "Toplu silme başarısız oldu."
+        "failed": "Toplu silme başarısız oldu.",
+        "selected": "{count} öğe seçildi"
       }
       ,
       "sprintDelete": {

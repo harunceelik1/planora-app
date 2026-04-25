@@ -31,6 +31,8 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@tanstack/react-table": "^8.21.3",
     "@uploadthing/react": "^7.3.3",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -53,7 +55,8 @@
     "resend": "^6.6.0",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
-    "uploadthing": "^7.7.4"
+    "uploadthing": "^7.7.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

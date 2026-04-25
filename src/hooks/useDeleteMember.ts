@@ -22,9 +22,10 @@ export const useDeleteMember = () => {
 
       toast.success("Üye projeden çıkarıldı.");
       router.refresh();
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "Bir hata oluştu.");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error || "Bir hata oluştu.");
+      console.error(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

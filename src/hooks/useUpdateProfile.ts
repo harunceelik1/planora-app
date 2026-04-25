@@ -4,8 +4,9 @@ import { db } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { revalidatePath } from "next/cache";
+import type { UpdateProfileInput } from "@/types/shared";
 
-export async function updateProfile(values: any) {
+export async function updateProfile(values: UpdateProfileInput) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { error: "Yetkisiz erişim" };
 
@@ -20,7 +21,9 @@ export async function updateProfile(values: any) {
 
     revalidatePath("/profile");
     return { success: true };
-  } catch (error) {
-    return { error: "Güncelleme başarısız oldu." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || "Güncelleme başarısız oldu.");
+    console.error("updateProfile error:", message);
+    return { error: message };
   }
 }

@@ -34,7 +34,7 @@ export default function ProjectSummary({ project }: Props) {
   const done = issues.filter((i) => i.status === "DONE").length;
   const overdue = issues.filter((i) => {
     if (!i.dueDate) return false;
-    const due = new Date(i.dueDate);
+    const due = new Date(String(i.dueDate));
     return due.getTime() < Date.now() && i.status !== "DONE";
   }).length;
 
@@ -46,23 +46,23 @@ export default function ProjectSummary({ project }: Props) {
     .filter((i) => i.dueDate)
     .filter((i) => {
       try {
-        return new Date(i.dueDate as any).getTime() < Date.now() && i.status !== "DONE";
+        return new Date(String(i.dueDate)).getTime() < Date.now() && i.status !== "DONE";
       } catch (e) {
         return false;
       }
     })
-    .sort((a, b) => new Date(a.dueDate as any).getTime() - new Date(b.dueDate as any).getTime());
+    .sort((a, b) => new Date(String(a.dueDate)).getTime() - new Date(String(b.dueDate)).getTime());
 
   const upcomingList = issues
     .filter((i) => i.dueDate)
     .filter((i) => {
       try {
-        return new Date(i.dueDate as any).getTime() >= Date.now();
+        return new Date(String(i.dueDate)).getTime() >= Date.now();
       } catch (e) {
         return false;
       }
     })
-    .sort((a, b) => new Date(a.dueDate as any).getTime() - new Date(b.dueDate as any).getTime());
+    .sort((a, b) => new Date(String(a.dueDate)).getTime() - new Date(String(b.dueDate)).getTime());
 
   return (
     <section className="w-full flex flex-col gap-6">

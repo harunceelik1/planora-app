@@ -7,12 +7,10 @@ import { sendVerificationEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { email } = body;
-
-    if (!email) {
-      return NextResponse.json({ error: "Email gerekli." }, { status: 400 });
-    }
+    const raw = await req.json();
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.resendSchema, raw));
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+    const { email } = parsed.data;
 
     const user = await db.user.findUnique({ where: { email } });
     if (!user) {

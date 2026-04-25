@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
+import type { Project, Issue } from "@/types/project";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { ActiveProjects } from "./active-projects";
@@ -60,7 +61,7 @@ export default function ProjectInitialization() {
   let dueThisWeekCount = 0;
 
   if (hasProjects) {
-    const allIssues = projects.flatMap((project: any) => project.issues || []);
+    const allIssues: Issue[] = projects.flatMap((project: Project) => project.issues || []);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Sadece gün bazlı karşılaştırma için saatleri sıfırlıyoruz
@@ -68,7 +69,7 @@ export default function ProjectInitialization() {
     const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7);
 
-    allIssues.forEach((issue: any) => {
+    allIssues.forEach((issue: Issue) => {
       const isOpen = issue.status !== "DONE" && issue.status !== "CANCELLED";
 
       if (!isOpen) return;

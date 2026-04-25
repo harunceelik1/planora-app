@@ -86,11 +86,11 @@ export function ActiveProjects({ projects }: ActiveProjectsProps) {
                       className="w-6 h-6 border-2 border-background ring-0"
                     >
                       <AvatarImage
-                        src={member.user.image}
-                        alt={member.user.name}
+                        src={member.user.image ?? undefined}
+                        alt={member.user.name ?? undefined}
                       />
                       <AvatarFallback className="text-[9px] bg-muted text-muted-foreground font-medium">
-                        {member.user.name.charAt(0).toUpperCase()}
+                        {member.user.name ? member.user.name.charAt(0).toUpperCase() : "?"}
                       </AvatarFallback>
                     </Avatar>
                   ))}

@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const logConfig: Array<any> = ["error", "warn"];
+const logConfig: Prisma.LogLevel[] = ["error", "warn"];
 if (process.env.PRISMA_LOG_QUERIES === "true") logConfig.unshift("query");
 
 export const db =

@@ -38,9 +38,10 @@ export function useMemberRole() {
 
       router.refresh(); // Listeyi anında yenile
       return true;
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "Bir hata oluştu.");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error || "Bir hata oluştu.");
+      console.error(message);
+      toast.error(message);
       return false;
     } finally {
       setIsLoading(false);

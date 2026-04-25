@@ -26,9 +26,10 @@ export const useCreateProject = () => {
       
       router.push(ROUTES.PROJECTS.LIST);
 
-    } catch (error: any) {
-      setApiError(error.message);
-      toast.error(error.message || "Proje oluşturulamadı.");    
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error || "Proje oluşturulamadı.");
+      setApiError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

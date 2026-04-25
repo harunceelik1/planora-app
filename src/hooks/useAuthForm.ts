@@ -86,9 +86,9 @@ export const useAuthForm = (type: "signin" | "signup") => {
       router.push(ROUTES.NEW_VERIFICATION(email));
 
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 👇 Çeviri: Beklenmeyen hata
-      const message = err?.message ?? t("errors.unexpected");
+      const message = err instanceof Error ? err.message : String(err || t("errors.unexpected"));
       toast.error(message);
     } finally {
       setLoading(false);

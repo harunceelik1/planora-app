@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function updateIssueAssignee(
@@ -40,7 +41,7 @@ export async function updateIssueData(
   },
 ) {
   try {
-    const updatePayload: any = { ...data };
+    const updatePayload: Prisma.IssueUpdateInput = { ...data } as Prisma.IssueUpdateInput;
 
     if (data.dueDate !== undefined) {
       updatePayload.dueDate = data.dueDate ? new Date(data.dueDate) : null;
@@ -59,9 +60,10 @@ export async function updateIssueData(
 
     revalidatePath("/");
     return { success: true, data: updatedIssue };
-  } catch (error: any) {
-    console.error("GÖREV GÜNCELLEME HATASI DETAYI:", error.message || error);
-    return { success: false, error: error.message || "Görev güncellenemedi." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("GÖREV GÜNCELLEME HATASI DETAYI:", message);
+    return { success: false, error: message || "Görev güncellenemedi." };
   }
 }
 

@@ -312,7 +312,9 @@
         "confirm": "Are you sure you want to delete the selected issues?",
         "delete": "Delete selected",
         "success": "{count} issues deleted.",
-        "failed": "Bulk delete failed."
+        "failed": "Bulk delete failed.",
+        "selected": "{count} items selected"
+
       }
       ,
       "sprintDelete": {

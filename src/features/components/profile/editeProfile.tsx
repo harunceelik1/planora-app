@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing";
 import { updateProfile } from "@/hooks/useUpdateProfile";
+import type { UpdateProfileInput } from "@/types/shared";
 import { FormDatePicker } from "../form/date-picker";
 import { TimezoneSelect } from "../form/timezone-select";
 import { User } from "@/types/user";
@@ -127,7 +128,7 @@ export default function EditProfileDialog({
           : user.birthdate,
       };
 
-      const result = await updateProfile(payload as any);
+      const result = await updateProfile(payload as UpdateProfileInput);
 
       if (!result.success) {
         toast.error(result.error || "Hata oluştu");
@@ -142,9 +143,10 @@ export default function EditProfileDialog({
       toast.success("Profil güncellendi");
       setOpen(false);
       if (onSuccess) onSuccess();
-    } catch (err) {
-      console.error(err);
-      toast.error("Bir şeyler yanlış gitti");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err || "Bir şeyler yanlış gitti");
+      console.error(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

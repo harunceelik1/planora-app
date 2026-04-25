@@ -25,11 +25,10 @@ export const useAddMember = () => {
       }
 
       router.refresh();
-    } catch (error: any) {
-      {
-        setApiError(error.message);
-        toast.error(error.message || "Üye eklenemedi.");
-      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error || "Üye eklenemedi.");
+      setApiError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

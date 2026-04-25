@@ -5,16 +5,15 @@ import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const ids: string[] = body?.ids || [];
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return NextResponse.json({ error: "No ids provided" }, { status: 400 });
-  }
+  const raw = await req.json();
+  const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.bulkDeleteSchema, raw));
+  if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+  const ids: string[] = parsed.data.ids;
 
   try {
     // Load projectId from first id to revalidate later
@@ -31,8 +30,9 @@ export async function POST(req: Request) {
     revalidatePath("/", "layout");
 
     return NextResponse.json({ success: true, deleted: ids.length });
-  } catch (error: any) {
-    console.error("Bulk delete error:", error);
-    return NextResponse.json({ success: false, error: error?.message || "Failed" }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error || "Failed");
+    console.error("Bulk delete error:", message);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

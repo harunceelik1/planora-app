@@ -5,12 +5,10 @@ import { db } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { token } = body;
-
-    if (!token) {
-      return NextResponse.json({ error: "Kod eksik!" }, { status: 400 });
-    }
+    const raw = await req.json();
+    const parsed = await import("@/lib/validation").then((m) => m.parseSafe(m.newVerificationSchema, raw));
+    if (!parsed.ok) return NextResponse.json({ error: "Invalid body", details: parsed.error }, { status: 400 });
+    const { token } = parsed.data;
 
     // 1. Token veritabanında var mı?
     const existingToken = await db.verificationToken.findFirst({

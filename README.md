@@ -40,3 +40,20 @@ TODO
 1. Dashboard -> home olabilir (naming)
 2. Home kısmını kaldır
 3. Login olduktan sonra project sayfasına gitsin, project yok ise create new project ekranı gelsin, proje var ise var olan projeler listelensin ve sağ üstte yeni proje oluşturabileceği bir buton olsun yeni proje oluşturma akışına girsin. proje oluşturulduktan sonra tekrar project ekranına geri dönsün.
+
+## Production: Rate limiting and Upstash
+
+This project includes an optional Redis-backed rate limiter that integrates with Upstash. To enable it in production, set the following environment variables in your deployment:
+
+- `UPSTASH_REDIS_REST_URL` — Upstash REST URL
+- `UPSTASH_REDIS_REST_TOKEN` — Upstash REST token
+
+If these are not set, the app falls back to an in-memory rate limiter (not suitable for multi-instance production). The primary use is to protect AI endpoints like `POST /api/ai/decompose`.
+
+Recommended steps for production:
+
+1. Create an Upstash Redis instance and copy the REST URL & token.
+2. Add them to your deployment environment settings (Vercel/Netlify/etc.).
+3. Ensure `GOOGLE_GEMINI_KEY` and `DATABASE_URL` are also configured.
+
+Note: In-memory fallback is useful for local development but will not synchronize across multiple server instances.

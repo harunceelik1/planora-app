@@ -5,8 +5,9 @@ import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
+import type { Project } from "@/types/project";
 
-export function BacklogTab({ project }: { project: any }) {
+export function BacklogTab({ project }: { project: Project }) {
   // 2. Hook'u tanımlıyoruz.
   // "ProjectDetails" namespace'ini kullanıyoruz.
   const t = useTranslations("ProjectDetails");
