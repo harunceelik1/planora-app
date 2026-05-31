@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Issue, Project, Sprint, ProjectMember } from "@/types/project";
 import { IssueAssigneeSelector } from "./issue-assignee-selector";
+import { IssueLabelList } from "../issue/issue-labels";
 
 interface BacklogItemCardProps {
   issue: Issue;
@@ -37,13 +38,14 @@ interface BacklogItemCardProps {
   onMove: (issueId: string, targetSprintId: string | null) => void;
   selected?: boolean;
   onToggleSelect?: (id: string) => void;
+  currentUserRole?: "OWNER" | "ADMIN" | "MEMBER";
 }
 
 const priorityStyles: Record<string, string> = {
-  LOW: "bg-blue-50 text-blue-600 dark:bg-blue-900/80 dark:text-blue-200",
-  MEDIUM: "bg-amber-50 text-amber-600 dark:bg-amber-900/80 dark:text-amber-200",
-  HIGH: "bg-orange-50 text-orange-600 dark:bg-orange-900/80 dark:text-orange-200",
-  HIGHEST: "bg-red-50 text-red-600 dark:bg-red-900/80 dark:text-red-200",
+  LOW: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300",
+  MEDIUM: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300",
+  HIGH: "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/50 dark:bg-orange-950/40 dark:text-orange-300",
+  HIGHEST: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300",
 };
 
 export default function BacklogItemCard({
@@ -55,6 +57,7 @@ export default function BacklogItemCard({
   onMove,
   selected,
   onToggleSelect,
+  currentUserRole = "MEMBER",
 }: BacklogItemCardProps) {
   const t = useTranslations("ProjectDetails");
   const priority = issue.priority || "MEDIUM";
@@ -68,61 +71,80 @@ export default function BacklogItemCard({
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={cn(
-            "grid grid-cols-[30px_30px_minmax(200px,1fr)_120px_150px_50px] gap-2 items-center px-4 py-3 bg-card dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:border-slate-300 dark:hover:border-slate-700 transition-all",
-            snapshot.isDragging && "shadow-2xl border-primary/30 z-50 ring-2 ring-primary/20 opacity-95",
+            "grid grid-cols-[26px_28px_minmax(220px,1fr)_120px_150px_44px] items-center gap-4 rounded-xl border border-border bg-card px-4 py-3 text-card-foreground",
+            "group transition-all duration-150 hover:border-border/80 hover:bg-muted/40",
+            selected && "border-indigo-500/30 bg-indigo-50/40 dark:border-indigo-500/40 dark:bg-indigo-950/20",
+            snapshot.isDragging &&
+              "z-50 border-primary/30 bg-card shadow-2xl ring-2 ring-primary/15",
           )}
         >
+          {/* Drag Handle */}
           <div
             {...provided.dragHandleProps}
-            className="cursor-grab active:cursor-grabbing text-slate-300 opacity-0 group-hover:opacity-100 flex justify-center transition-opacity"
+            className="flex justify-center text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 cursor-grab active:cursor-grabbing"
           >
             <GripVertical size={16} />
           </div>
+
+          {/* Checkbox */}
           <div className="flex justify-center">
             <Checkbox
               aria-label={`select-issue-${issue.id}`}
               checked={!!selected}
               onCheckedChange={() => onToggleSelect && onToggleSelect(issue.id)}
-              className="h-4 w-4 mt-1 cursor-pointer"
+              className="h-4 w-4 cursor-pointer"
             />
           </div>
+
+          {/* Task Info */}
           <div
-            className="flex flex-col items-start gap-0.5 overflow-hidden cursor-pointer"
+            className="flex cursor-pointer flex-col items-start gap-1 overflow-hidden"
             onClick={onEdit}
           >
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-none truncate w-full">
+            <span className="w-full truncate text-sm font-semibold leading-snug text-card-foreground">
               {issue.title}
             </span>
-            <div className="text-[11px] font-medium text-slate-400 dark:text-slate-400 mt-1">
+            <div className="font-mono text-[11px] font-medium text-muted-foreground/80">
               {project.projectKey}-{issue.number}
             </div>
+            <IssueLabelList labels={issue.labels} limit={3} />
           </div>
-          <div>
+
+          {/* Priority Badge */}
+          <div className="flex items-center">
             <Badge
               variant="secondary"
               className={cn(
-                "px-2 py-0.5 text-[10px] font-bold border-transparent",
+                "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide shadow-none",
                 badgeStyle,
               )}
             >
               {priority}
             </Badge>
           </div>
-          <div>
+
+          {/* Assignee Selector */}
+          <div className="min-w-0">
             <IssueAssigneeSelector
               issue={issue}
               members={users}
               projectId={project.id}
+              currentUserRole={currentUserRole}
             />
           </div>
-          <div className="flex justify-end pr-2">
+
+          {/* Actions Dropdown */}
+          <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 outline-none">
-                  <MoreHorizontal className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 rounded-lg p-0 text-muted-foreground outline-none hover:bg-muted hover:text-foreground"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48 bg-card text-card-foreground border-border">
                 <DropdownMenuLabel>
                   {t("backlogView.table.actions")}
                 </DropdownMenuLabel>
@@ -138,7 +160,7 @@ export default function BacklogItemCard({
                   <Pen className="mr-2 h-3.5 w-3.5" />{" "}
                   {t("backlogView.table.edit_task")}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-border" />
                 {sprints?.length ? (
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
@@ -146,27 +168,25 @@ export default function BacklogItemCard({
                       {t("backlogView.table.move_to_sprint")}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                       {sprints.map((s) => {
-                const isCompleted = s.status === "COMPLETED"; // Durumu kontrol et
+                      <DropdownMenuSubContent className="bg-card text-card-foreground border-border">
+                        {sprints.map((s) => {
+                          const isCompleted = s.status === "COMPLETED";
 
-                return (
-                  <DropdownMenuItem
-                    key={s.id}
-                    // 1. Tıklamayı sadece "COMPLETED" değilse çalıştır
-                    onClick={() => !isCompleted && onMove(issue.id, s.id)}
-                    // 2. Menü öğesini disabled yap (bu otomatik olarak sönükleştirir ve tıklamayı keser)
-                    disabled={isCompleted}
-                    className={cn(
-                      isCompleted && "opacity-50 cursor-not-allowed" 
-                    )}
-                  >
-                    <span className="truncate">
-                      {s.name}
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
+                          return (
+                            <DropdownMenuItem
+                              key={s.id}
+                              onClick={() => !isCompleted && onMove(issue.id, s.id)}
+                              disabled={isCompleted}
+                              className={cn(
+                                isCompleted && "opacity-50 cursor-not-allowed"
+                              )}
+                            >
+                              <span className="truncate">
+                                {s.name}
+                              </span>
+                            </DropdownMenuItem>
+                          );
+                        })}
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>

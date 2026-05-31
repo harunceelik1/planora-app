@@ -10,15 +10,15 @@ interface IssueItemProps {
   issue: Issue;
   projectKey: string;
   members: Project["members"];
-  projectId: string; // 👈 1. Buraya projectId ekledik
+  projectId: string;
+  currentUserRole?: "OWNER" | "ADMIN" | "MEMBER"; // Kullanıcının projede ki rolü
 }
 
 export function IssueItem({
   issue,
   projectKey,
   members,
-  projectId,
-}: IssueItemProps) {
+  projectId,  currentUserRole = "MEMBER",}: IssueItemProps) {
   // 👈 2. Prop olarak aldık
   const users = members.map((m) => m.user);
 
@@ -53,8 +53,7 @@ export function IssueItem({
           <IssueAssigneeSelector
             issue={issue}
             members={users}
-            projectId={projectId}
-          />
+            projectId={projectId}            currentUserRole={currentUserRole}          />
         </div>
 
         <div

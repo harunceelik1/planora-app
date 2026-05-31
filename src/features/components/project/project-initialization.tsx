@@ -34,10 +34,10 @@ export default function ProjectInitialization() {
     revalidateOnFocus: true,
   });
 
-  // ⭐ Hem oturum hem de projeler yüklenene kadar bekleme durumu
+  //Hem oturum hem de projeler yüklenene kadar bekleme durumu
   const isPageLoading = status === "loading" || isLoading;
 
-  // ⭐ Tam ekran, ortalanmış profesyonel yükleme (Spinner) ekranı
+  // Tam ekran, ortalanmış profesyonel yükleme (Spinner) ekranı
   if (isPageLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
@@ -54,7 +54,7 @@ export default function ProjectInitialization() {
   const userName = session?.user?.name || t("defaultUser");
   const hasProjects = projects && projects.length > 0;
 
-  // ⭐ DİNAMİK HESAPLAMA (API'den dönen güncel şemaya göre)
+  //  DİNAMİK HESAPLAMA (API'den dönen güncel şemaya göre)
   let openTasksCount = 0;
   let criticalTasksCount = 0;
   let upcomingTasksCount = 0;

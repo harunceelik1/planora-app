@@ -146,7 +146,8 @@
       },
       "phone": {
         "label": "Phone Number",
-        "placeholder": "(555) 123 45 67"
+        "placeholder": "(555) 123 45 67",
+        "helper": "Use international format, e.g. +90 555 123 45 67"
       }
     },
     "googleManaged": {
@@ -208,8 +209,14 @@
       "timeline": "Timeline",
       "backlog": "Backlog",
       "board": "Board",
+      "team": "Team",
       "calendar": "Calendar",
       "archive": "Archive"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
     },
     "sprintPanel": {
       "title": "Sprint {number}",
@@ -332,6 +339,18 @@
         "totalTasks": "Total Tasks",
         "completed": "Completed",
         "overdue": "Overdue"
+      },
+      "team": {
+        "title": "Team Members",
+        "description": "See who is part of this project and where they are located.",
+        "noMembers": {
+          "title": "No teammates yet",
+          "description": "Invite people to the project to build your team."
+        },
+        "noJobTitle": "No title provided",
+        "noLocation": "Location not specified",
+        "emailMissing": "Email not available",
+        "unknown": "Unknown"
       },
       "timeline": {
         "title": "Timeline",
@@ -645,6 +664,26 @@
     }
   },
   "footerNote": "Need help? Check out the documentation.",
+  "projectSwitcher": {
+    "label": "Switch project"
+  },
+  "invite": {
+    "bannerTitle": "{from} invited you",
+    "bannerDesc": "You have been invited to join a project. Accept to join the workspace.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "accepting": "Accepting...",
+    "declining": "Declining..."
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "steps": {
+      "createProject": "Create your first project",
+      "inviteTeam": "Invite your team",
+      "createFirstIssue": "Create your first task",
+      "connectRepo": "Connect a repository or import a template"
+    }
+  },
   "sidebar": {
     "activeProjects": "Active Projects",
       "lastUpdated": "Last updated: {time}",
@@ -720,7 +759,8 @@
       "priority": "PRIORITY",
       "dueDate": "DUE DATE",
       "storyPoints": "STORY POINTS",
-      "description": "DESCRIPTION"
+      "description": "DESCRIPTION",
+      "labels": "LABELS"
     },
     "statuses": {
       "todo": "To Do",
@@ -739,11 +779,16 @@
       "estimate": "Estimate",
       "addDescription": "Add a description...",
       "addComment": "Add a comment...",
-      "selectPriority": "Select priority"
+      "selectPriority": "Select priority",
+      "addLabel": "Add a label..."
     },
     "buttons": {
       "save": "Save",
       "cancel": "Cancel"
+    },
+    "activity": {
+      "loading": "Loading...",
+      "noActivities": "No activities yet"
     },
     "deleteDialog": {
       "title": "Delete task",
@@ -763,7 +808,43 @@
       "inProgress": "In Progress",
       "completed": "Completed",
       "overdue": "Overdue",
-      "members": "Members"
+      "members": "Members",
+      "totalTasksHint": "All tasks created in this project",
+      "completedHint": "{rate}% completion rate",
+      "inProgressHint": "Tasks currently being worked on",
+      "overdueHint": "Open tasks past their due date"
+    },
+    "common": {
+      "unknownUser": "Unknown user"
+    },
+    "sprint": {
+      "title": "Sprint Status",
+      "noActiveSprint": "No active sprint",
+      "noActiveSprintDescription": "Scope and progress will appear here once a sprint starts.",
+      "noGoal": "No sprint goal has been set.",
+      "progress": "Progress",
+      "scope": "Scope",
+      "doneRatio": "{done}/{total} tasks completed"
+    },
+    "status": {
+      "todo": "{count} to do",
+      "inProgress": "{count} in progress",
+      "done": "{count} done"
+    },
+    "lists": {
+      "overdueTitle": "At-risk and overdue tasks",
+      "overdueEmpty": "No overdue tasks.",
+      "upcomingTitle": "Upcoming deadlines",
+      "upcomingEmpty": "No upcoming due dates.",
+      "overdueBadge": "{count} days overdue",
+      "todayBadge": "Today",
+      "upcomingBadge": "{count} days left"
+    },
+    "team": {
+      "title": "Team workload",
+      "empty": "No team members to display yet.",
+      "completedCount": "{count} completed tasks",
+      "openCount": "open tasks"
     },
     "recent": {
       "title": "Recently Updated Issues",

@@ -13,19 +13,21 @@ import {
   CalendarDays,
   LayoutDashboard,
   Archive,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import BacklogView from "@/features/components/project/backlog/backlog-view";
 import TimelineView from "@/features/components/project/tabs/timeline-view";
+import TeamMembers from "@/features/components/project/tabs/team-members";
 import { FavoriteButton } from "@/features/components/project/favorite-button";
 import { AddMemberDialog } from "@/features/components/project/project-data/add-member-dialog";
 import { ProjectActions } from "@/features/components/project/proejct-actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Issue, Project } from "@/types/project";
 import BoardView from "@/features/components/project/tabs/board-view";
-import ProjectSummary from "@/features/components/project/project-summary";
+import ProjectSummary from "@/features/components/project/tabs/project-summary";
 
 // --- 1. Helper Bileşen: Circular Progress ---
 const CircularProgress = ({
@@ -164,9 +166,9 @@ export default function ProjectDetailsPage({
   };
 
   return (
-    <main className="flex flex-col h-screen bg-background transition-colors overflow-hidden">
+    <main className="min-h-screen bg-background transition-colors">
       {/* HEADER */}
-      <header className="flex-none px-8 pt-6 pb-0 bg-background z-20">
+      <header className="px-8 pt-6 pb-0 bg-background z-20">
         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-4">
           <Link
             href="/main/projects"
@@ -256,7 +258,7 @@ export default function ProjectDetailsPage({
         <div className="mt-4">
           <Tabs
             defaultValue="backlog"
-            className="w-full flex flex-col h-[calc(100vh-140px)]"
+            className="flex w-full flex-col"
           >
             <div className="border-b border-border w-full px-1">
               <TabsList className="flex w-fit justify-start gap-8 bg-transparent p-0 h-auto rounded-none">
@@ -279,6 +281,9 @@ export default function ProjectDetailsPage({
                 <TabsTrigger value="board" className={tabTriggerStyle}>
                   <KanbanSquare className="h-4 w-4 mb-0.5" /> {t("tabs.board")}
                 </TabsTrigger>
+                <TabsTrigger value="team" className={tabTriggerStyle}>
+                  <Users className="h-4 w-4 mb-0.5" /> {t("tabs.team")}
+                </TabsTrigger>
                 <TabsTrigger value="archive" className={tabTriggerStyle}>
                   <Archive className="h-4 w-4 mb-0.5" /> {t("tabs.archive")}
                 </TabsTrigger>
@@ -286,7 +291,7 @@ export default function ProjectDetailsPage({
             </div>
 
             {/* SEKMELERİN İÇERİĞİ - bg-transparent yapılarak arka plan uyumu sağlandı */}
-            <div className="flex-1 bg-transparent overflow-hidden relative">
+            <div className="bg-transparent relative">
               <TabsContent
                 value="backlog"
                 className="h-full m-0 border-none outline-none"
@@ -301,22 +306,33 @@ export default function ProjectDetailsPage({
 
               <TabsContent
                 value="board"
-                className="h-full m-0 p-6 overflow-y-auto"
+                className="m-0 overflow-hidden p-6"
               >
                 <BoardView project={project} />
               </TabsContent>
-              <TabsContent value="overview" className="h-full p-6">
-                <div className="h-full overflow-y-auto">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">
-                    {t("views.overview.title")}
-                  </h3>
-                  <ProjectSummary project={project} />
-                </div>
+              <TabsContent value="overview" className="m-0 p-6">
+                <h3 className="mb-4 text-lg font-semibold text-foreground">
+                  {t("views.overview.title")}
+                </h3>
+                <ProjectSummary project={project} />
               </TabsContent>
-              <TabsContent value="timeline" className="h-full m-0 p-6">
+              <TabsContent value="timeline" className="m-0 p-6">
                 <TimelineView project={project} />
               </TabsContent>
-              <TabsContent value="archive" className="h-full p-6">
+              <TabsContent value="team" className="m-0 p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold text-foreground">
+                      {t("views.team.title")}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t("views.team.description")}
+                    </p>
+                  </div>
+                  <TeamMembers members={members} />
+                </div>
+              </TabsContent>
+              <TabsContent value="archive" className="m-0 p-6">
                 <ArchiveTab project={project} />
               </TabsContent>
             </div>

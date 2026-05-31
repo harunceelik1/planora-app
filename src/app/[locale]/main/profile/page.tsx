@@ -7,8 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { formatName, getInitials } from "@/lib/utils";
-import { MapPin, BriefcaseBusiness, Calendar, Phone } from "lucide-react";
+import { formatName, getInitials, formatTimezone } from "@/lib/utils";
+import { MapPin, BriefcaseBusiness, Calendar, Phone, Clock } from "lucide-react";
 import EditProfileDialog from "@/features/components/profile/editeProfile";
 import ChangePasswordDialog from "@/features/components/profile/changePassword";
 import { useTranslations, useFormatter } from "next-intl";
@@ -65,6 +65,7 @@ export default function ProfilePage() {
   const hasPassword = user.hasPassword;
   const fName = formatName(user.name);
   const initials = getInitials(user.name, user.email);
+  const timezoneLabel = user.timezone ? formatTimezone(user.timezone).full : null;
 
   return (
     // DÜZELTME 3: Sayfa arka planı (opsiyonel, genelde layout verir ama garanti olsun)
@@ -150,6 +151,19 @@ export default function ProfilePage() {
 
                 <Field label={t("phone") || "Telefon"} icon={Phone}>
                   {user.phone || (
+                    <span className="text-muted-foreground/50 italic">
+                      {t("notSpecified")}
+                    </span>
+                  )}
+                </Field>
+
+                <Field
+                  label={t("details.timezone.label") || "Zaman Dilimi"}
+                  icon={Clock}
+                >
+                  {timezoneLabel ? (
+                    <span>{timezoneLabel}</span>
+                  ) : (
                     <span className="text-muted-foreground/50 italic">
                       {t("notSpecified")}
                     </span>

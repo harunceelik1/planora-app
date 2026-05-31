@@ -26,6 +26,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ROUTES } from "@/constants/routest";
 import { LanguageSwitcher } from "../language-switcher/language-switcher";
 import useSWR from "swr";
+import { ModeToggle } from "../theme/mode-toggle";
 
 interface NavbarNotification {
   id: string;
@@ -108,8 +109,8 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-4 z-50 mx-4 md:ml-4 md:mr-4 border border-border/60 rounded-2xl bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg shadow-black/5">
-      <nav className="flex items-center justify-between px-4 sm:px-6 lg:px-6 py-3">
+    <header className="sticky top-0 z-40 border-b border-border/10 bg-background/95 backdrop-blur-sm">
+      <nav className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-10">
           <div className="md:flex hidden items-center gap-1">
             {navLinks.map((link) => (
@@ -129,6 +130,8 @@ export const Navbar = () => {
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>
+
+          <ModeToggle />
 
           {status === "loading" ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -334,8 +337,9 @@ export const Navbar = () => {
                 </SheetHeader>
 
                 <div className="flex flex-col gap-2 mt-6 px-4 w-full">
-                  <div className="mb-4 flex justify-start">
+                  <div className="mb-4 flex items-center justify-start gap-3">
                     <LanguageSwitcher />
+                    <ModeToggle />
                   </div>
 
                   {navLinks.map((link) => (

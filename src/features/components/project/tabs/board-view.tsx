@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { useSWRConfig } from "swr";
 import {
   KanbanSquare,
   CalendarDays,
@@ -17,7 +18,6 @@ import {
   TrendingUp,
   Flag,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +31,13 @@ import { Issue, IssueStatus, Project } from "@/types/project";
 import { completeSprint } from "@/actions/sprint-actions";
 import { updateIssueData } from "@/actions/issue-actions";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_ISSUE_FILTERS,
+  filterIssues,
+  IssueFilters,
+  type IssueFilterState,
+} from "../issue/issue-filters";
+import { IssueLabelList } from "../issue/issue-labels";
 
 interface BoardViewProps {
   project: Project;
@@ -109,6 +116,8 @@ const COLUMN_CONFIG: Record<
 
 export default function BoardView({ project }: BoardViewProps) {
   const t = useTranslations("ProjectDetails");
+  const { mutate } = useSWRConfig();
+  const projectApiKey = `/api/project/${project.id}`;
   const activeSprint = project.sprints?.find((s) => s.status === "ACTIVE");
   const sprintIssues = useMemo(
     () =>
@@ -121,11 +130,13 @@ export default function BoardView({ project }: BoardViewProps) {
   );
 
   const [issues, setIssues] = useState<Issue[]>(sprintIssues);
+  const [filters, setFilters] = useState<IssueFilterState>(DEFAULT_ISSUE_FILTERS);
   const [isCompletingSprint, setIsCompletingSprint] = useState(false);
   const [isCompleteSprintDialogOpen, setIsCompleteSprintDialogOpen] =
     useState(false);
 
   useEffect(() => setIssues(sprintIssues), [sprintIssues]);
+  const filteredIssues = filterIssues(issues, filters);
 
   const handleCompleteSprint = async () => {
     if (!activeSprint) return;
@@ -179,7 +190,10 @@ export default function BoardView({ project }: BoardViewProps) {
       if (!result.success) {
         setIssues(prev);
         toast.error(`${t("views.board.statusUpdateFailed")} ${result.error || ""}`.trim());
+        return;
       }
+
+      await mutate(projectApiKey);
     } catch {
       setIssues(prev);
       toast.error(t("views.board.statusUpdateError"));
@@ -187,15 +201,15 @@ export default function BoardView({ project }: BoardViewProps) {
   };
 
   // ── Stats ──────────────────────────────────────────────────────────────
-  const totalIssues = issues.length;
-  const doneCount = issues.filter((i) => i.status === "DONE").length;
-  const inProgressCount = issues.filter((i) => i.status === "IN_PROGRESS").length;
+  const totalIssues = filteredIssues.length;
+  const doneCount = filteredIssues.filter((i) => i.status === "DONE").length;
+  const inProgressCount = filteredIssues.filter((i) => i.status === "IN_PROGRESS").length;
   const progressPct = totalIssues > 0 ? Math.round((doneCount / totalIssues) * 100) : 0;
 
   // ── No active sprint ───────────────────────────────────────────────────
   if (!activeSprint) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+      <div className="flex h-full flex-col items-center justify-center gap-4 mt-16 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
           <KanbanSquare className="h-8 w-8 text-slate-400" />
         </div>
@@ -212,18 +226,25 @@ export default function BoardView({ project }: BoardViewProps) {
   }
 
   return (
-    <div className="flex h-full flex-col gap-5 overflow-y-auto pb-8">
+    <div className="flex h-full min-h-0 flex-col gap-5 overflow-y-auto pb-8">
+      <IssueFilters
+        filters={filters}
+        onChange={setFilters}
+        issues={issues}
+        members={project.members || []}
+        resultCount={filteredIssues.length}
+      />
 
       {/* ── Sprint Header Card ──────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white h-full dark:bg-slate-900 shadow-sm overflow-hidden">
+      <div className="shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900">
         {/* top accent bar */}
         <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500" />
 
         <div className="p-5">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
 
             {/* Left — sprint info */}
-            <div className="flex-1 space-y-4">
+            <div className="min-w-0 flex-1 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 {/* Active badge */}
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/50">
@@ -261,9 +282,9 @@ export default function BoardView({ project }: BoardViewProps) {
             </div>
 
             {/* Right — stats + button */}
-            <div className="flex flex-col gap-4 lg:items-end">
+            <div className="flex w-full flex-col gap-4 xl:w-auto xl:min-w-[240px] xl:items-end">
               {/* Mini stat chips */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 xl:justify-end">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400">
                   <Zap className="h-3.5 w-3.5 text-amber-500" />
                   {inProgressCount} in progress
@@ -275,7 +296,7 @@ export default function BoardView({ project }: BoardViewProps) {
               </div>
 
               {/* Progress bar */}
-              <div className="w-full lg:w-56 space-y-1.5">
+              <div className="w-full space-y-1.5 xl:w-56">
                 <div className="flex justify-between text-[11px] text-slate-400 dark:text-slate-500">
                   <span>{doneCount} / {totalIssues} done</span>
                   <span>{progressPct}%</span>
@@ -293,7 +314,7 @@ export default function BoardView({ project }: BoardViewProps) {
                 disabled={isCompletingSprint}
                 size="sm"
                 className={cn(
-                  "h-9 px-4 gap-2 rounded-xl text-xs font-semibold",
+                  "h-9 w-full px-4 gap-2 rounded-xl text-xs font-semibold sm:w-auto",
                   "bg-slate-900 hover:bg-slate-700 text-white",
                   "dark:bg-slate-100 dark:hover:bg-slate-300 dark:text-slate-900",
                   "transition-colors duration-150 disabled:opacity-50",
@@ -310,16 +331,17 @@ export default function BoardView({ project }: BoardViewProps) {
       </div>
 
       {/* ── Kanban columns ─────────────────────────────────────────────── */}
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="overflow-x-auto pb-2">
+        <div className="flex min-w-full items-start gap-4 xl:grid xl:grid-cols-3 xl:overflow-visible">
         {columns.map((column) => {
           const colCfg = COLUMN_CONFIG[column.key];
-          const columnIssues = issues.filter((i) => i.status === column.key);
+          const columnIssues = filteredIssues.filter((i) => i.status === column.key);
 
           return (
             <div
               key={column.key}
               className={cn(
-                "flex flex-col rounded-2xl border-t-2 border border-slate-200 dark:border-slate-700/60",
+                "flex min-h-[280px] min-w-[280px] flex-1 flex-col rounded-2xl border border-slate-200 border-t-2 md:min-w-[320px] xl:min-w-0 dark:border-slate-700/60",
                 "bg-slate-50/50 dark:bg-slate-900/50",
                 "shadow-sm overflow-hidden",
                 colCfg.accent,
@@ -390,9 +412,12 @@ export default function BoardView({ project }: BoardViewProps) {
 
                         {/* Top row: title + assignee avatar */}
                         <div className="flex items-start justify-between gap-3 pl-2.5">
-                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">
-                            {issue.title}
-                          </p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">
+                              {issue.title}
+                            </p>
+                            <IssueLabelList labels={issue.labels} limit={3} className="mt-1.5" />
+                          </div>
                           {/* Avatar */}
                           <div className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
                             {issue.assignee?.name
@@ -474,6 +499,7 @@ export default function BoardView({ project }: BoardViewProps) {
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* ── Complete Sprint Dialog ──────────────────────────────────────── */}

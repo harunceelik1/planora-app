@@ -10,12 +10,12 @@ async function canAccessProject(userId: string, projectId: string) {
     where: { id: projectId },
     select: {
       ownerId: true,
-      members: { where: { userId }, select: { id: true }, take: 1 },
+      members: { where: { userId }, select: { role: true }, take: 1 },
     },
   });
   if (!project) return false;
   if (project.ownerId === userId) return true;
-  return project.members.length > 0;
+  return project.members[0]?.role === "ADMIN";
 }
 
 // 1. Yeni Boş Sprint Oluştur

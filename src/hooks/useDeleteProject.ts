@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify"; // Kullandığınız toast kütüphanesi
+import { ROUTES } from "@/constants/routest";
 
 export function useDeleteProject() {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -21,7 +22,26 @@ export function useDeleteProject() {
 
       toast.success("Proje başarıyla silindi.");
 
-      router.push("/main/projects"); // Listeye yönlendir
+      // Projeler listesini kontrol et: eğer hiç proje yoksa ana sayfaya, aksi halde /main/projects'e yönlendir
+      try {
+        const projectsRes = await fetch("/api/project");
+        if (projectsRes.ok) {
+          const projects = await projectsRes.json();
+          const hasProjects = Array.isArray(projects) && projects.length > 0;
+          if (hasProjects) {
+            router.push(ROUTES.PROJECTS.LIST);
+          } else {
+            router.push(ROUTES.MAIN);
+          }
+        } else {
+          // Eğer projeler alınamazsa varsayılan olarak listeye yönlendir
+          router.push(ROUTES.PROJECTS.LIST);
+        }
+      } catch (err) {
+        console.error("Proje kontrolü sırasında hata:", err);
+        router.push(ROUTES.PROJECTS.LIST);
+      }
+
       router.refresh(); // Server componentleri yenile
 
       return true; // İşlem başarılı

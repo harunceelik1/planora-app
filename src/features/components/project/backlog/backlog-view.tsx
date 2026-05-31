@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
@@ -26,6 +26,12 @@ import BacklogGroup from "./BacklogGroup";
 import SprintGroup from "./SprintGroup";
 import StartSprintModal from "./StartSprintModal";
 import { TaskDetailSheet } from "./TaskDetailSheet";
+import {
+  DEFAULT_ISSUE_FILTERS,
+  filterIssues,
+  IssueFilters,
+  IssueFilterState,
+} from "../issue/issue-filters";
 
 type ProjectWithSprints = Project & { sprints?: Sprint[] };
 
@@ -42,10 +48,20 @@ export default function BacklogView({
   const { mutate } = useSWRConfig();
   const t = useTranslations("ProjectDetails");
 
+  // Current user'ın rolünü bul
+  const currentUserRole = (() => {
+    if (!session?.user?.id) return "MEMBER";
+    const currentMember = project.members?.find(
+      (m) => m.user.id === session.user.id
+    );
+   return (currentMember?.role as "OWNER" | "ADMIN" | "MEMBER") || "MEMBER";
+  })();
+
   const [isMounted, setIsMounted] = useState(false);
   const [issues, setIssues] = useState<Issue[]>(initialIssues || []);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [filters, setFilters] = useState<IssueFilterState>(DEFAULT_ISSUE_FILTERS);
   const [creatingSprint, setCreatingSprint] = useState(false);
   const [sprintModal, setSprintModal] = useState<{
     sprint: Sprint;
@@ -56,7 +72,8 @@ export default function BacklogView({
   const sprints = project.sprints || [];
   const activeSprints = sprints.filter((sprint) => sprint.status !== "COMPLETED");
   const projectApiKey = `/api/project/${project.id}`;
-  const backlogIssues = issues.filter((issue) => !issue.sprintId);
+  const filteredIssues = filterIssues(issues, filters);
+  const backlogIssues = filteredIssues.filter((issue) => !issue.sprintId);
 
   useEffect(() => {
     setIsMounted(true);
@@ -83,7 +100,7 @@ export default function BacklogView({
       if (draggedIndex === -1) return current;
 
       const [draggedItem] = newIssues.splice(draggedIndex, 1);
-      const updatedIssue = { ...draggedItem, sprintId: targetSprintId as any };
+      const updatedIssue: Issue = { ...draggedItem, sprintId: targetSprintId };
 
       const targetList = newIssues.filter((issue) =>
         targetSprintId === null
@@ -122,7 +139,7 @@ export default function BacklogView({
     setIssues((current) =>
       current.map((issue) =>
         String(issue.id) === String(issueId)
-          ? { ...issue, sprintId: targetSprintId as any }
+          ? { ...issue, sprintId: targetSprintId }
           : issue,
       ),
     );
@@ -194,6 +211,14 @@ export default function BacklogView({
 
   return (
     <div className="flex flex-col gap-8 w-full h-full p-6 bg-transparent overflow-y-auto">
+      <IssueFilters
+        filters={filters}
+        onChange={setFilters}
+        issues={issues}
+        members={project.members || []}
+        resultCount={filteredIssues.length}
+      />
+
       <DragDropContext onDragEnd={onDragEnd}>
         {activeSprints.length > 0 && (
           <div className="flex flex-col gap-6">
@@ -201,7 +226,7 @@ export default function BacklogView({
               <SprintGroup
                 key={sprint.id}
                 sprint={sprint}
-                issues={issues.filter(
+                issues={filteredIssues.filter(
                   (issue) => String(issue.sprintId) === String(sprint.id),
                 )}
                 projectKey={project.projectKey}
@@ -211,6 +236,7 @@ export default function BacklogView({
                 onCompleteSprint={() => openCompleteSprintConfirm(sprint)}
                 onDeleteSprint={() => handleDeleteSprint(sprint.id)}
                 onSelectIssue={setSelectedIssue}
+                currentUserRole={currentUserRole}
               />
             ))}
           </div>
@@ -224,6 +250,7 @@ export default function BacklogView({
           onCreateSprint={handleCreateSprint}
           onSelectIssue={setSelectedIssue}
           onMoveIssue={handleMoveToSprint}
+          currentUserRole={currentUserRole}
         />
       </DragDropContext>
 

@@ -27,3 +27,20 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+export async function GET() {
+  try {
+    const results = await processDueTaskReminders();
+    
+    // Tarayıcıya sonuçları yazdır
+    return NextResponse.json({
+      success: true,
+      message: "Bildirim taraması tamamlandı!",
+      data: results
+    });
+  } catch (error) {
+    console.error("Cron hatası:", error);
+    return NextResponse.json({ success: false, error: "Bir hata oluştu" }, { status: 500 });
+  }
+}

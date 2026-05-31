@@ -1,10 +1,9 @@
 "use client";
 
-import { ROUTES } from "@/constants/routest";
-// 👇 1. DOĞRU ROUTER'I IMPORT ET (Dil desteği için)
-import { useRouter } from "@/i18n/routing";
-// 👇 2. TRANSLATION IMPORTU
 import { useTranslations } from "next-intl";
+
+import { ROUTES } from "@/constants/routest";
+import { useRouter } from "@/i18n/routing";
 
 interface AuthFooterProps {
   isSignIn: boolean;
@@ -12,33 +11,27 @@ interface AuthFooterProps {
 
 const AuthFooter = ({ isSignIn }: AuthFooterProps) => {
   const router = useRouter();
-
-  // 👇 3. HOOK'U BAŞLAT (Auth.Footer grubuna odaklandık)
   const t = useTranslations("Auth.Footer");
 
   return (
-    <div className="flex justify-center text-sm pt-4 border-t rounded-b-lg w-full">
+    <div className="flex w-full justify-center rounded-b-lg pt-4 text-sm text-muted-foreground">
       {isSignIn ? (
         <>
-          {/* 👇 Çeviri */}
           {t("dontHaveAccount")}
           <button
-            className="pl-2 hover:text-[#303030] cursor-pointer transition duration-300 font-semibold "
+            className="cursor-pointer pl-2 font-semibold text-foreground transition-colors duration-300 hover:text-primary"
             onClick={() => router.push(ROUTES.SIGN_UP)}
           >
-            {/* 👇 Çeviri */}
             {t("signUp")}
           </button>
         </>
       ) : (
         <>
-          {/* 👇 Çeviri */}
           {t("alreadyHaveAccount")}
           <button
-            className="pl-2 hover:text-[#303030] cursor-pointer transition duration-300 font-semibold "
+            className="cursor-pointer pl-2 font-semibold text-foreground transition-colors duration-300 hover:text-primary"
             onClick={() => router.push(ROUTES.SIGN_IN)}
           >
-            {/* 👇 Çeviri */}
             {t("signIn")}
           </button>
         </>

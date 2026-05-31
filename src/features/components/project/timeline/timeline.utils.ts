@@ -30,7 +30,14 @@ export function buildTimelineData(
   const sprints = project.sprints ?? [];
   const sprintMap = new Map<string, Sprint>(sprints.map((s) => [s.id, s]));
 
-  const allDates: Date[] = [];
+  // Sabitler
+  const MIN_DAYS       = 90;  // Canvas her zaman en az 90 gün gösterir
+  const PAD_LEFT       = 14;  // En erken tarihten önce 14 gün boşluk
+  const PAD_RIGHT      = 30;  // En geç tarihten sonra 30 gün boşluk
+  const DEFAULT_DURATION = 7; // dueDate yoksa varsayılan bar uzunluğu (gün)
+
+  const today = toDay(new Date());
+  const allDates: Date[] = [today]; // Bugünü her zaman dahil et
 
   for (const s of sprints) {
     if (s.startDate) allDates.push(new Date(s.startDate));
@@ -47,9 +54,11 @@ export function buildTimelineData(
     const sprintEnd   = sprint?.endDate   ? new Date(sprint.endDate)   : null;
     const createdAt   = new Date(issue.createdAt);
 
-    const start  = toDay(sprintStart || createdAt);
-    const rawEnd = dueDate || sprintEnd || createdAt;
-    const end    = toDay(rawEnd < start ? start : rawEnd);
+    const start = toDay(sprintStart || createdAt);
+
+    // dueDate yoksa: sprintEnd varsa onu kullan, yoksa start + DEFAULT_DURATION
+    const rawEnd = dueDate || sprintEnd || addDays(start, DEFAULT_DURATION);
+    const end    = toDay(rawEnd < start ? addDays(start, DEFAULT_DURATION) : rawEnd);
 
     allDates.push(start, end);
     rawItems.push({ issue, sprintId: issue.sprintId ?? null, start, end });
@@ -57,9 +66,21 @@ export function buildTimelineData(
 
   if (allDates.length === 0) return null;
 
-  const sorted    = [...allDates].sort((a, b) => a.getTime() - b.getTime());
-  const minDate   = addDays(toDay(sorted[0]), -1);
-  const maxDate   = addDays(toDay(sorted[sorted.length - 1]), 2);
+  const sorted = [...allDates].sort((a, b) => a.getTime() - b.getTime());
+
+  // Ham min/max
+  const rawMin = toDay(sorted[0]);
+  const rawMax = toDay(sorted[sorted.length - 1]);
+
+  // Padding uygula
+  let minDate = addDays(rawMin, -PAD_LEFT);
+  let maxDate = addDays(rawMax,  PAD_RIGHT);
+
+  // Minimum 90 gün garantisi
+  if (diffDays(minDate, maxDate) < MIN_DAYS) {
+    maxDate = addDays(minDate, MIN_DAYS);
+  }
+
   const totalDays = clamp(diffDays(minDate, maxDate) + 1);
 
   // Month bands
@@ -109,21 +130,20 @@ export function buildTimelineData(
 
     const sortedItems = [...items].sort((a, b) => a.start.getTime() - b.start.getTime());
     const laned = assignLanes(
-  sortedItems.map((item) => ({
-    issue: {
-      ...item.issue,
-      // Date hatasını zaten düzeltmiştik, şimdi assignee'yi düzeltiyoruz:
-      assignee: item.issue.assignee 
-        ? { name: item.issue.assignee.name ?? "Unassigned" } 
-        : null,
-      dueDate: item.issue.dueDate ? item.issue.dueDate : null,
-    },
-    startDay: diffDays(minDate, item.start),
-    endDay:   diffDays(minDate, item.end),
-    durationDays: clamp(diffDays(item.start, item.end) + 1),
-    lane: 0,
-  })),
-);
+      sortedItems.map((item) => ({
+        issue: {
+          ...item.issue,
+          assignee: item.issue.assignee
+            ? { name: item.issue.assignee.name ?? "Unassigned" }
+            : null,
+          dueDate: item.issue.dueDate ? item.issue.dueDate : null,
+        },
+        startDay:     diffDays(minDate, item.start),
+        endDay:       diffDays(minDate, item.end),
+        durationDays: clamp(diffDays(item.start, item.end) + 1),
+        lane: 0,
+      })),
+    );
 
     const laneCount = laned.length > 0 ? Math.max(...laned.map((i) => i.lane)) + 1 : 1;
     groups.push({ sprint, label, startDay, endDay, laneCount, items: laned });

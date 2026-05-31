@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import { createIssue } from "@/actions/issue-creator";
+import { IssueLabelList, normalizeIssueLabels } from "./issue-labels";
 
 interface InlineIssueCreatorProps {
   projectId: string;
@@ -26,6 +27,7 @@ export function InlineIssueCreator({
   const [isLoading, setIsLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isAiDisabledUntil, setIsAiDisabledUntil] = useState<number | null>(null);
+  const [labelsInput, setLabelsInput] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { mutate } = useSWRConfig();
@@ -35,7 +37,10 @@ export function InlineIssueCreator({
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const disableEditing = () => setIsEditing(false);
+  const disableEditing = () => {
+    setLabelsInput("");
+    setIsEditing(false);
+  };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") disableEditing();
@@ -66,6 +71,7 @@ export function InlineIssueCreator({
     } else {
       toast.success("Task added to backlog");
       formRef.current?.reset();
+      setLabelsInput("");
       if (isSprint) {
         disableEditing();
       } else {
@@ -113,6 +119,7 @@ export function InlineIssueCreator({
       } else {
         toast.success(`${data.createdCount || 0} subtasks created by AI`);
         formRef.current?.reset();
+        setLabelsInput("");
         await mutate(`/api/project/${projectId}`);
         if (isSprint) disableEditing();
       }
@@ -123,6 +130,13 @@ export function InlineIssueCreator({
     setIsAiLoading(false);
   };
 
+  const previewLabels = normalizeIssueLabels(
+    labelsInput
+      .split(",")
+      .map((label) => label.trim())
+      .filter(Boolean),
+  );
+
   // ─── BACKLOG MODE ───────────────────────────────────────────────────────────
 
   if (!isSprint) {
@@ -132,99 +146,100 @@ export function InlineIssueCreator({
           ref={formRef}
           action={onSubmit}
           className={cn(
-            // container
-            "relative w-full flex items-center gap-1 px-3 py-1.5 rounded-xl",
-            // light
-            "bg-white border border-indigo-200 ring-2 ring-indigo-100 shadow-sm",
-            // dark
-            "dark:bg-slate-800 dark:border-indigo-700/60 dark:ring-indigo-900/50 dark:shadow-none",
+            "relative w-full rounded-xl px-3 py-2",
+            "bg-card border border-border shadow-sm focus-within:ring-1 focus-within:ring-ring focus-within:border-ring",
             "transition-all duration-150",
             className,
           )}
         >
-          {/* leading icon */}
-          <span className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/50">
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
-            ) : (
-              <Plus className="h-4 w-4 text-indigo-500" />
-            )}
-          </span>
-
-          {/* input */}
-          <Input
-            ref={inputRef}
-            name="title"
-            disabled={isLoading}
-            onKeyDown={onKeyDown}
-            placeholder="What needs to be done?"
-            className={cn(
-              "h-10 flex-1 border-0 shadow-none focus-visible:ring-0 bg-transparent",
-              "text-sm text-slate-800 dark:text-slate-100",
-              "placeholder:text-slate-400 dark:placeholder:text-slate-500",
-            )}
-            autoComplete="off"
-          />
-
-          {/* action buttons */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {/* AI split */}
-            <Button
-              type="button"
-              onClick={handleAiSplit}
-              size="sm"
-              variant="ghost"
-              disabled={isAiLoading}
-              className={cn(
-                "h-8 px-2.5 gap-1.5 text-xs font-medium rounded-lg",
-                "text-slate-500 dark:text-slate-400",
-                "hover:text-emerald-700 hover:bg-emerald-50",
-                "dark:hover:text-emerald-300 dark:hover:bg-emerald-950/40",
-                "disabled:opacity-50 transition-colors",
-              )}
-            >
-              {isAiLoading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <div className="flex items-center gap-1">
+            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
               ) : (
-                <Sparkles className="h-3.5 w-3.5" />
+                <Plus className="h-4 w-4 text-primary" />
               )}
-              <span className="hidden sm:inline">AI Split</span>
-            </Button>
+            </span>
 
-            {/* submit */}
-            <Button
-              type="submit"
-              size="sm"
-              variant="ghost"
+            <Input
+              ref={inputRef}
+              name="title"
               disabled={isLoading}
+              onKeyDown={onKeyDown}
+              placeholder="What needs to be done?"
               className={cn(
-                "h-8 px-2.5 gap-1 text-xs font-semibold rounded-lg",
-                "text-slate-500 dark:text-slate-400",
-                "hover:text-indigo-700 hover:bg-indigo-50",
-                "dark:hover:text-indigo-300 dark:hover:bg-indigo-950/50",
-                "transition-colors",
+                "h-10 flex-1 border-0 bg-transparent text-sm shadow-none focus-visible:ring-0",
+                "text-foreground placeholder:text-muted-foreground",
               )}
-            >
-              <span className="hidden sm:inline">Enter</span>
-              <CornerDownLeft className="h-3.5 w-3.5" />
-            </Button>
+              autoComplete="off"
+            />
 
-            {/* close */}
-            <Button
-              type="button"
-              onClick={disableEditing}
-              size="sm"
-              variant="ghost"
-              className={cn(
-                "h-8 w-8 p-0 rounded-lg",
-                "text-slate-400 dark:text-slate-500",
-                "hover:text-red-500 hover:bg-red-50",
-                "dark:hover:text-red-400 dark:hover:bg-red-950/40",
-                "transition-colors",
-              )}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex flex-shrink-0 items-center gap-1">
+              <Button
+                type="button"
+                onClick={handleAiSplit}
+                size="sm"
+                variant="ghost"
+                disabled={isAiLoading}
+                className={cn(
+                  "h-8 px-2.5 gap-1.5 rounded-lg text-xs font-medium",
+                  "text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                  "disabled:opacity-50 transition-colors",
+                )}
+              >
+                {isAiLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                <span className="hidden sm:inline">AI Split</span>
+              </Button>
+
+              <Button
+                type="submit"
+                size="sm"
+                variant="ghost"
+                disabled={isLoading}
+                className={cn(
+                  "h-8 px-2.5 gap-1 rounded-lg text-xs font-semibold",
+                  "text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                  "transition-colors",
+                )}
+              >
+                <span className="hidden sm:inline">Enter</span>
+                <CornerDownLeft className="h-3.5 w-3.5" />
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setLabelsInput("");
+                  disableEditing();
+                }}
+                size="sm"
+                variant="ghost"
+                className={cn(
+                  "h-8 w-8 rounded-lg p-0",
+                  "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                  "transition-colors",
+                )}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-1 border-t border-border pt-2">
+            <Input
+              name="labels"
+              value={labelsInput}
+              onChange={(event) => setLabelsInput(event.target.value)}
+              placeholder="Quick labels: bug, ui, urgent"
+              className="h-8 border-0 bg-transparent px-4 text-xs shadow-none focus-visible:ring-1 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground"
+            />
+            {previewLabels.length > 0 ? (
+              <IssueLabelList labels={previewLabels} className="mt-2" />
+            ) : null}
           </div>
         </form>
       );
@@ -236,18 +251,16 @@ export function InlineIssueCreator({
         onClick={enableEditing}
         className={cn(
           "relative w-full flex items-center h-11 px-3 rounded-xl cursor-text group",
-          "border border-dashed border-slate-200 dark:border-slate-700/60",
-          "bg-slate-50/50 dark:bg-slate-800/30",
-          "hover:border-indigo-300 hover:bg-indigo-50/40",
-          "dark:hover:border-indigo-700/60 dark:hover:bg-indigo-950/20",
+          "border border-dashed border-border bg-muted/30",
+          "hover:border-primary/40 hover:bg-accent/40",
           "transition-colors duration-150",
           className,
         )}
       >
-        <span className="flex items-center justify-center w-6 h-6 rounded-md bg-slate-200/60 dark:bg-slate-700/60 mr-2.5 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
-          <Plus className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" />
+        <span className="flex items-center justify-center w-6 h-6 rounded-md bg-muted group-hover:bg-primary/20 transition-colors mr-2.5">
+          <Plus className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
         </span>
-        <span className="text-sm text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
           Add a task…
         </span>
       </div>
@@ -262,9 +275,8 @@ export function InlineIssueCreator({
         ref={formRef}
         action={onSubmit}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 mx-2 mb-2 rounded-b-xl",
-          "border border-t-0 border-slate-200 dark:border-slate-700/60",
-          "bg-white dark:bg-slate-800/60",
+          "mx-2 mb-2 flex flex-col gap-2 rounded-b-xl px-3 py-2",
+          "border border-t-0 border-border bg-card",
           "animate-in slide-in-from-top-1 duration-150",
         )}
       >
@@ -273,22 +285,34 @@ export function InlineIssueCreator({
           name="title"
           placeholder="Task title…"
           className={cn(
-            "h-8 text-sm border-slate-200 dark:border-slate-600",
-            "bg-transparent dark:bg-slate-700/40",
-            "text-slate-800 dark:text-slate-100",
-            "placeholder:text-slate-400 dark:placeholder:text-slate-500",
-            "focus-visible:ring-1 focus-visible:ring-indigo-500",
+            "h-8 text-sm border-input bg-transparent",
+            "text-foreground placeholder:text-muted-foreground",
+            "focus-visible:ring-1 focus-visible:ring-ring",
           )}
           autoComplete="off"
           onKeyDown={onKeyDown}
           disabled={isLoading}
         />
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <Input
+          name="labels"
+          value={labelsInput}
+          onChange={(event) => setLabelsInput(event.target.value)}
+          placeholder="Labels: bug, ui"
+          className={cn(
+            "h-8 text-xs border-input bg-transparent",
+            "text-foreground placeholder:text-muted-foreground",
+            "focus-visible:ring-1 focus-visible:ring-ring",
+          )}
+        />
+        {previewLabels.length > 0 ? (
+          <IssueLabelList labels={previewLabels} />
+        ) : null}
+        <div className="flex flex-shrink-0 items-center gap-1 self-end">
           <Button
             type="submit"
             disabled={isLoading}
             size="sm"
-            className="h-8 w-8 p-0 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+            className="h-8 w-8 p-0 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -298,14 +322,15 @@ export function InlineIssueCreator({
           </Button>
           <Button
             type="button"
-            onClick={disableEditing}
+            onClick={() => {
+              setLabelsInput("");
+              disableEditing();
+            }}
             size="sm"
             variant="ghost"
             className={cn(
               "h-8 w-8 p-0 rounded-lg",
-              "text-slate-400 dark:text-slate-500",
-              "hover:text-red-500 hover:bg-red-50",
-              "dark:hover:text-red-400 dark:hover:bg-red-950/40",
+              "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
               "transition-colors",
             )}
           >
@@ -324,9 +349,7 @@ export function InlineIssueCreator({
         variant="ghost"
         className={cn(
           "w-full justify-start h-8 px-2.5 gap-2 rounded-lg text-xs font-medium",
-          "text-slate-400 dark:text-slate-500",
-          "hover:text-slate-700 hover:bg-slate-100",
-          "dark:hover:text-slate-300 dark:hover:bg-slate-700/50",
+          "text-muted-foreground hover:text-foreground hover:bg-accent",
           "transition-colors duration-150",
         )}
       >

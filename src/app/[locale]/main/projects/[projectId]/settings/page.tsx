@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Settings, Users } from "lucide-react"; // Loader2 kaldırıldı, kullanılmıyordu
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ChangeOwnerDialog } from "@/features/components/project/project-data/change-owner-dialog";
 import { useUpdateProject } from "@/hooks/useUpdateProject";
-import { toast } from "react-toastify";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl"; // 👈 İthalat eklendi
@@ -37,6 +37,7 @@ export default function ProjectSettingsPage({ params }: SettingsPageProps) {
   const t = useTranslations("ProjectSettings"); // 👈 Çeviri kancası (Hook)
   const { projectId } = use(params);
   const router = useRouter();
+  const { data: session } = useSession();
   const { updateProject, isUpdating } = useUpdateProject(projectId);
 
   const {
@@ -235,7 +236,7 @@ export default function ProjectSettingsPage({ params }: SettingsPageProps) {
             <MembersList
               projectId={projectId}
               members={formattedMembers}
-              currentUserId={project?.ownerId || ""}
+              currentUserId={session?.user?.id || ""}
               ownerId={project?.ownerId || ""}
               onUpdate={() => mutate()}
             />

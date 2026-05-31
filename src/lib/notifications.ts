@@ -2,7 +2,10 @@
 import { db } from "@/lib/prisma";
 import { sendTaskReminderEmail } from "@/lib/mail";
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+// Reminder thresholds (dakika cinsinden)
+const DUE_IN_3_DAYS_MINUTES = 3 * 24 * 60; // 4320 dakika
+const DUE_TOMORROW_MINUTES = 24 * 60; // 1440 dakika
+const DUE_TODAY_MINUTES = 0; // Bugün veya geçti
 
 type IssueWithReminderContext = Prisma.IssueGetPayload<{
   include: {
@@ -18,48 +21,21 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "İptal Edildi",
 };
 
-function parseTimezoneOffsetToMinutes(rawTimezone?: string | null) {
-  if (!rawTimezone) return 0;
-
-  const normalized = rawTimezone.trim().toUpperCase().replace("UTC", "");
-  const match = normalized.match(/^([+-])(\d{1,2})(?::?(\d{2}))?$/);
-
-  if (!match) return 0;
-
-  const [, sign, hours, minutes] = match;
-  const totalMinutes = Number(hours) * 60 + Number(minutes || "0");
-
-  return sign === "-" ? -totalMinutes : totalMinutes;
+function getMinutesUntilDue(dueDate: Date) {
+  return Math.ceil((dueDate.getTime() - Date.now()) / (60 * 1000));
 }
 
-function getLocalDateKey(date: Date, timezoneOffsetMinutes: number) {
-  return new Date(date.getTime() + timezoneOffsetMinutes * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
-}
-
-function getDiffInDaysForTimezone(dueDate: Date, timezone?: string | null) {
-  const offsetMinutes = parseTimezoneOffsetToMinutes(timezone);
-  const todayKey = getLocalDateKey(new Date(), offsetMinutes);
-  const dueKey = getLocalDateKey(dueDate, offsetMinutes);
-
-  const startOfToday = new Date(`${todayKey}T00:00:00.000Z`);
-  const startOfDue = new Date(`${dueKey}T00:00:00.000Z`);
-
-  return Math.round((startOfDue.getTime() - startOfToday.getTime()) / DAY_IN_MS);
-}
-
-function getReminderType(diffInDays: number): NotificationType | null {
-  if (diffInDays === 3) return NotificationType.DUE_IN_3_DAYS;
-  if (diffInDays === 1) return NotificationType.DUE_TOMORROW;
-  if (diffInDays === 0) return NotificationType.DUE_TODAY;
-  if (diffInDays < 0) return NotificationType.OVERDUE;
+function getReminderType(minutesUntilDue: number): NotificationType | null {
+  if (minutesUntilDue <= 0) return NotificationType.OVERDUE;
+  if (minutesUntilDue <= 24 * 60) return NotificationType.DUE_TODAY;
+  if (minutesUntilDue <= 2 * 24 * 60) return NotificationType.DUE_TOMORROW;
+  if (minutesUntilDue <= DUE_IN_3_DAYS_MINUTES) return NotificationType.DUE_IN_3_DAYS;
   return null;
 }
 
 function getReminderContent(
   issue: IssueWithReminderContext,
-  diffInDays: number,
+  minutesUntilDue: number,
   projectUrl?: string,
 ) {
   const issueCode = `${issue.project.projectKey}-${issue.number}`;
@@ -69,37 +45,37 @@ function getReminderContent(
     year: "numeric",
   }).format(issue.dueDate!);
 
-  if (diffInDays === 3) {
+  if (minutesUntilDue <= 0) {
     return {
-      title: "Teslim tarihi yaklaşıyor",
-      message: `${issueCode} teslim tarihine 3 gün kaldı.`,
-      emailDueLabel: `${dueDateLabel} (3 gün kaldı)`,
+      title: "Görev gecikti",
+      message: `${issueCode} teslim tarihini geçti.`,
+      emailDueLabel: `${dueDateLabel} (gecikti)`,
       projectUrl,
     };
   }
-
-  if (diffInDays === 1) {
+  
+  if (minutesUntilDue <= 24 * 60) {
+    return {
+      title: "Teslim tarihi bugün",
+      message: `${issueCode} bugün teslim edilmesi gerekiyor.`,
+      emailDueLabel: `${dueDateLabel} (bugün)`,
+      projectUrl,
+    };
+  }
+  
+  if (minutesUntilDue <= 2 * 24 * 60) {
     return {
       title: "Teslim tarihi yarın",
-      message: `${issueCode} yarın teslim edilecek.`,
+      message: `${issueCode} yarın teslim edilmesi gerekiyor.`,
       emailDueLabel: `${dueDateLabel} (yarın)`,
       projectUrl,
     };
   }
 
-  if (diffInDays === 0) {
-    return {
-      title: "Teslim tarihi bugün",
-      message: `${issueCode} bugün teslim edilmeli.`,
-      emailDueLabel: `${dueDateLabel} (bugün)`,
-      projectUrl,
-    };
-  }
-
   return {
-    title: "Görev gecikti",
-    message: `${issueCode} teslim tarihini geçti.`,
-    emailDueLabel: `${dueDateLabel} (gecikti)`,
+    title: "Teslim tarihi yaklaşıyor",
+    message: `${issueCode} teslim tarihine 3 gün kaldı.`,
+    emailDueLabel: `${dueDateLabel} (3 gün kaldı)`,
     projectUrl,
   };
 }
@@ -132,11 +108,8 @@ export async function processDueTaskReminders() {
       continue;
     }
 
-    const diffInDays = getDiffInDaysForTimezone(
-      issue.dueDate,
-      issue.assignee.timezone,
-    );
-    const type = getReminderType(diffInDays);
+    const minutesUntilDue = getMinutesUntilDue(issue.dueDate);
+    const type = getReminderType(minutesUntilDue);
 
     if (!type) {
       results.skipped += 1;
@@ -147,7 +120,7 @@ export async function processDueTaskReminders() {
       ? `${process.env.NEXT_PUBLIC_APP_URL}/main/projects/${issue.projectId}`
       : undefined;
 
-    const content = getReminderContent(issue, diffInDays, projectUrl);
+    const content = getReminderContent(issue, minutesUntilDue, projectUrl);
 
     const notification = await db.notification.upsert({
       where: {

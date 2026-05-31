@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle2, UserPlus, Loader2 } from "lucide-react"; // Loader2 eklendi
+import { UserCircle2, UserPlus, AlertTriangle } from "lucide-react";
 import { Issue } from "@/types/project";
 import { updateIssueAssignee } from "@/actions/issue-actions";
 import { Spinner } from "@/components/ui/spinner";
@@ -22,22 +22,28 @@ export interface AssigneeUser {
   email?: string | null;
 }
 
+type UserRole = "OWNER" | "ADMIN" | "MEMBER";
+
 interface IssueAssigneeSelectorProps {
   issue: Issue;
   projectId: string;
   members: AssigneeUser[];
+  currentUserRole?: UserRole;
 }
 
 export function IssueAssigneeSelector({
   issue,
   members,
   projectId,
+  currentUserRole = "MEMBER",
 }: IssueAssigneeSelectorProps) {
   const router = useRouter();
   const { mutate } = useSWRConfig();
 
-  // Yükleniyor durumu için state
   const [isLoading, setIsLoading] = useState(false);
+
+  // MEMBER atama yapamaz yetki kontrolü
+  const canAssign = currentUserRole !== "MEMBER";
 
   const [assignee, setAssignee] = useState<AssigneeUser | null>(
     issue.assignee
@@ -50,14 +56,12 @@ export function IssueAssigneeSelector({
   );
 
   const handleAssign = async (memberId: string) => {
-    // 1. Yükleniyor başlat
-    setIsLoading(true);
+    // Güvenlik: Eğer atama yetkisi yoksa fonksiyonu hiç çalıştırma
+    if (!canAssign) return;
 
+    setIsLoading(true);
     const previousAssignee = assignee;
 
-    // Local state güncellemesi (Optimistic)
-    // Bunu loading'den sonra yapıyoruz ama loading true olduğu için
-    // kullanıcı zaten spinner görecek.
     if (memberId === "") {
       setAssignee(null);
     } else {
@@ -78,7 +82,6 @@ export function IssueAssigneeSelector({
       console.error("Atama hatası:", error);
       setAssignee(previousAssignee);
     } finally {
-      // 2. İşlem bittiğinde (başarılı veya hatalı) yükleniyor'u kapat
       setIsLoading(false);
     }
   };
@@ -92,16 +95,18 @@ export function IssueAssigneeSelector({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          disabled={isLoading} // Yüklenirken tıklamayı engelle
-          className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-slate-200 transition-all outline-none disabled:cursor-not-allowed"
+          // DİKKAT: Sadece isLoading durumunda tıklamayı engelliyoruz.
+          // canAssign durumunda ENGELLEMİYORUZ ki Dropdown açılsın ve uyarıyı görsünler.
+          disabled={isLoading} 
+          className={`flex items-center justify-center rounded-full transition-all outline-none 
+            ${isLoading ? "cursor-not-allowed opacity-50" : "hover:ring-2 hover:ring-slate-200"}
+          `}
         >
-          {/* DURUM KONTROLÜ: Loading mi? */}
           {isLoading ? (
             <div className="h-7 w-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
               <Spinner className="absolute h-4 w-4 animate-spin text-slate-400" />
             </div>
           ) : assignee ? (
-            // Atanmış kişi varsa
             <Avatar className="h-7 w-7 border-2 border-white shadow-sm cursor-pointer">
               <AvatarImage
                 src={assignee.image || ""}
@@ -112,10 +117,8 @@ export function IssueAssigneeSelector({
               </AvatarFallback>
             </Avatar>
           ) : (
-            // Kimse yoksa (+) butonu
             <div
               className="h-7 w-7 rounded-full bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer"
-              title="Ata"
             >
               <UserPlus size={14} />
             </div>
@@ -124,7 +127,18 @@ export function IssueAssigneeSelector({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
-        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+        {/* MEMBER ise bu uyarıyı en üstte gösteririz (ikonlu, okunaklı bir kart görünümü) */}
+        {!canAssign && (
+          <div className="px-3 py-2 flex items-start gap-3 bg-amber-50 border-b border-amber-100">
+            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+            <div className="flex flex-col text-amber-800">
+              <span className="text-sm font-semibold">Sadece yöneticiler atama yapabilir</span>
+              <span className="text-xs text-amber-700/90">Atama yapmak için proje yöneticisine başvurun veya rolünüzü yükseltin.</span>
+            </div>
+          </div>
+        )}
+
+        <div className="px-3 py-2 text-sm font-medium text-slate-700">
           Kime atansın?
         </div>
 
@@ -132,7 +146,9 @@ export function IssueAssigneeSelector({
           <DropdownMenuItem
             key={member.id}
             onClick={() => handleAssign(member.id)}
-            className="flex items-center gap-2 cursor-pointer"
+            // MEMBER ise butonları inaktif (disabled) yaparız
+            disabled={!canAssign}
+            className={`flex items-center gap-2 ${!canAssign ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <Avatar className="h-6 w-6">
               <AvatarImage
@@ -152,7 +168,8 @@ export function IssueAssigneeSelector({
             <div className="h-px bg-slate-100 my-1" />
             <DropdownMenuItem
               onClick={() => handleAssign("")}
-              className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+              disabled={!canAssign}
+              className={`text-red-600 focus:text-red-600 focus:bg-red-50 ${!canAssign ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             >
               <UserCircle2 className="mr-2 h-4 w-4" />
               <span>Atamayı Kaldır</span>

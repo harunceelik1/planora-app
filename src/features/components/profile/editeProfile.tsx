@@ -44,6 +44,18 @@ export default function EditProfileDialog({
   const t = useTranslations("ProfilePage");
   const { update } = useSession();
   const { startUpload } = useUploadThing("projectImage");
+  const localTimezone = React.useMemo(
+    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+    []
+  );
+  const locationSuggestions = [
+    "Istanbul, Turkey",
+    "Ankara, Turkey",
+    "Izmir, Turkey",
+    "Berlin, Germany",
+    "London, United Kingdom",
+    "New York, USA",
+  ];
 
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -69,7 +81,7 @@ export default function EditProfileDialog({
       reset({
         name: user.name || "",
         jobTitle: user.jobTitle || "",
-        timezone: user.timezone || "",
+        timezone: user.timezone || localTimezone || "",
         location: user.location || "",
         phone: user.phone || "",
         birthdate: user.birthdate ? new Date(user.birthdate) : null,
@@ -77,7 +89,7 @@ export default function EditProfileDialog({
       setPreview(user.image || "");
       setSelectedFile(null);
     }
-  }, [open, user, reset]);
+  }, [open, user, reset, localTimezone]);
 
   /* Avatar işlemleri */
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -231,14 +243,22 @@ export default function EditProfileDialog({
               control={control}
               name="timezone"
               label={t("details.timezone.label")}
+              placeholder={t("details.timezone.placeholder")}
             />
 
             <div className="space-y-1.5">
               <Label>{t("location")}</Label>
               <Input
                 {...register("location")}
+                list="location-suggestions"
                 placeholder={t("details.location.placeholder")}
+                autoComplete="street-address"
               />
+              <datalist id="location-suggestions">
+                {locationSuggestions.map((location) => (
+                  <option key={location} value={location} />
+                ))}
+              </datalist>
             </div>
 
             <div className="space-y-1.5">
@@ -246,8 +266,14 @@ export default function EditProfileDialog({
               <Input
                 {...register("phone")}
                 type="tel"
+                inputMode="tel"
+                pattern="\\+?\\d[\\d\\s()\-]{7,}"
                 placeholder={t("details.phone.placeholder")}
+                autoComplete="tel"
               />
+              <p className="text-xs text-muted-foreground">
+                {t("details.phone.helper") || "+90 555 123 45 67 gibi formatı tercih edin."}
+              </p>
             </div>
 
             <FormDatePicker

@@ -31,6 +31,7 @@ model User {
   comments         Comment[]
   favoriteProjects FavoriteProject[]
   notifications    Notification[]
+  issueActivities  IssueActivity[]
 }
 
 model Account {
@@ -66,8 +67,10 @@ model VerificationToken {
   token   String   @unique
   expires DateTime
 
-  @@unique([email, token]) // Aynı email ve token ikilisi tekrar edemez
+  @@unique([email, token])
 }
+
+
 
 model Project {
   id          String   @id @default(cuid())
@@ -93,6 +96,7 @@ model Project {
 
   sprints     Sprint[]
   favoritedBy FavoriteProject[]
+  issueActivities IssueActivity[]
 }
 
 model ProjectMember {
@@ -126,6 +130,7 @@ model Issue {
   id          String        @id @default(cuid())
   title       String
   description String?       @db.Text
+  labels      String[]      @default([])
   status      IssueStatus   @default(TODO) // Enum ile durum yönetimi
   priority    IssuePriority @default(MEDIUM) // Enum ile öncelik yönetimi
   createdAt   DateTime      @default(now())
@@ -156,6 +161,8 @@ model Issue {
 
   sprint   Sprint? @relation(fields: [sprintId], references: [id])
   sprintId String?
+
+  activities IssueActivity[]
 
   @@unique([projectId, number])
 }
@@ -202,6 +209,38 @@ model Comment {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+}
+
+// --- Activity log for issue-level events ---
+model IssueActivity {
+  id         String             @id @default(cuid())
+  issueId    String
+  issue      Issue              @relation(fields: [issueId], references: [id])
+  projectId  String
+  project    Project            @relation(fields: [projectId], references: [id])
+  userId     String
+  user       User               @relation(fields: [userId], references: [id])
+  type       IssueActivityType
+  data       Json?
+  createdAt  DateTime           @default(now())
+
+  @@index([issueId])
+  @@index([projectId])
+}
+
+enum IssueActivityType {
+  ISSUE_CREATED
+  ISSUE_UPDATED
+  STATUS_CHANGED
+  ASSIGNEE_CHANGED
+  DUE_DATE_CHANGED
+  SPRINT_CHANGED
+  LABELS_CHANGED
+  PRIORITY_CHANGED
+  TITLE_CHANGED
+  DESCRIPTION_EDITED
+  COMMENT_ADDED
+  ISSUE_DELETED
 }
 
 model Notification {

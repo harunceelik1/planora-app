@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/prisma"; // Prisma client yolun
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options"; // Auth options yolun
+import { authOptions } from "@/lib/auth-options";
+import { db } from "@/lib/prisma";
 
 interface RouteParams {
   params: Promise<{ projectId: string }>;
@@ -9,77 +9,152 @@ interface RouteParams {
 
 export async function GET(request: Request, { params }: RouteParams) {
   const session = await getServerSession(authOptions);
-  if (!session)
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { projectId } = await params;
 
-  const project = await db.project.findUnique({
-    where: { id: projectId },
-    include: {
-      // Sprints: sadece temel alanlar
-      sprints: {
-        orderBy: { createdAt: "asc" },
-        select: { id: true, name: true, status: true, startDate: true, endDate: true },
-      },
-      // Issues: yalnızca UI için gerekli alanları seçiyoruz
-      issues: {
-        orderBy: { order: "asc" },
-        select: {
-          id: true,
-          number: true,
-          title: true,
-          description: true,
-          status: true,
-          priority: true,
-          order: true,
-          sprintId: true,
-          createdAt: true,
-          dueDate: true,
-          storyPoints: true,
-          reporterId: true,
-          assignee: { select: { id: true, name: true, image: true } },
-          _count: { select: { comments: true } },
-        },
-      },
-      owner: { select: { id: true, name: true, image: true } },
-      members: {
-        select: { id: true, role: true, user: { select: { id: true, name: true, image: true } } },
+  const baseInclude = {
+    sprints: {
+      orderBy: { createdAt: "asc" as const },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        startDate: true,
+        endDate: true,
       },
     },
-  });
+    owner: { select: { id: true, name: true, image: true } },
+    members: {
+      select: {
+        id: true,
+        role: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            email: true,
+            location: true,
+            jobTitle: true,
+          },
+        },
+      },
+    },
+  };
 
-  if (!project)
+  let project;
+
+  try {
+    project = await db.project.findUnique({
+      where: { id: projectId },
+      include: {
+        ...baseInclude,
+        issues: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            number: true,
+            title: true,
+            description: true,
+            labels: true,
+            status: true,
+            priority: true,
+            order: true,
+            sprintId: true,
+            assigneeId: true,
+            createdAt: true,
+            updatedAt: true,
+            dueDate: true,
+            storyPoints: true,
+            reporterId: true,
+            assignee: { select: { id: true, name: true, image: true } },
+            _count: { select: { comments: true } },
+          },
+        },
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const isLabelsMismatch =
+      message.includes("labels") ||
+      message.includes("column") ||
+      message.includes("Unknown arg");
+
+    if (!isLabelsMismatch) {
+      throw error;
+    }
+
+    project = await db.project.findUnique({
+      where: { id: projectId },
+      include: {
+        ...baseInclude,
+        issues: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            number: true,
+            title: true,
+            description: true,
+            status: true,
+            priority: true,
+            order: true,
+            sprintId: true,
+            assigneeId: true,
+            createdAt: true,
+            updatedAt: true,
+            dueDate: true,
+            storyPoints: true,
+            reporterId: true,
+            assignee: { select: { id: true, name: true, image: true } },
+            _count: { select: { comments: true } },
+          },
+        },
+      },
+    });
+
+    if (project) {
+      project = {
+        ...project,
+        issues: project.issues.map((issue) => ({
+          ...issue,
+          labels: [],
+        })),
+      };
+    }
+  }
+
+  if (!project) {
     return NextResponse.json({ error: "Bulunamadı" }, { status: 404 });
+  }
 
   return NextResponse.json(project);
 }
-// --- PATCH: GÜNCELLEME VE SAHİPLİK DEVRİ ---
+
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
-    // @ts-ignore
-    const currentUserId = session?.user?.id;
+    const currentUserId = session?.user?.id as string | undefined;
 
-    if (!currentUserId)
+    if (!currentUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { projectId } = await params;
     const body = await request.json();
+    const { name, ownerId, key, image, icon, color } = body;
 
-    // Frontend'den gelen veriler
-    const { name, description, ownerId, key, image, icon, color } = body;
-
-    // 1. Mevcut projeyi kontrol et
     const existingProject = await db.project.findUnique({
       where: { id: projectId },
       select: { ownerId: true },
     });
 
-    if (!existingProject)
+    if (!existingProject) {
       return NextResponse.json({ error: "Proje yok" }, { status: 404 });
+    }
 
-    // 2. GÜVENLİK: Sadece şu anki sahip (Owner) değişiklik yapabilir
     if (existingProject.ownerId !== currentUserId) {
       return NextResponse.json(
         { error: "Bu işlem için yetkiniz yok. Sadece proje sahibi yapabilir." },
@@ -89,16 +164,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const oldOwnerId = existingProject.ownerId;
 
-    // SENARYO 2: SAHİPLİK DEVRİ (Transfer Ownership)
-    // Eğer body içinde 'ownerId' geldiyse ve eski sahibinden farklıysa:
     if (ownerId && ownerId !== oldOwnerId) {
       const result = await db.$transaction([
-        // ADIM 1: Proje tablosunda 'ownerId'yi değiştir
-        // (Aynı zamanda isim, key, resim değiştiyse onları da güncelle)
         db.project.update({
           where: { id: projectId },
           data: {
-            ownerId: ownerId, // YENİ SAHİP
+            ownerId,
             ...(name && { projectName: name }),
             ...(key && { projectKey: key }),
             ...(image !== undefined && { image }),
@@ -106,40 +177,33 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             ...(color !== undefined && { color }),
           },
         }),
-
-        // ADIM 2: Eski sahibin (SENİN) rolünü 'ADMIN' yap
-        // Böylece projeden atılmazsın, yönetici olarak kalırsın.
         db.projectMember.upsert({
           where: {
-            userId_projectId: { userId: oldOwnerId, projectId: projectId },
+            userId_projectId: { userId: oldOwnerId, projectId },
           },
-          create: { userId: oldOwnerId, projectId: projectId, role: "ADMIN" },
+          create: { userId: oldOwnerId, projectId, role: "ADMIN" },
           update: { role: "ADMIN" },
         }),
-
-        // ADIM 3: Yeni sahibin rolünü 'OWNER' yap
         db.projectMember.upsert({
           where: {
-            userId_projectId: { userId: ownerId, projectId: projectId },
+            userId_projectId: { userId: ownerId, projectId },
           },
-          create: { userId: ownerId, projectId: projectId, role: "OWNER" },
+          create: { userId: ownerId, projectId, role: "OWNER" },
           update: { role: "OWNER" },
         }),
       ]);
 
-      // İşlem başarılı, güncellenmiş projeyi döndür
       return NextResponse.json(result[0]);
     }
-    // NORMAL GÜNCELLEME (Sahiplik değişmiyor, sadece isim/resim vb.)
 
     const simpleUpdate = await db.project.update({
       where: { id: projectId },
       data: {
         ...(name && { projectName: name }),
         ...(key && { projectKey: key }),
-        ...(image !== undefined && { image: image }),
-        ...(icon !== undefined && { icon }), // 👈 EKLENDİ
-        ...(color !== undefined && { color }), // 👈 EKLEN
+        ...(image !== undefined && { image }),
+        ...(icon !== undefined && { icon }),
+        ...(color !== undefined && { color }),
       },
     });
 
@@ -150,20 +214,17 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 }
 
-// --- DELETE: SİLME ---
 export async function DELETE(request: Request, { params }: RouteParams) {
   const session = await getServerSession(authOptions);
+  const currentUserId = session?.user?.id as string | undefined;
 
-  // @ts-ignore
-  const currentUserId = session?.user?.id;
-
-  if (!currentUserId)
+  if (!currentUserId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { projectId } = await params;
-
-  // Sadece Owner silebilir kontrolü eklemek iyi olur
   const project = await db.project.findUnique({ where: { id: projectId } });
+
   if (project?.ownerId !== currentUserId) {
     return NextResponse.json(
       { error: "Sadece proje sahibi silebilir" },

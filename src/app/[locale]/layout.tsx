@@ -16,7 +16,6 @@ export const metadata: Metadata = {
     "A productivity app to plan your tasks and manage your time effectively.",
 };
 
-// 👇 TİP TANIMLAMASI GÜNCELLENDİ (Promise eklendi)
 interface RootLayoutProps {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;

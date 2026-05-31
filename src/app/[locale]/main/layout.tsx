@@ -1,8 +1,8 @@
 "use client";
-// app/(main)/layout.tsx
+
 import Navbar from "@/features/components/layout/navbar";
-import { usePathname } from "next/navigation";
 import { Sidebar } from "@/features/components/layout/sidebar";
+import { usePathname } from "next/navigation";
 
 export default function MainLayout({
   children,
@@ -12,24 +12,22 @@ export default function MainLayout({
   const pathname = usePathname();
   const shouldHideNavbarAndSideBar = pathname.includes("/main/create-project");
 
-  // Eğer create-project sayfasındaysak sadece ana içeriği göster
   if (shouldHideNavbarAndSideBar) {
     return <main className="min-h-screen bg-background">{children}</main>;
   }
 
   return (
-    // Ana kapsayıcı: Ekranı yan yana (flex) bölüyoruz
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      {/* 1. SOL TARAF: Sidebar tüm yüksekliği alarak burada duracak */}
-      <Sidebar />
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="flex min-h-screen w-full">
+        <Sidebar />
 
-      {/* 2. SAĞ TARAF: Sidebar'ın bitiminden başlayan ana sütun */}
-      <div className="flex flex-col flex-1 min-w-0">
-        {/* Navbar artık sadece sağ tarafın en tepesinde duruyor */}
-        <Navbar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Navbar />
 
-        {/* Ana içerik alanı (Sayfalar buraya gelecek ve sadece burası kaydırılacak) */}
-        <main className="flex-1 overflow-y-auto pb-4">{children}</main>
+          <main className="flex-1 px-4 pb-6 pt-2 md:px-6 md:pb-8">
+            <div className="mx-auto w-full max-w-[1600px]">{children}</div>
+          </main>
+        </div>
       </div>
     </div>
   );

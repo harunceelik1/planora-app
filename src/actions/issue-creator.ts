@@ -5,6 +5,23 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { db } from "@/lib/prisma";
 
+function normalizeLabels(rawValue: FormDataEntryValue | null) {
+  if (typeof rawValue !== "string") return [];
+
+  const seen = new Set<string>();
+
+  return rawValue
+    .split(",")
+    .map((label) => label.trim())
+    .filter(Boolean)
+    .filter((label) => {
+      const key = label.toLocaleLowerCase("tr-TR");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
 export async function createIssue(formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.email) {
@@ -14,6 +31,7 @@ export async function createIssue(formData: FormData) {
   const title = formData.get("title") as string;
   const projectId = formData.get("projectId") as string;
   const sprintId = formData.get("sprintId") as string | null;
+  const labels = normalizeLabels(formData.get("labels"));
 
   if (!title || !projectId) {
     return { error: "Başlık ve Proje ID gereklidir." };
@@ -48,6 +66,7 @@ export async function createIssue(formData: FormData) {
         projectId,
         number: newNumber,
         order: newOrder,
+        labels,
         status: "TODO",
         priority: "MEDIUM",
         sprintId: sprintId || null,

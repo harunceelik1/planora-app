@@ -167,8 +167,14 @@
       "timeline": "Zaman Çizelgesi",
       "backlog": "Kapsam (Backlog)",
       "board": "Pano",
+      "team": "Takım",
       "calendar": "Takvim",
       "archive": "Arşiv"
+    },
+    "roles": {
+      "owner": "Sahip",
+      "admin": "Yönetici",
+      "member": "Üye"
     },
     "sprintPanel": {
       "title": "Sprint {number}",
@@ -293,6 +299,18 @@
         "totalTasks": "Toplam Görev",
         "completed": "Tamamlanan",
         "overdue": "Geciken"
+      },
+      "team": {
+        "title": "Takım Üyeleri",
+        "description": "Projede kimlerin yer aldığını ve konumlarını görün.",
+        "noMembers": {
+          "title": "Henüz takım üyesi yok",
+          "description": "Takımınızı oluşturmak için kişileri projeye davet edin."
+        },
+        "noJobTitle": "Pozisyon bilgisi yok",
+        "noLocation": "Konum belirtilmemiş",
+        "emailMissing": "E-posta bilgisi yok",
+        "unknown": "Bilinmiyor"
       },
       "timeline": {
         "title": "Zaman Çizelgesi",
@@ -438,7 +456,8 @@
       },
       "phone": {
         "label": "Telefon Numarası",
-        "placeholder": "(555) 123 45 67"
+        "placeholder": "(555) 123 45 67",
+        "helper": "Uluslararası formatta, örn +90 555 123 45 67"
       }
     },
     "changePassword": {
@@ -646,6 +665,26 @@
     }
   },
   "footerNote": "Yardıma mı ihtiyacın var? Dokümantasyona göz atabilirsin.",
+  "projectSwitcher": {
+    "label": "Projeyi değiştir"
+  },
+  "invite": {
+    "bannerTitle": "{from} sizi davet etti",
+    "bannerDesc": "Bir projeye davet edildiniz. Katılmak için kabul edin.",
+    "accept": "Kabul Et",
+    "decline": "Reddet",
+    "accepting": "Kabul ediliyor...",
+    "declining": "Reddediliyor..."
+  },
+  "onboarding": {
+    "title": "Hızlı Başlangıç",
+    "steps": {
+      "createProject": "İlk projenizi oluşturun",
+      "inviteTeam": "Takımınızı davet edin",
+      "createFirstIssue": "İlk görevinizi oluşturun",
+      "connectRepo": "Bir depo bağlayın veya şablon içe aktarın"
+    }
+  },
   "sidebar": {
     "activeProjects": "Aktif Projeler",
     "lastUpdated": "Son güncelleme tarihi: {time}",
@@ -721,7 +760,8 @@
       "priority": "ÖNCELİK",
       "dueDate": "TESLİM TARİHİ",
       "storyPoints": "STORY POINTS",
-      "description": "AÇIKLAMA"
+      "description": "AÇIKLAMA",
+      "labels": "ETİKETLER"
     },
     "statuses": {
       "todo": "Yapılacak",
@@ -740,11 +780,16 @@
       "estimate": "Tahmin",
       "selectPriority": "Öncelik seçin",
       "addDescription": "Açıklama ekleyin...",
-      "addComment": "Yorum ekle..."
+      "addComment": "Yorum ekle...",
+      "addLabel": "Etiket ekle..."
     },
     "buttons": {
       "save": "Kaydet",
       "cancel": "İptal"
+    },
+    "activity": {
+      "loading": "Yükleniyor...",
+      "noActivities": "Henüz aktivite yok"
     },
     "deleteDialog": {
       "title": "Görevi sil",
@@ -764,7 +809,43 @@
       "inProgress": "Yapılıyor",
       "completed": "Tamamlandı",
       "overdue": "Süre Aşımı",
-      "members": "Üye"
+      "members": "Üye",
+      "totalTasksHint": "Projede açılan tüm görevler",
+      "completedHint": "%{rate} tamamlanma oranı",
+      "inProgressHint": "Aktif olarak üzerinde çalışılanlar",
+      "overdueHint": "Teslim tarihi geçmiş açık görevler"
+    },
+    "common": {
+      "unknownUser": "Bilinmeyen kullanıcı"
+    },
+    "sprint": {
+      "title": "Sprint Durumu",
+      "noActiveSprint": "Aktif sprint yok",
+      "noActiveSprintDescription": "Sprint başlatıldığında kapsam ve ilerleme burada görünecek.",
+      "noGoal": "Bu sprint için hedef tanımlanmamış.",
+      "progress": "İlerleme",
+      "scope": "Kapsam",
+      "doneRatio": "{done}/{total} görev tamamlandı"
+    },
+    "status": {
+      "todo": "{count} yapılacak",
+      "inProgress": "{count} devam ediyor",
+      "done": "{count} tamamlandı"
+    },
+    "lists": {
+      "overdueTitle": "Riskli ve geciken görevler",
+      "overdueEmpty": "Geciken görev bulunmuyor.",
+      "upcomingTitle": "Yaklaşan teslimler",
+      "upcomingEmpty": "Yaklaşan teslim tarihi yok.",
+      "overdueBadge": "{count} gün gecikti",
+      "todayBadge": "Bugün",
+      "upcomingBadge": "{count} gün kaldı"
+    },
+    "team": {
+      "title": "Takım iş yükü",
+      "empty": "Henüz ekip üyesi görünmüyor.",
+      "completedCount": "{count} tamamlanan görev",
+      "openCount": "açık görev"
     },
     "recent": {
       "title": "Son Güncellenen Görevler",

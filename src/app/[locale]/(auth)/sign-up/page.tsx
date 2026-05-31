@@ -1,10 +1,7 @@
 import SignUpCard from "@/features/components/auth/sign-up-card";
 
 const SignUpPage = () => {
-  return (
-    <div>
-      <SignUpCard />
-    </div>
-  );
+  return <SignUpCard />;
 };
+
 export default SignUpPage;

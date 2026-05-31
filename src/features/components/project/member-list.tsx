@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 
 interface Member {
-  id: string; // ProjectMember ID
+  id: string; // User ID
   role: "OWNER" | "ADMIN" | "MEMBER";
   user: {
     id: string; // User ID (Silme işlemi için gerekli)
@@ -100,8 +100,8 @@ export function MembersList({
       <div className="space-y-3">
         {members.map((member) => (
           <div
-            key={member.id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-xl bg-card text-card-foreground shadow-sm hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors gap-3"
+            key={member.user?.id || member.id}
+            className="flex flex-col sm:flex-row sm:items-center bg-card justify-between  p-3 border rounded-xl  text-card-foreground shadow-sm hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors gap-3"
           >
             {/* SOL TARAF: KULLANICI BİLGİSİ */}
             <div className="flex items-center gap-3">
@@ -145,7 +145,7 @@ export function MembersList({
             {/* SAĞ TARAF: AKSİYON MENÜSÜ */}
             <div className="flex items-center justify-end">
               {/* Sadece Lider başkalarını yönetebilir ve kendini silemez */}
-              {isCurrentUserOwner && member.id !== ownerId ? (
+              {isCurrentUserOwner && member.user.id !== ownerId ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -166,7 +166,7 @@ export function MembersList({
                     {member.role === "MEMBER" ? (
                       <DropdownMenuItem
                         disabled={isBusy}
-                        onClick={() => handleRoleChange(member.id, "ADMIN")}
+                        onClick={() => handleRoleChange(member.user.id, "ADMIN")}
                         className="cursor-pointer"
                       >
                         <Shield className="mr-2 h-4 w-4 text-blue-500" />
@@ -175,7 +175,7 @@ export function MembersList({
                     ) : (
                       <DropdownMenuItem
                         disabled={isBusy}
-                        onClick={() => handleRoleChange(member.id, "MEMBER")}
+                        onClick={() => handleRoleChange(member.user.id, "MEMBER")}
                         className="cursor-pointer"
                       >
                         <ShieldAlert className="mr-2 h-4 w-4 text-orange-500" />

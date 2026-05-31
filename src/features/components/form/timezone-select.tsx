@@ -26,9 +26,15 @@ interface TimezoneSelectProps {
   control: Control<any>;
   name: string;
   label?: string;
+  placeholder?: string;
 }
 
-export function TimezoneSelect({ control, name, label }: TimezoneSelectProps) {
+export function TimezoneSelect({
+  control,
+  name,
+  label,
+  placeholder,
+}: TimezoneSelectProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -59,7 +65,11 @@ export function TimezoneSelect({ control, name, label }: TimezoneSelectProps) {
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0" align="start">
               <Command>
-                <CommandInput placeholder="Şehir veya bölge ara..." />
+                <CommandInput
+                  placeholder={
+                    placeholder || "Şehir veya bölge ara..."
+                  }
+                />
                 {/* 👇 DÜZELTME: Scroll sınıfını buraya taşıdık */}
                 <CommandList
                   className="max-h-[300px] overflow-y-auto overflow-x-hidden"

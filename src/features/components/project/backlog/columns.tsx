@@ -29,6 +29,7 @@ export const columns = (
   projectId: string,
   // 👇 1. YENİ PARAMETRE: Edit fonksiyonunu buraya alıyoruz
   onEditClick: (issue: Issue) => void,
+  currentUserRole?: "OWNER" | "ADMIN" | "MEMBER",
 ): ColumnDef<Issue>[] => [
   {
     id: "select",
@@ -112,6 +113,7 @@ export const columns = (
             issue={issue}
             members={users}
             projectId={projectId}
+            currentUserRole={currentUserRole}
           />
         </div>
       );

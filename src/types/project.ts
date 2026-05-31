@@ -36,6 +36,7 @@ export interface Issue {
   id: string;
   title: string;
   description?: string | null;
+  labels?: string[];
   status: IssueStatus;
   priority: IssuePriority;
   order: number;
