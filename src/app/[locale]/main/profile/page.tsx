@@ -65,7 +65,8 @@ export default function ProfilePage() {
   const hasPassword = user.hasPassword;
   const fName = formatName(user.name);
   const initials = getInitials(user.name, user.email);
-  const timezoneLabel = user.timezone ? formatTimezone(user.timezone).full : null;
+  const timezoneResult = user.timezone ? formatTimezone(user.timezone) : null;
+  const timezoneLabel = typeof timezoneResult === 'object' && timezoneResult ? timezoneResult.full : null;
 
   return (
     // DÜZELTME 3: Sayfa arka planı (opsiyonel, genelde layout verir ama garanti olsun)

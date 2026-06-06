@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { listIssueActivities } from '@/actions/issue-activity';
 
-export async function GET(_req: Request, { params }: { params: { issueId: string } }) {
-  const { issueId } = params;
+export async function GET(_req: Request, { params }: { params: Promise<{ issueId: string }> }) {
+  const { issueId } = await params;
   if (!issueId) return NextResponse.json({ error: 'missing_issueId' }, { status: 400 });
 
   try {
