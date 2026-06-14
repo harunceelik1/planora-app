@@ -96,8 +96,8 @@ export function ChangeOwnerDialog({
       </PopoverTrigger>
 
       <PopoverContent className="w-[350px] p-0" align="start">
-        <div className="p-4 border-b bg-slate-50 dark:bg-slate-900/50">
-          <h4 className="font-semibold text-sm">{t("header.title")}</h4>{" "}
+        <div className="p-4 border-b bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
+          <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t("header.title")}</h4>{" "}
           {/* Çeviri: Proje Sahibini Değiştir */}
           <p className="text-xs text-muted-foreground mt-1">
             {t("header.warning")} {/* Çeviri: Dikkat... */}
@@ -135,10 +135,10 @@ export function ChangeOwnerDialog({
                     flex items-center gap-3 p-2 rounded-md transition-all text-sm mb-1 mt-2
                     ${
                       isCurrentOwner
-                        ? "opacity-100 cursor-default bg-yellow-50"
-                        : "cursor-pointer hover:bg-slate-100"
+                        ? "opacity-100 cursor-default bg-yellow-50 dark:bg-yellow-900/20"
+                        : "cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                     }
-                    ${isSelected ? "bg-blue-50 ring-1 ring-blue-200" : ""}
+                    ${isSelected ? "bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-200 dark:ring-blue-800" : ""}
                   `}
                 >
                   <Avatar className="h-8 w-8">
@@ -153,16 +153,16 @@ export function ChangeOwnerDialog({
 
                       {/* ROZETLER (Çeviri ile) */}
                       {isCurrentOwner ? (
-                        <span className="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-bold flex items-center gap-1 border border-yellow-200">
+                        <span className="text-[10px] px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-500 rounded-full font-bold flex items-center gap-1 border border-yellow-200 dark:border-yellow-900/30">
                           <Crown className="h-3 w-3" /> {t("roles.owner")}{" "}
                           {/* Çeviri: Lider */}
                         </span>
                       ) : isAdmin ? (
-                        <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-bold border border-blue-200">
+                        <span className="text-[10px] px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full font-bold border border-blue-200 dark:border-blue-900/30">
                           {t("roles.admin")} {/* Çeviri: Yönetici */}
                         </span>
                       ) : (
-                        <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full font-medium border border-slate-200">
+                        <span className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-full font-medium border border-slate-200 dark:border-slate-800">
                           {t("roles.member")} {/* Çeviri: Üye */}
                         </span>
                       )}
@@ -177,7 +177,7 @@ export function ChangeOwnerDialog({
           </div>
         </div>
 
-        <div className="p-3 border-t flex justify-end gap-2 bg-slate-50 dark:bg-slate-900/50">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 bg-slate-50 dark:bg-slate-900/50">
           <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
             {t("buttons.cancel")} {/* Çeviri: İptal */}
           </Button>

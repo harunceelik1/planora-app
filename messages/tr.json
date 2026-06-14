@@ -789,7 +789,15 @@
     },
     "activity": {
       "loading": "Yükleniyor...",
-      "noActivities": "Henüz aktivite yok"
+      "noActivities": "Henüz aktivite yok",
+      "assigneeAssigned": "{userName} görevi {assignee} kişisine atadı",
+      "assigneeRemoved": "{userName} {assignee} kişisindeki atamayı kaldırdı",
+      "assigneeChanged": "{userName} atamayı {from} → {to} olarak değiştirdi",
+      "assigneeUpdated": "{userName} atama bilgisini güncelledi",
+      "commentAdded": "{userName} yorum ekledi: \"{content}\"",
+      "issueUpdated": "{userName} görevde değişiklik yaptı",
+      "statusChanged": "{userName} durumu {from} → {to} olarak değiştirdi",
+      "actionPerformed": "{userName} işlem gerçekleştirdi"
     },
     "deleteDialog": {
       "title": "Görevi sil",

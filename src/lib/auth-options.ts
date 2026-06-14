@@ -17,6 +17,16 @@ declare module "next-auth" {
   }
 }
 
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    hasPassword: boolean;
+  }
+}
+
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
@@ -75,6 +85,9 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.image = user.image;
       }
 
       if (!token.id) {
@@ -84,13 +97,16 @@ export const authOptions: AuthOptions = {
       try {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
-          select: { id: true, password: true },
+          select: { id: true, password: true, name: true, email: true, image: true },
         });
 
         if (!dbUser) {
           throw new Error("User not found in database.");
         }
 
+        token.name = dbUser.name;
+        token.email = dbUser.email;
+        token.image = dbUser.image;
         token.hasPassword = !!dbUser.password;
       } catch (error) {
         console.error("JWT oturum kontrolü veritabanı hatası:", error);
@@ -102,6 +118,9 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (session.user && token?.id) {
         session.user.id = token.id as string;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.image;
         session.user.hasPassword = token.hasPassword as boolean;
       }
       return session;

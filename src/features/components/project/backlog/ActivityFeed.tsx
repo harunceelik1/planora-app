@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useFormatter, useTranslations } from "next-intl";
+import { getActivityMessage } from "./activity-messages";
 
 interface ActivityFeedProps {
   activities: any[];
@@ -51,7 +52,7 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
               </span>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300 mt-0.5">
-              {getActivityMessage(a, t("unknownUser"))}
+              {getActivityMessage(a, t)}
             </p>
           </div>
         </div>
@@ -60,25 +61,3 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
   );
 }
 
-function getActivityMessage(activity: any, unknownUserText: string): string {
-  const userName = activity.user?.name || unknownUserText;
-
-  switch (activity.type) {
-    case "ASSIGNEE_CHANGED": {
-      const from = activity.data?.from ? activity.data.from : "—";
-      const to = activity.data?.to ? activity.data.to : "—";
-      return `${userName} atamayı ${from} → ${to} yaptı`;
-    }
-    case "COMMENT_ADDED":
-      return `${userName} yorum ekledi: "${(activity.data?.content || "").slice(0, 140)}"`;
-    case "ISSUE_UPDATED":
-      return `${userName} görevde değişiklik yaptı`;
-    case "STATUS_CHANGED": {
-      const from = activity.data?.from ? activity.data.from : "—";
-      const to = activity.data?.to ? activity.data.to : "—";
-      return `${userName} durumu ${from} → ${to} değiştirdi`;
-    }
-    default:
-      return `${userName} işlem gerçekleştirdi`;
-  }
-}

@@ -788,7 +788,15 @@
     },
     "activity": {
       "loading": "Loading...",
-      "noActivities": "No activities yet"
+      "noActivities": "No activities yet",
+      "assigneeAssigned": "{userName} assigned the task to {assignee}",
+      "assigneeRemoved": "{userName} removed the assignee {assignee}",
+      "assigneeChanged": "{userName} changed assignment from {from} to {to}",
+      "assigneeUpdated": "{userName} updated assignment details",
+      "commentAdded": "{userName} added a comment: \"{content}\"",
+      "issueUpdated": "{userName} updated the task",
+      "statusChanged": "{userName} changed status from {from} to {to}",
+      "actionPerformed": "{userName} performed an action"
     },
     "deleteDialog": {
       "title": "Delete task",

@@ -147,10 +147,7 @@ export default function EditProfileDialog({
         return;
       }
 
-      await update({
-        ...user,
-        ...payload,
-      });
+      await update();
 
       toast.success("Profil güncellendi");
       setOpen(false);
