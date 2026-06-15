@@ -91,7 +91,7 @@ export default function HomePage() {
 
   return (
     <main className="relative flex min-h-screen flex-col bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_58%)] dark:bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.12),transparent_54%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-112 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_58%)] dark:bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.12),transparent_54%)]" />
 
       <section className="relative flex flex-col gap-12 px-4 py-20 md:px-8 lg:flex-row lg:px-16 lg:py-32">
         <div className="flex flex-col justify-center lg:w-5/12">
@@ -155,8 +155,8 @@ export default function HomePage() {
               }`}
             >
               {card.slug === "hesap-yonetimi" ? (
-                <div className="relative flex w-full px-6 py-12">
-                  <div className="z-0 flex h-96 w-1/2 flex-col items-center justify-center rounded-3xl border border-border/70 bg-card/95 p-6 text-card-foreground shadow-xl shadow-black/10 lg:translate-x-[-4px] dark:bg-card/90 dark:shadow-black/30">
+                <div className="relative flex flex-col gap-4 w-full px-6 py-12 lg:flex-row">
+                  <div className="z-0 flex h-96 w-full flex-col items-center justify-center rounded-3xl border border-border/70 bg-card/95 p-6 text-card-foreground shadow-xl shadow-black/10 lg:w-1/2 lg:translate-x-[-4px] dark:bg-card/90 dark:shadow-black/30">
                     <div className="flex flex-col items-center">
                       <FcGoogle size={64} className="mb-4" />
                       <span className="text-center text-xl font-semibold text-card-foreground">
@@ -168,7 +168,7 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <div className="z-10 flex h-96 w-1/2 flex-col items-center justify-center rounded-3xl border border-border/70 bg-card/95 p-6 text-center shadow-xl shadow-black/10 lg:-translate-x-16 dark:bg-card/90 dark:shadow-black/30">
+                  <div className="z-10 flex h-96 w-full flex-col items-center justify-center rounded-3xl border border-border/70 bg-card/95 p-6 text-center shadow-xl shadow-black/10 lg:w-1/2 lg:-translate-x-16 dark:bg-card/90 dark:shadow-black/30">
                     <Mail size={48} className="mb-4 text-primary" />
                     <span className="text-5xl font-extrabold leading-none text-card-foreground">
                       {t("buttons.register")}

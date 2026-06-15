@@ -43,11 +43,10 @@ const AuthCard = ({ type }: AuthCardProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="flex w-full items-center justify-center py-8 md:py-12">
-      <Card className="relative flex w-full max-w-[487px] flex-col overflow-hidden rounded-3xl border-border/60 bg-card/90 shadow-2xl shadow-black/5 backdrop-blur dark:border-border dark:bg-card/95 dark:shadow-black/30">
-       
+    <div className="flex min-h-[calc(100vh-4rem)] w-full items-center justify-center py-8 md:py-12 px-4 sm:px-6">
+      <Card className="relative flex w-full max-w-lg mx-auto flex-col overflow-hidden rounded-3xl border-border/60 bg-card/90 shadow-2xl shadow-black/5 backdrop-blur dark:border-border dark:bg-card/95 dark:shadow-black/30">
 
-        <CardHeader className="space-y-1 pt-8 pb-4 text-center">
+        <CardHeader className="space-y-1 pt-8 pb-4 px-6 sm:px-7 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
             {isSignIn ? t("SignIn.title") : t("SignUp.title")}
           </CardTitle>
@@ -56,7 +55,7 @@ const AuthCard = ({ type }: AuthCardProps) => {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex-1 space-y-6 px-7">
+        <CardContent className="flex-1 space-y-6 px-6 sm:px-7">
           <Button
             type="button"
             variant="outline"
