@@ -4,7 +4,7 @@ import { NewVerificationForm } from "@/features/components/auth/new-verification
 
 const NewVerificationPage = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen ">
       <NewVerificationForm />
     </div>
   );

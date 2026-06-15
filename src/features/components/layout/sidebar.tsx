@@ -57,8 +57,9 @@ function NavLink({
         className={cn(
           "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
           "transition-all duration-150 ease-out select-none",
+          // Seçili arka plan yumuşatıldı (Siyah yerine yumuşak gri)
           active
-            ? "bg-primary text-primary-foreground"
+            ? "bg-muted/80 text-foreground shadow-xs"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
           collapsed && "justify-center px-2",
         )}
@@ -66,12 +67,12 @@ function NavLink({
         <Icon
           className={cn(
             "h-[18px] w-[18px] shrink-0 transition-colors",
-            active ? "text-primary-foreground" : "text-muted-foreground/80",
+            active ? "text-foreground" : "text-muted-foreground/80",
           )}
         />
         {!collapsed && <span className="truncate leading-none">{item.label}</span>}
         {active && !collapsed && (
-          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary-foreground/60" />
+          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-foreground/40" />
         )}
       </div>
     </Link>
@@ -94,15 +95,16 @@ function ProjectLink({
     <Link href={href} className="block" title={collapsed ? project.projectName : undefined}>
       <div
         className={cn(
-          "flex items-center  gap-3 rounded-xl px-3 py-2 text-sm",
+          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm",
           "transition-all duration-150 ease-out select-none",
+          // Seçili proje arka planı yumuşatıldı
           active
-            ? "bg-primary text-primary-foreground"
+            ? "bg-muted/80 text-foreground shadow-xs"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
           collapsed && "justify-center px-2",
         )}
       >
-        <Avatar className="h-6 w-6 shrink-0 rounded-lg border border-border">
+        <Avatar className="h-6 w-6 shrink-0 rounded-lg border border-border/80">
           <AvatarImage src={project.image} alt={project.projectName} />
           <AvatarFallback className="rounded-lg bg-muted text-[9px] font-bold uppercase text-muted-foreground">
             {getInitials(project.projectName, "").slice(0, 1)}
@@ -116,7 +118,7 @@ function ProjectLink({
             <div
               className={cn(
                 "truncate text-[10px] leading-none font-medium tracking-wide",
-                active ? "text-primary-foreground/70" : "text-muted-foreground/60",
+                active ? "text-foreground/70" : "text-muted-foreground/60",
               )}
             >
               {project.projectKey}
@@ -142,7 +144,7 @@ function SectionHeader({
 }) {
   return (
     <div className="mb-1 flex items-center justify-between px-3">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/70">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">
         {label}
       </span>
       <div className="flex items-center gap-0.5">
@@ -150,7 +152,7 @@ function SectionHeader({
           <button
             type="button"
             onClick={onAdd}
-            className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <Plus className="h-3 w-3" />
           </button>
@@ -158,7 +160,7 @@ function SectionHeader({
         <button
           type="button"
           onClick={onToggle}
-          className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <ChevronDown
             className={cn(
@@ -175,7 +177,7 @@ function SectionHeader({
 /* ─── EmptyState ──────────────────────────────────────────────────────── */
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="mx-1 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-[12px] text-muted-foreground/60">
+    <div className="mx-1 rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-3 text-[12px] text-muted-foreground/60">
       {text}
     </div>
   );
@@ -193,7 +195,7 @@ function LoadingRow({ label }: { label: string }) {
 
 /* ─── Divider ─────────────────────────────────────────────────────────── */
 function Divider() {
-  return <div className="my-4 border-t border-border" />;
+  return <div className="my-3 border-t border-border/50" />;
 }
 
 /* ─── Sidebar ─────────────────────────────────────────────────────────── */
@@ -239,7 +241,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-screen shrink-0 md:flex flex-col border-r border-border bg-card text-card-foreground",
+        "sticky top-0 hidden h-screen shrink-0 md:flex flex-col border-r border-border/60 bg-background text-foreground",
         "transition-[width] duration-300 ease-in-out",
         collapsed ? "w-[68px] px-2 py-4" : "w-[220px] px-3 py-4",
       )}
@@ -248,25 +250,24 @@ export function Sidebar() {
         {/* ── Logo / Brand ─────────────────────────────────────────── */}
         <div
           className={cn(
-            "flex items-center px-4 pt-4 pb-3",
+            "flex items-center px-4 pt-2 pb-2",
             collapsed ? "justify-center px-3" : "justify-between",
           )}
         >
           <button
             onClick={() => router.push(ROUTES.MAIN)}
-            className="flex items-center gap-2.5 rounded-xl outline-none ring-offset-card focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex items-center gap-2.5 rounded-xl outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Planora"
           >
             {/* Logomark */}
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-primary shadow-sm text-primary-foreground">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-primary shadow-xs text-primary-foreground">
               <span className="text-[11px] font-black tracking-[0.18em]">
                 P
               </span>
             </div>
             {!collapsed && (
               <div className="leading-none text-left">
-               
-                <div className="text-[14px] font-bold text-card-foreground">
+                <div className="text-[14px] font-bold text-foreground">
                   Planora
                 </div>
               </div>
@@ -279,7 +280,7 @@ export function Sidebar() {
               type="button"
               onClick={() => setCollapsed(true)}
               aria-label={t("aria.toggleSidebar")}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
@@ -288,12 +289,12 @@ export function Sidebar() {
 
         {/* Expand button when collapsed */}
         {collapsed && (
-          <div className="flex justify-center pb-2">
+          <div className="flex justify-center pb-1">
             <button
               type="button"
               onClick={() => setCollapsed(false)}
               aria-label={t("aria.toggleSidebar")}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <ChevronLeft className="h-3.5 w-3.5 rotate-180" />
             </button>
@@ -303,7 +304,7 @@ export function Sidebar() {
         <Divider />
 
         {/* ── Scrollable nav ───────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2  scrollbar-none">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-2 scrollbar-none">
           {/* Main nav */}
           <nav className="space-y-0.5">
             {navItems.map((item) => {
@@ -332,7 +333,7 @@ export function Sidebar() {
                     onToggle={() => setIsProjectsOpen((v) => !v)}
                     onAdd={() => router.push(ROUTES.CREATE_PROJECT)}
                   />
-                  <CollapsibleContent className="space-y-1.5">
+                  <CollapsibleContent className="space-y-1">
                     {isLoading ? (
                       <LoadingRow label={t("status.loading")} />
                     ) : recentProjects.length > 0 ? (
@@ -382,12 +383,13 @@ export function Sidebar() {
                               className={cn(
                                 "flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium",
                                 "transition-all duration-150 ease-out select-none",
+                                // Seçili favori arka planı yumuşatıldı
                                 isFavActive
-                                  ? "bg-primary text-primary-foreground shadow-sm"
+                                  ? "bg-muted/80 text-foreground shadow-xs"
                                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                               )}
                             >
-                              <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
+                              <Star className="h-3.5 w-3.5 shrink-0 fill-amber-500/90 text-amber-500/90" />
                               <span className="truncate">{project.projectName}</span>
                             </div>
                           </Link>
@@ -404,13 +406,13 @@ export function Sidebar() {
         </div>
 
         {/* ── Bottom CTA ───────────────────────────────────────────── */}
-        <div className="border-t border-border px-2 pt-3">
+        <div className="border-t border-border/50 px-2 pt-3">
           {collapsed ? (
             <button
               type="button"
               onClick={() => router.push(ROUTES.CREATE_PROJECT)}
               aria-label={t("actions.createProject")}
-              className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-150 hover:bg-primary/90 hover:shadow-md active:scale-[0.97]"
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/90 hover:shadow-sm active:scale-[0.97]"
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -418,7 +420,7 @@ export function Sidebar() {
             <button
               type="button"
               onClick={() => router.push(ROUTES.CREATE_PROJECT)}
-              className="flex h-10 w-full items-center gap-2.5 rounded-2xl bg-primary px-4 text-[13px] font-medium text-primary-foreground shadow-sm transition-all duration-150 hover:bg-primary/90 hover:shadow-md active:scale-[0.99]"
+              className="flex h-10 w-full items-center gap-2.5 rounded-2xl bg-primary px-4 text-[13px] font-medium text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/90 hover:shadow-sm active:scale-[0.99]"
             >
               <Plus className="h-4 w-4 shrink-0" />
               <span>{t("actions.createProject")}</span>

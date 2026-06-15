@@ -14,13 +14,12 @@ interface SprintIssueCardProps {
   disabled?: boolean;
 }
 
+// Shadcn temasıyla uyumlu, gözü yormayan premium öncelik renkleri
 const priorityStyles: Record<string, string> = {
-  LOW: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300",
-  MEDIUM:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300",
-  HIGH: "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-300",
-  HIGHEST:
-    "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300",
+  LOW: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  MEDIUM: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  HIGH: "border-orange-500/20 bg-orange-500/10 text-orange-600 dark:text-orange-400",
+  HIGHEST: "border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400",
 };
 
 export default function SprintIssueCard({
@@ -44,44 +43,54 @@ export default function SprintIssueCard({
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={cn(
-            "group grid grid-cols-[24px_minmax(220px,1fr)_104px] items-center gap-4 rounded-xl border border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950",
-            "transition-all duration-150 hover:border-slate-300 hover:bg-slate-50/60 dark:hover:border-slate-700 dark:hover:bg-slate-900/80",
-            disabled
-              ? "border-slate-200 bg-slate-100 text-slate-500 opacity-80 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
-              : snapshot.isDragging
-                ? "z-40 border-primary/30 shadow-2xl ring-2 ring-primary/15"
-                : "",
+            // Ana Kart Yapısı: Tamamen Shadcn değişkenlerine bağlandı (bg-card, border-border, text-card-foreground)
+            "group grid grid-cols-[24px_minmax(220px,1fr)_104px] items-center gap-4 rounded-xl border border-border bg-card px-4 py-3 text-card-foreground shadow-xs",
+            "transition-all duration-200",
+            
+            // Tıklanabilir Kart Durumu (Hover & Active)
+            !disabled && "cursor-pointer hover:border-muted-foreground/30 hover:bg-accent/40 active:bg-accent/60",
+            
+            // Sürüklenme Anı (Dragging) Görsel İyileştirmesi
+            snapshot.isDragging && "z-50 border-primary/40 bg-card shadow-xl ring-2 ring-primary/10 select-none",
+            
+            // Devre Dışı (Disabled) Durumu
+            disabled && "cursor-not-allowed border-border/60 bg-muted/40 text-muted-foreground/60 opacity-60"
           )}
           onClick={() => !disabled && onClick()}
         >
+          {/* Sürükleme Kulpu (Drag Handle) */}
           <div
             {...provided.dragHandleProps}
             className={cn(
-              "flex justify-center text-slate-300 transition-opacity",
-              disabled ? "cursor-default opacity-40" : "cursor-grab opacity-0 group-hover:opacity-100 active:cursor-grabbing",
+              "flex justify-center text-muted-foreground/30 transition-all",
+              disabled 
+                ? "cursor-not-allowed opacity-20" 
+                : "cursor-grab opacity-0 group-hover:opacity-100 active:cursor-grabbing text-muted-foreground/60"
             )}
           >
             <GripVertical size={15} />
           </div>
 
+          {/* İçerik Alanı */}
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+            <p className="truncate text-sm font-semibold tracking-tight text-foreground">
               {issue.title}
             </p>
-            <p className="mt-1 font-mono text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            <p className="mt-0.5 font-mono text-[11px] font-medium text-muted-foreground/80">
               {projectKey}-{issue.number}
             </p>
             <IssueLabelList labels={issue.labels} limit={2} className="mt-1.5" />
           </div>
 
-          <div className="flex justify-end">
+          {/* Sağ Alan - Öncelik Badge */}
+          <div className="flex justify-end select-none">
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide",
+                "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase transition-colors",
                 badgeStyle,
               )}
             >
-              <Flag className="h-3 w-3" />
+              <Flag className="h-2.5 w-2.5 stroke-[2.5]" />
               {priority}
             </span>
           </div>

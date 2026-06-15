@@ -86,12 +86,7 @@ export default function BacklogGroup({
           disabled={creatingSprint}
           size="sm"
           variant="outline"
-          className={cn(
-            "h-8 rounded-lg px-3 text-xs font-medium",
-            "border-border text-muted-foreground",
-            "hover:bg-accent hover:text-accent-foreground",
-            "disabled:opacity-50 transition-colors duration-150",
-          )}
+          className="h-8 rounded-lg px-3 text-xs font-medium border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors duration-150"
         >
           <Plus className="h-3.5 w-3.5" />
           {creatingSprint
@@ -106,7 +101,6 @@ export default function BacklogGroup({
           isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        {/* min-h-0 is required for the grid trick to work */}
         <div className="min-h-0 overflow-hidden">
           {/* Inline issue creator */}
           <div className="border-b border-border/60 px-5 py-3">
@@ -117,40 +111,44 @@ export default function BacklogGroup({
             />
           </div>
 
-          {/* ─── Bulk action bar ────────────────────────────────────────────────── */}
+          {/* ─── Bulk action bar (Toplu İşlem Çubuğu) ────────────────────────────────────────────────── */}
           {selectedCount > 0 && (
-            <div className="mx-5 mb-3 mt-3 flex items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-2.5 dark:border-indigo-900/40 dark:bg-indigo-950/30">
+            /* İndigo renkler tamamen uçuruldu. Shadcn'in marka/ana rengi olan primary/10 yapısına geçildi.
+              Koyu modda yumuşacık parlayacak, gözü tırmalamayacak.
+            */
+            <div className="mx-5 mb-3 mt-3 flex items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-2.5 backdrop-blur-md transition-all">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-bold text-white tabular-nums">
+                <span className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground tabular-nums shadow-sm">
                   {selectedCount}
                 </span>
-                <span className="text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                <span className="text-xs font-medium text-foreground/90">
                   {t("backlogView.bulkDelete.selected", { count: selectedCount })}
                 </span>
               </div>
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm" className="h-7 px-3 gap-1.5 text-xs rounded-lg">
+                  <Button variant="destructive" size="sm" className="h-7 px-3 gap-1.5 text-xs rounded-lg font-medium shadow-sm">
                     <Trash2 className="h-3 w-3" />
                     {t("backlogView.bulkDelete.delete")}
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-2xl border-border shadow-2xl bg-card text-card-foreground">
+                <AlertDialogContent className="rounded-2xl border-border shadow-2xl bg-background text-foreground max-w-[425px]">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
+                    <AlertDialogTitle className="text-foreground font-semibold tracking-tight">
                       {t("backlogView.bulkDelete.confirm")}
                     </AlertDialogTitle>
-                    <AlertDialogDescription className="text-muted-foreground">
+                    <AlertDialogDescription className="text-muted-foreground text-sm">
                       {t("backlogView.bulkDelete.confirm")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-lg">
+                  <AlertDialogFooter className="gap-2 sm:gap-3">
+                    <AlertDialogCancel className="rounded-lg border-input bg-background hover:bg-muted text-foreground transition-colors m-0">
                       {t("backlogView.modal.buttons.cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction
-                      className="rounded-lg bg-red-500 hover:bg-red-600 text-white"
+                      /* bg-red-500 yerine tamamen projenin temasına uyum sağlayan bg-destructive yapıldı */
+                      className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 font-medium transition-colors"
                       onClick={async () => {
                         const ids = Object.keys(selectedIds);
                         try {
@@ -206,7 +204,7 @@ export default function BacklogGroup({
                 )}
               >
                 {issues.length === 0 ? (
-                  <div className="flex w-full max-w-md flex-col items-center justify-center rounded-2xl border border-border bg-muted/30 px-8 py-12 text-center">
+                  <div className="flex w-full  flex-col items-center justify-center rounded-2xl border border-border bg-muted/30 px-8 py-12 text-center">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground">
                       <Layers className="h-5 w-5" />
                     </div>

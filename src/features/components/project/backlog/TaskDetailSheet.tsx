@@ -11,6 +11,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
 
 import { Comment, Issue } from "@/types/project";
@@ -102,7 +103,7 @@ export function TaskDetailSheet({
       setLabels(normalizeIssueLabels(task.labels));
       setLabelInput("");
     }
-    // load activities for the task
+    
     (async () => {
       if (!task) return;
       setLoadingActivities(true);
@@ -210,8 +211,15 @@ export function TaskDetailSheet({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent className="sm:max-w-125 w-full p-0 flex flex-col h-full bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl">
-          <SheetHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0 h-16 shrink-0 bg-white dark:bg-slate-950">
+        {/* Sınıflar tamamen Shadcn (bg-card, border-border, shadow-xl) standartlarına çekildi */}
+        <SheetContent className="sm:max-w-125 w-full p-0 flex flex-col h-full bg-card text-card-foreground border-l border-border shadow-xl">
+          
+          <SheetHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between space-y-0 h-16 shrink-0 bg-card">
+            {/* Emniyet Başlığı: Radix UI'ın DOM ağacında zorunlu olarak aradığı asıl alan */}
+            <SheetTitle className="sr-only">
+              {task.title ? `${task.title} - Detay` : "Görev Detay Paneli"}
+            </SheetTitle>
+            
             <TaskDetailHeader
               task={task}
               onClose={onClose}
@@ -221,7 +229,8 @@ export function TaskDetailSheet({
 
           <div className="flex-1 overflow-y-auto">
             <div className="p-6 space-y-6">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              {/* Görsel Başlık Alanı: text-slate-800 kaldırılıp dinamik text-foreground yapıldı */}
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">
                 {task.title || t("noTitle")}
               </h2>
 
