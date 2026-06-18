@@ -662,7 +662,11 @@
     "inviteTeam": {
       "title": "Takımını Davet Et",
       "description": "Ekip arkadaşlarınla birlikte çalışmaya başla."
-    }
+    },
+    "completeProfile": {
+        "title": "Profilini Özelleştir",
+        "description": "Profil fotoğrafını yükle, bildirim ayarlarını düzenle ve çalışma alanını kişiselleştir."
+      }
   },
   "footerNote": "Yardıma mı ihtiyacın var? Dokümantasyona göz atabilirsin.",
   "projectSwitcher": {

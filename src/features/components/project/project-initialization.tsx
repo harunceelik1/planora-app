@@ -9,6 +9,7 @@ import {
   Folder,
   LayoutList,
   CalendarClock,
+  User,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
@@ -108,7 +109,6 @@ export default function ProjectInitialization() {
           {/* MANTIK AYRIMI */}
           {hasProjects ? (
             /* DURUM B: AKTİF KULLANICI (KPI KARTLARI) */
-            // 👇 sm altı tek sütun, sm-xl arası 2 sütun, büyük ekran 3 sütun olarak esnetildi
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               
               {/* Kart 1: Görevler */}
@@ -198,23 +198,29 @@ export default function ProjectInitialization() {
                   </Card>
                 </Link>
 
-                <div className="group cursor-pointer block min-w-0">
-                  <Card className="h-full border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all rounded-2xl bg-card">
-                    <CardContent className="p-5 sm:p-6 flex flex-col items-start h-full justify-between gap-4">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-secondary border border-border flex items-center justify-center text-secondary-foreground group-hover:bg-secondary/80 transition-colors shrink-0">
-                        <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
-                      </div>
-                      <div className="min-w-0 w-full">
-                        <h3 className="text-lg sm:text-xl font-bold text-card-foreground mb-1.5 truncate">
-                          {t("actions.inviteTeam.title")}
-                        </h3>
-                        <p className="text-muted-foreground text-xs sm:text-sm leading-normal line-clamp-3">
-                          {t("actions.inviteTeam.description")}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                <Link href="/main/profile" className="group block min-w-0">
+  <Card className="h-full border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all cursor-pointer rounded-2xl bg-card">
+    <CardContent className="p-5 sm:p-6 flex flex-col items-start h-full justify-between gap-4">
+      
+      {/* İkon Alanı */}
+      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-secondary border border-border flex items-center justify-center text-secondary-foreground group-hover:bg-secondary/80 transition-colors shrink-0">
+        <User className="h-5 w-5 sm:h-6 sm:w-6" />
+      </div>
+      
+      {/* Metin Alanı */}
+      <div className="min-w-0 w-full">
+        <h3 className="text-lg sm:text-xl font-bold text-card-foreground mb-1.5 truncate">
+          {/* İstersen doğrudan i18n dosyasından çek, istersen geçici olarak düz yaz */}
+          {t("actions.completeProfile.title") || "Profilini Özelleştir"}
+        </h3>
+        <p className="text-muted-foreground text-xs sm:text-sm leading-normal line-clamp-3">
+          {t("actions.completeProfile.description") || "Profil fotoğrafını ekle, bildirim ayarlarını düzenle ve çalışma alanını kişiselleştir."}
+        </p>
+      </div>
+
+    </CardContent>
+  </Card>
+</Link>
               </div>
 
               <p className="text-xs text-muted-foreground mt-2">

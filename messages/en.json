@@ -661,7 +661,11 @@
     "inviteTeam": {
       "title": "Invite Team",
       "description": "Start collaborating with your team members."
-    }
+    },
+    "completeProfile": {
+        "title": "Customize Your Profile",
+        "description": "Upload a profile picture, manage notification settings, and personalize your workspace."
+      }
   },
   "footerNote": "Need help? Check out the documentation.",
   "projectSwitcher": {

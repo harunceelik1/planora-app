@@ -3,7 +3,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/prisma";
+import { db } from "./prisma";
 
 declare module "next-auth" {
   interface Session {
