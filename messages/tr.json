@@ -867,5 +867,17 @@
       "upcomingTitle": "Yaklaşan",
       "upcomingEmpty": "Yaklaşan tarih yok"
     }
+  },
+    "IssueFilters": {
+    "searchPlaceholder": "Görevlerde ara...",
+    "assigneePlaceholder": "Atanan Kişi",
+    "allAssignees": "Tüm kişiler",
+    "priorityPlaceholder": "Öncelik",
+    "allPriorities": "Tüm öncelikler",
+    "labelPlaceholder": "Etiket",
+    "allLabels": "Tüm etiketler",
+    "resultCount": "{count} görev gösteriliyor",
+    "clearFilters": "Filtreleri temizle",
+    "unknownUser": "Bilinmeyen kullanıcı"
   }
 }

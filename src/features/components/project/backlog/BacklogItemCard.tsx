@@ -81,7 +81,7 @@ export default function BacklogItemCard({
           {/* Drag Handle */}
           <div
             {...provided.dragHandleProps}
-            className="flex justify-center text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 cursor-grab active:cursor-grabbing"
+            className="flex justify-center  text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 cursor-grab active:cursor-grabbing"
           >
             <GripVertical size={16} />
           </div>

@@ -171,7 +171,6 @@ export default function HomePage() {
                       <div className="h-3 w-3 rounded-full bg-amber-500/80" />
                       <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
                     </div>
-                    <span className="font-mono text-[10px] tracking-wider text-slate-500">Gantt_Timeline.tsx</span>
                   </div>
                   
                   {/* Simüle Edilmiş Gantt Şeması */}

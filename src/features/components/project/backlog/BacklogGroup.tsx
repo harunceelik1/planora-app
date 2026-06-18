@@ -6,6 +6,7 @@ import { useSWRConfig } from "swr";
 import { ChevronDown, Layers, Trash2, Plus, LayoutList } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox"; // Hazır Checkbox bileşeni eklendi
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -51,6 +52,7 @@ export default function BacklogGroup({
   const projectApiKey = `/api/project/${project.id}`;
 
   const selectedCount = Object.keys(selectedIds).length;
+  const isAllSelected = issues.length > 0 && selectedCount === issues.length;
 
   return (
     <div className="mt-6 flex flex-col overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-sm">
@@ -113,9 +115,6 @@ export default function BacklogGroup({
 
           {/* ─── Bulk action bar (Toplu İşlem Çubuğu) ────────────────────────────────────────────────── */}
           {selectedCount > 0 && (
-            /* İndigo renkler tamamen uçuruldu. Shadcn'in marka/ana rengi olan primary/10 yapısına geçildi.
-              Koyu modda yumuşacık parlayacak, gözü tırmalamayacak.
-            */
             <div className="mx-5 mb-3 mt-3 flex items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-2.5 backdrop-blur-md transition-all">
               <div className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground tabular-nums shadow-sm">
@@ -147,7 +146,6 @@ export default function BacklogGroup({
                       {t("backlogView.modal.buttons.cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction
-                      /* bg-red-500 yerine tamamen projenin temasına uyum sağlayan bg-destructive yapıldı */
                       className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 font-medium transition-colors"
                       onClick={async () => {
                         const ids = Object.keys(selectedIds);
@@ -181,8 +179,25 @@ export default function BacklogGroup({
 
           {/* Table Header */}
           {issues.length > 0 && (
-            <div className="grid grid-cols-[26px_28px_minmax(220px,1fr)_120px_150px_44px] gap-4 border-b border-border bg-muted/20 px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
-              <div />
+            <div className="grid grid-cols-[26px_28px_minmax(220px,1fr)_120px_150px_44px] gap-4 border-b border-border bg-muted/20 px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 items-center">
+              {/* UI/UX Uyumlu Checkbox Component Entegrasyonu */}
+              <div className="flex items-center justify-center">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={(checked) => {
+                    if (!checked) {
+                      setSelectedIds({});
+                    } else {
+                      const allSelected: Record<string, boolean> = {};
+                      issues.forEach((issue) => {
+                        allSelected[issue.id] = true;
+                      });
+                      setSelectedIds(allSelected);
+                    }
+                  }}
+                  aria-label="Select all issues"
+                />
+              </div>
               <div />
               <div>{t("backlogView.table.task_name")}</div>
               <div>{t("backlogView.table.priority")}</div>

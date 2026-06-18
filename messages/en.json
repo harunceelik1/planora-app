@@ -866,6 +866,19 @@
       "upcomingTitle": "Upcoming",
       "upcomingEmpty": "No upcoming dates"
     }
+    
+  },
+  "IssueFilters": {
+    "searchPlaceholder": "Search tasks...",
+    "assigneePlaceholder": "Assignee",
+    "allAssignees": "All people",
+    "priorityPlaceholder": "Priority",
+    "allPriorities": "All priorities",
+    "labelPlaceholder": "Label",
+    "allLabels": "All labels",
+    "resultCount": "{count} tasks shown",
+    "clearFilters": "Clear filters",
+    "unknownUser": "Unknown user"
   }
 }
 

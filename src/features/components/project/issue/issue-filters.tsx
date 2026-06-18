@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,8 @@ export function IssueFilters({
   members,
   resultCount,
 }: IssueFiltersProps) {
+  const t = useTranslations("IssueFilters");
+
   const allLabels = Array.from(
     new Set(
       issues.flatMap((issue) =>
@@ -93,8 +96,9 @@ export function IssueFilters({
     filters.label !== DEFAULT_ISSUE_FILTERS.label;
 
   return (
-    <div className="rounded-2xl border bg-card p-4 shadow-sm  ">
+    <div className="rounded-2xl border bg-card p-4 shadow-sm">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        {/* Arama Input Alanı */}
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
@@ -102,38 +106,41 @@ export function IssueFilters({
             onChange={(event) =>
               onChange({ ...filters, query: event.target.value })
             }
-            placeholder="Görevlerde ara..."
+            placeholder={t("searchPlaceholder")}
             className="pl-9"
           />
         </div>
 
+        {/* Seçim Filtreleri Grubu */}
         <div className="grid gap-3 sm:grid-cols-3 lg:w-auto">
+          {/* Atanan Kişi Seçimi */}
           <Select
             value={filters.assigneeId}
             onValueChange={(assigneeId) => onChange({ ...filters, assigneeId })}
           >
             <SelectTrigger className="min-w-[170px]">
-              <SelectValue placeholder="Assignee" />
+              <SelectValue placeholder={t("assigneePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm kişiler</SelectItem>
+              <SelectItem value="all">{t("allAssignees")}</SelectItem>
               {members.map((member) => (
                 <SelectItem key={member.user.id} value={member.user.id}>
-                  {member.user.name || member.user.email || "Bilinmeyen kullanıcı"}
+                  {member.user.name || member.user.email || t("unknownUser")}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
+          {/* Öncelik Seçimi */}
           <Select
             value={filters.priority}
             onValueChange={(priority) => onChange({ ...filters, priority })}
           >
             <SelectTrigger className="min-w-[150px]">
-              <SelectValue placeholder="Priority" />
+              <SelectValue placeholder={t("priorityPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm öncelikler</SelectItem>
+              <SelectItem value="all">{t("allPriorities")}</SelectItem>
               <SelectItem value="LOW">Low</SelectItem>
               <SelectItem value="MEDIUM">Medium</SelectItem>
               <SelectItem value="HIGH">High</SelectItem>
@@ -141,15 +148,16 @@ export function IssueFilters({
             </SelectContent>
           </Select>
 
+          {/* Etiket Seçimi */}
           <Select
             value={filters.label}
             onValueChange={(label) => onChange({ ...filters, label })}
           >
             <SelectTrigger className="min-w-[150px]">
-              <SelectValue placeholder="Label" />
+              <SelectValue placeholder={t("labelPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm etiketler</SelectItem>
+              <SelectItem value="all">{t("allLabels")}</SelectItem>
               {allLabels.map((label) => (
                 <SelectItem
                   key={label}
@@ -163,8 +171,9 @@ export function IssueFilters({
         </div>
       </div>
 
+      {/* Alt Bilgi ve Filtre Temizleme Alanı */}
       <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-        <span>{resultCount} görev gösteriliyor</span>
+        <span>{t("resultCount", { count: resultCount })}</span>
         {hasActiveFilters ? (
           <Button
             type="button"
@@ -174,7 +183,7 @@ export function IssueFilters({
             className="h-8 gap-1 px-2 text-xs"
           >
             <X className="h-3.5 w-3.5" />
-            Filtreleri temizle
+            {t("clearFilters")}
           </Button>
         ) : null}
       </div>

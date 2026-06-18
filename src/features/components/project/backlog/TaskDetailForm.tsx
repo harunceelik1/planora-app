@@ -55,7 +55,6 @@ export function TaskDetailForm({
     // Tüm alanları 2 sütunlu, dengeli bir grid yapısına toplayarak görsel bütünlük sağladık
     <div className="grid grid-cols-2 gap-x-6 gap-y-5">
       
-      {/* STATUS (DURUM) - En üste tek başına yayılmak yerine artık grid'in şık bir parçası */}
       <div className="space-y-1.5">
         <label className="text-[11px] font-bold text-muted-foreground/80 uppercase tracking-wider block">
           {t("labels.status")}
