@@ -200,9 +200,7 @@ export default function ProjectSummary({ project }: Props) {
           <div className="rounded-3xl border border-border bg-card p-5 shadow-sm backdrop-blur-md">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
               <div className="min-w-0 flex-1">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                  {activeSprint ? t("sprint.activeSprintTitle") : t("sprint.title")}
-                </span>
+                
                 <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
                   {activeSprint?.name || t("sprint.noActiveSprint")}
                 </h3>
